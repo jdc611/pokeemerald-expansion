@@ -1,1 +1,35 @@
+name: Build Playtest ROM
 
+on:
+  workflow_dispatch:
+
+env:
+  GAME_REVISION: 0
+  GAME_LANGUAGE: ENGLISH
+  COMPARE: 0
+  UNUSED_ERROR: 1
+  DEPRECATED_ERROR: 1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends binutils-arm-none-eabi gcc-arm-none-eabi libnewlib-arm-none-eabi libpng-dev python3
+
+      - name: Build Emerald
+        env:
+          GAME_VERSION: EMERALD
+        run: make -j$(nproc) -O all
+
+      - name: Upload Playtest ROM
+        uses: actions/upload-artifact@v4
+        with:
+          name: our-rom-playtest
+          path: pokeemerald.gba
