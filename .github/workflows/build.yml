@@ -53,7 +53,7 @@ jobs:
           GAME_VERSION: EMERALD
         run: make -j$(nproc) -O all
 
-        - name: Upload Emerald ROM
+      - name: Upload Emerald ROM
         uses: actions/upload-artifact@v4
         with:
           name: emerald-test-build
