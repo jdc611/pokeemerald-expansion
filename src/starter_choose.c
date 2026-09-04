@@ -126,7 +126,10 @@ static void GenerateRandomStarters(void)
         .arg2 = FILTER_FUNC_ARG_NONE,
     };
 
-    SeedRng(gSaveBlock3Ptr->worldSeed);
+    if (gSaveBlock3Ptr->worldSeed == 12345678)
+    SeedRng(12345678);
+else
+    SeedRng(87654321);
 
     for (u32 i = 0; i < STARTER_MON_COUNT; i++)
     {
