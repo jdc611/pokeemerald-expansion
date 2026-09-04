@@ -10,11 +10,8 @@
 #include "palette.h"
 #include "pokedex.h"
 #include "pokemon.h"
-#include "pokedex.h"
-#include "pokemon.h"
 #include "random_mon_generation.h"
 #include "constants/random_mon_generation.h"
-#include "scanline_effect.h"
 #include "scanline_effect.h"
 #include "sound.h"
 #include "sprite.h"
@@ -119,14 +116,28 @@ static const u8 sStarterLabelCoords[STARTER_MON_COUNT][2] =
 #define FIRE_STARTER  (IS_FRLG ? SPECIES_CHARMANDER : SPECIES_RIOLU)
 #define WATER_STARTER (IS_FRLG ? SPECIES_SQUIRTLE   : SPECIES_GIBLE)
 
-static const u16 sStarterMon[STARTER_MON_COUNT] =
-{
-    GRASS_STARTER,
-    FIRE_STARTER,
-    WATER_STARTER,
-};
+static u16 sStarterMon[STARTER_MON_COUNT];
 
-static const struct BgTemplate sBgTemplates[3] =
+static void GenerateRandomStarters(void)
+{
+    struct FilterFuncArgs filterArgs =
+    {
+        .arg1 = FILTER_FUNC_ARG_NONE,
+        .arg2 = FILTER_FUNC_ARG_NONE,
+    };
+
+    for (u32 i = 0; i < STARTER_MON_COUNT; i++)
+    {
+        do
+        {
+            sStarterMon[i] = GetRandomSpecies(SPECIES_GENERATOR_NO_SUPERMONS, &filterArgs);
+        }
+        while ((i > 0 && sStarterMon[i] == sStarterMon[0])
+            || (i > 1 && sStarterMon[i] == sStarterMon[1]));
+    }
+}
+
+static const struct BgTemplate sBgTemplates[] =
 {
     {
         .bg = 0,
@@ -379,6 +390,8 @@ void CB2_ChooseStarter(void)
 {
     u8 taskId;
     u8 spriteId;
+
+    GenerateRandomStarters();
 
     SetVBlankCallback(NULL);
 
