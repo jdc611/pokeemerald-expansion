@@ -10,6 +10,7 @@
 #include "palette.h"
 #include "pokedex.h"
 #include "pokemon.h"
+#include "random.h"
 #include "random_mon_generation.h"
 #include "constants/random_mon_generation.h"
 #include "scanline_effect.h"
@@ -112,19 +113,20 @@ static const u8 sStarterLabelCoords[STARTER_MON_COUNT][2] =
     {8, 4},
 };
 
-#define GRASS_STARTER (IS_FRLG ? SPECIES_BULBASAUR  : SPECIES_RALTS)
-#define FIRE_STARTER  (IS_FRLG ? SPECIES_CHARMANDER : SPECIES_RIOLU)
-#define WATER_STARTER (IS_FRLG ? SPECIES_SQUIRTLE   : SPECIES_GIBLE)
 
 static u16 sStarterMon[STARTER_MON_COUNT];
 
 static void GenerateRandomStarters(void)
 {
+    rng_value_t oldRngState = gRngValue;
+
     struct FilterFuncArgs filterArgs =
     {
         .arg1 = FILTER_FUNC_ARG_NONE,
         .arg2 = FILTER_FUNC_ARG_NONE,
     };
+
+    SeedRng(gSaveBlock3Ptr->worldSeed);
 
     for (u32 i = 0; i < STARTER_MON_COUNT; i++)
     {
@@ -135,6 +137,9 @@ static void GenerateRandomStarters(void)
         while ((i > 0 && sStarterMon[i] == sStarterMon[0])
             || (i > 1 && sStarterMon[i] == sStarterMon[1]));
     }
+
+    gRngValue = oldRngState;
+
 }
 
 static const struct BgTemplate sBgTemplates[] =
