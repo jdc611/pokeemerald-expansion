@@ -1,6 +1,7 @@
 name: Build Playtest ROM
 
-on: workflow_dispatch:
+"on":
+  workflow_dispatch: {}
 
 env:
   GAME_REVISION: 0
