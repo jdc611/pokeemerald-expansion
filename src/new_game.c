@@ -233,6 +233,7 @@ void NewGameInitData(void)
     SetCurrentDifficultyLevel(DIFFICULTY_NORMAL);
     ResetItemFlags();
     ResetDexNav();
+    gSaveBlock3Ptr->worldSeed = 12345678;
     ClearFollowerNPCData();
 }
 
