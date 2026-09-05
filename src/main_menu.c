@@ -245,6 +245,7 @@ static void MainMenu_FormatSavegamePokedex(void);
 static void MainMenu_FormatSavegameTime(void);
 static void MainMenu_FormatSavegameBadges(void);
 static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId);
+static void Task_NewGameBirchSpeech_CreateRandomizerYesNo(u8 taskId);
 static void Task_NewGameBirchSpeech_ProcessRandomizerYesNo(u8 taskId);
 
 // .rodata
@@ -1747,14 +1748,28 @@ static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
     }
 }
 
+static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
+{
+    if (!RunTextPrintersAndIsPrinter0Active())
+    {
+        NewGameBirchSpeech_ClearWindow(0);
+        StringCopy(gStringVar4, gText_RandomizerQuestion);
+        AddTextPrinterForMessage(TRUE);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_CreateRandomizerYesNo;
+    }
+}
+
+static void Task_NewGameBirchSpeech_CreateRandomizerYesNo(u8 taskId)
+{
+    if (!RunTextPrintersAndIsPrinter0Active())
+    {
+        CreateYesNoMenuParameterized(2, 1, 0xF3, 0xDF, 2, 15);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessRandomizerYesNo;
+    }
+}
+
 static void Task_NewGameBirchSpeech_ProcessRandomizerYesNo(u8 taskId)
 {
-    if (RunTextPrintersAndIsPrinter0Active())
-        return;
-
-    if (!Menu_IsActive())
-        CreateYesNoMenuParameterized(2, 1, 0xF3, 0xDF, 2, 15);
-
     switch (Menu_ProcessInputNoWrapClearOnChoose())
     {
     case 0:
@@ -1771,7 +1786,6 @@ static void Task_NewGameBirchSpeech_ProcessRandomizerYesNo(u8 taskId)
         break;
     }
 }
-
 static void Task_NewGameBirchSpeech_AreYouReady(u8 taskId)
 {
     u8 spriteId;
