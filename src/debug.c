@@ -77,6 +77,7 @@
 #include "vs_seeker.h"
 #include "load_save.h"
 #include "battle_partner.h"
+#include "starter_choose.h"
 
 enum FollowerNPCCreateDebugMenu
 {
@@ -290,6 +291,7 @@ static void DebugAction_Selection_NextStep(u8 taskId);
 static void DebugAction_Util_Fly(u8 taskId);
 static void DebugAction_Util_WatchCredits(u8 taskId);
 static void DebugAction_Util_CheatStart(u8 taskId);
+static void DebugAction_Util_StarterTest(u8 taskId);
 
 static void DebugAction_TimeMenu_ChangeTimeOfDay(u8 taskId);
 static void DebugAction_TimeMenu_ChangeWeekdays(u8 taskId);
@@ -363,6 +365,12 @@ static void DebugAction_Player_Id(u8 taskId);
 static void Debug_CreateInputDisplayWindow(u8 taskId);
 static void DebugNativeStep_DelayedSelection(u8 taskId);
 static void DebugAction_Selection_Init(u8 taskId, const void *params);
+static void DebugAction_Util_StarterTest(u8 taskId)
+{
+    Debug_DestroyMenu_Full(taskId);
+    gMain.savedCallback = CB2_ReturnToField;
+    SetMainCallback2(CB2_ChooseStarter);
+}
 
 extern const u8 Debug_FlagsNotSetOverworldConfigMessage[];
 extern const u8 Debug_FlagsNotSetBattleConfigMessage[];
