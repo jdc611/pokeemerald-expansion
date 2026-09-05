@@ -1893,7 +1893,31 @@ static bool8 SpeciesInArray(enum Species species, u8 section)
 
     return FALSE;
 }
+static enum Species GetDexNavSeededSpecies(enum WildPokemonArea area, u8 wildMonIndex)
+{
+    rng_value_t oldRngState = gRngValue;
+    enum Species species;
 
+    struct FilterFuncArgs filterArgs =
+    {
+        .arg1 = FILTER_FUNC_ARG_NONE,
+        .arg2 = FILTER_FUNC_ARG_NONE,
+    };
+
+    u32 seed = gSaveBlock3Ptr->worldSeed;
+
+    seed ^= ((u32)gSaveBlock1Ptr->location.mapGroup << 24);
+    seed ^= ((u32)gSaveBlock1Ptr->location.mapNum << 16);
+    seed ^= ((u32)area << 8);
+    seed ^= wildMonIndex;
+
+    SeedRng(seed);
+    species = GetRandomSpecies(SPECIES_GENERATOR_NO_SUPERMONS, &filterArgs);
+
+    gRngValue = oldRngState;
+
+    return species;
+}
 // get unique wild encounters on current map
 static void DexNavLoadEncounterData(void)
 {
@@ -1925,9 +1949,9 @@ static void DexNavLoadEncounterData(void)
     {
         for (i = 0; i < NUM_LAND_MONS_ENCOUNTER_SLOTS; i++)
         {
-            species = landMonsInfo->wildPokemon[i].species;
+            species = GetDexNavSeededSpecies(WILD_AREA_LAND, i);
             if (species != SPECIES_NONE && !SpeciesInArray(species, 0))
-                sDexNavUiDataPtr->landSpecies[grassIndex++] = landMonsInfo->wildPokemon[i].species;
+                sDexNavUiDataPtr->landSpecies[grassIndex++] = species;
         }
     }
 
@@ -1936,9 +1960,9 @@ static void DexNavLoadEncounterData(void)
     {
         for (i = 0; i < NUM_WATER_MONS_ENCOUNTER_SLOTS; i++)
         {
-            species = waterMonsInfo->wildPokemon[i].species;
+            species = GetDexNavSeededSpecies(WILD_AREA_WATER, i);
             if (species != SPECIES_NONE && !SpeciesInArray(species, 1))
-                sDexNavUiDataPtr->waterSpecies[waterIndex++] = waterMonsInfo->wildPokemon[i].species;
+                sDexNavUiDataPtr->waterSpecies[waterIndex++] = species;
         }
     }
 
