@@ -244,6 +244,8 @@ static void MainMenu_FormatSavegamePlayer(void);
 static void MainMenu_FormatSavegamePokedex(void);
 static void MainMenu_FormatSavegameTime(void);
 static void MainMenu_FormatSavegameBadges(void);
+static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId);
+static void Task_NewGameBirchSpeech_ProcessRandomizerYesNo(u8 taskId);
 
 // .rodata
 
@@ -275,6 +277,7 @@ static const u8 gText_ContinueMenuPlayer[] = _("PLAYER");
 static const u8 gText_ContinueMenuTime[] = _("TIME");
 static const u8 gText_ContinueMenuPokedex[] = _("POKéDEX");
 static const u8 gText_ContinueMenuBadges[] = _("BADGES");
+static const u8 gText_RandomizerQuestion[] = _("Use randomized Pokémon?");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -1728,8 +1731,44 @@ static void Task_NewGameBirchSpeech_WaitForSpriteFadeInAndTextPrinter(u8 taskId)
             NewGameBirchSpeech_StartFadeOutTarget1InTarget2(taskId, 2);
             NewGameBirchSpeech_StartFadePlatformIn(taskId, 1);
             gTasks[taskId].tTimer = 64;
-            gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
+            gTasks[taskId].func = Task_NewGameBirchSpeech_AskRandomizer;
         }
+    }
+}
+
+static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
+{
+    if (!RunTextPrintersAndIsPrinter0Active())
+    {
+        NewGameBirchSpeech_ClearWindow(0);
+        StringCopy(gStringVar4, gText_RandomizerQuestion);
+        AddTextPrinterForMessage(TRUE);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessRandomizerYesNo;
+    }
+}
+
+static void Task_NewGameBirchSpeech_ProcessRandomizerYesNo(u8 taskId)
+{
+    if (RunTextPrintersAndIsPrinter0Active())
+        return;
+
+    if (!Menu_IsActive())
+        CreateYesNoMenuParameterized(2, 1, 0xF3, 0xDF, 2, 15);
+
+    switch (Menu_ProcessInputNoWrapClearOnChoose())
+    {
+    case 0:
+        PlaySE(SE_SELECT);
+        gSaveBlock3Ptr->randomizerEnabled = TRUE;
+        gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
+        break;
+
+    case MENU_B_PRESSED:
+    case 1:
+        PlaySE(SE_SELECT);
+        gSaveBlock3Ptr->randomizerEnabled = FALSE;
+        gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
+        break;
     }
 }
 
