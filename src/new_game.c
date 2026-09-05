@@ -54,6 +54,7 @@
 #include "follower_npc.h"
 #include "run_settings.h"
 
+extern EWRAM_DATA bool8 gRunSetupRandomizerEnabled;
 extern const u8 EventScript_ResetAllMapFlags[];
 extern const u8 EventScript_ResetAllMapFlagsFrlg[];
 
@@ -235,6 +236,12 @@ void NewGameInitData(void)
     ResetItemFlags();
     ResetDexNav();
     gSaveBlock3Ptr->worldSeed = 12345678;
+    gSaveBlock3Ptr->randomizerEnabled = gRunSetupRandomizerEnabled;
+   
+    if (gRunSetupRandomizerEnabled)
+    gSaveBlock3Ptr->starterMode = RUN_STARTER_RANDOM;
+else
+    gSaveBlock3Ptr->starterMode = RUN_STARTER_NORMAL;
        
 gSaveBlock3Ptr->rivalMode = RUN_RIVAL_NORMAL;
 gSaveBlock3Ptr->filterMode = RUN_FILTER_NONE;
