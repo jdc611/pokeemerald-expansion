@@ -365,6 +365,8 @@ static void DebugAction_Player_Id(u8 taskId);
 static void Debug_CreateInputDisplayWindow(u8 taskId);
 static void DebugNativeStep_DelayedSelection(u8 taskId);
 static void DebugAction_Selection_Init(u8 taskId, const void *params);
+static void Debug_DestroyMenu_Full(u8 taskId);
+
 static void DebugAction_Util_StarterTest(u8 taskId)
 {
     Debug_DestroyMenu_Full(taskId);
