@@ -1949,7 +1949,10 @@ static void DexNavLoadEncounterData(void)
     {
         for (i = 0; i < NUM_LAND_MONS_ENCOUNTER_SLOTS; i++)
         {
-            species = GetDexNavSeededSpecies(WILD_AREA_LAND, i);
+            if (gSaveBlock3Ptr->randomizerEnabled)
+    species = GetDexNavSeededSpecies(WILD_AREA_LAND, i);
+else
+    species = landMonsInfo->wildPokemon[i].species;
             if (species != SPECIES_NONE && !SpeciesInArray(species, 0))
                 sDexNavUiDataPtr->landSpecies[grassIndex++] = species;
         }
@@ -1960,7 +1963,10 @@ static void DexNavLoadEncounterData(void)
     {
         for (i = 0; i < NUM_WATER_MONS_ENCOUNTER_SLOTS; i++)
         {
-            species = GetDexNavSeededSpecies(WILD_AREA_WATER, i);
+            if (gSaveBlock3Ptr->randomizerEnabled)
+    species = GetDexNavSeededSpecies(WILD_AREA_WATER, i);
+else
+    species = waterMonsInfo->wildPokemon[i].species;
             if (species != SPECIES_NONE && !SpeciesInArray(species, 1))
                 sDexNavUiDataPtr->waterSpecies[waterIndex++] = species;
         }
