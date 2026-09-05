@@ -532,9 +532,6 @@ static enum Species GetSeededWildSpecies(enum WildPokemonArea area, u8 wildMonIn
     rng_value_t oldRngState = gRngValue;
     enum Species species;
 
-    if (!gSaveBlock3Ptr->randomizerEnabled)
-    return wildMonInfo->wildPokemon[wildMonIndex].species;
-
     struct FilterFuncArgs filterArgs =
     {
         .arg1 = FILTER_FUNC_ARG_NONE,
@@ -609,7 +606,10 @@ bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, enum WildPok
     if (gMapHeader.mapLayoutId != LAYOUT_BATTLE_FRONTIER_BATTLE_PIKE_ROOM_WILD_MONS && flags & WILD_CHECK_KEEN_EYE && !IsAbilityAllowingEncounter(level))
         return FALSE;
 
+    if (gSaveBlock3Ptr->randomizerEnabled)
     CreateWildMon(GetSeededWildSpecies(area, wildMonIndex), level);
+    else
+    CreateWildMon(wildMonInfo->wildPokemon[wildMonIndex].species, level);
     return TRUE;
 }
 
