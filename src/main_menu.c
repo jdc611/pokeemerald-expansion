@@ -174,6 +174,7 @@
 
 static EWRAM_DATA bool8 sStartedPokeBallTask = 0;
 static EWRAM_DATA u16 sCurrItemAndOptionMenuCheck = 0;
+EWRAM_DATA bool8 gRunSetupRandomizerEnabled = TRUE;
 
 static u8 sBirchSpeechMainTaskId;
 
@@ -1764,16 +1765,14 @@ static void Task_NewGameBirchSpeech_ProcessRandomizerYesNo(u8 taskId)
     {
     case 0:
         PlaySE(SE_SELECT);
-        gSaveBlock3Ptr->randomizerEnabled = TRUE;
-        gSaveBlock3Ptr->starterMode = RUN_STARTER_RANDOM;
+        gRunSetupRandomizerEnabled = TRUE;
         gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
         break;
 
     case MENU_B_PRESSED:
     case 1:
         PlaySE(SE_SELECT);
-        gSaveBlock3Ptr->randomizerEnabled = FALSE;
-        gSaveBlock3Ptr->starterMode = RUN_STARTER_NORMAL;
+        gRunSetupRandomizerEnabled = FALSE;
         gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
         break;
     }
