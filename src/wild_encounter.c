@@ -17,6 +17,8 @@
 #include "pokeblock.h"
 #include "pokemon.h"
 #include "random.h"
+#include "random_mon_generation.h"
+#include "constants/random_mon_generation.h"
 #include "roamer.h"
 #include "safari_zone.h"
 #include "script.h"
