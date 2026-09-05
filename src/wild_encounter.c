@@ -526,6 +526,31 @@ void CreateWildMon(enum Species species, u8 level)
 #define TRY_GET_ABILITY_INFLUENCED_WILD_MON_INDEX(wildPokemon, type, ability, ptr, count) TryGetAbilityInfluencedWildMonIndex(wildPokemon, type, ability, ptr)
 #endif
 
+static enum Species GetSeededWildSpecies(enum WildPokemonArea area, u8 wildMonIndex)
+{
+    rng_value_t oldRngState = gRngValue;
+    enum Species species;
+
+    struct FilterFuncArgs filterArgs =
+    {
+        .arg1 = FILTER_FUNC_ARG_NONE,
+        .arg2 = FILTER_FUNC_ARG_NONE,
+    };
+
+    u32 seed = gSaveBlock3Ptr->worldSeed;
+
+    seed ^= ((u32)gSaveBlock1Ptr->location.mapGroup << 24);
+    seed ^= ((u32)gSaveBlock1Ptr->location.mapNum << 16);
+    seed ^= ((u32)area << 8);
+    seed ^= wildMonIndex;
+
+    SeedRng(seed);
+    species = GetRandomSpecies(SPECIES_GENERATOR_NO_SUPERMONS, &filterArgs);
+
+    gRngValue = oldRngState;
+
+    return species;
+}
 bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, enum WildPokemonArea area, u8 flags)
 {
     u8 wildMonIndex = 0;
@@ -580,7 +605,7 @@ bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, enum WildPok
     if (gMapHeader.mapLayoutId != LAYOUT_BATTLE_FRONTIER_BATTLE_PIKE_ROOM_WILD_MONS && flags & WILD_CHECK_KEEN_EYE && !IsAbilityAllowingEncounter(level))
         return FALSE;
 
-    CreateWildMon(wildMonInfo->wildPokemon[wildMonIndex].species, level);
+    CreateWildMon(GetSeededWildSpecies(area, wildMonIndex), level);
     return TRUE;
 }
 
