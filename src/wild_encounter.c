@@ -33,6 +33,7 @@
 #include "constants/items.h"
 #include "constants/layouts.h"
 #include "constants/weather.h"
+#include "run_settings.h"
 
 extern const u8 EventScript_SprayWoreOff[];
 
@@ -530,6 +531,9 @@ static enum Species GetSeededWildSpecies(enum WildPokemonArea area, u8 wildMonIn
 {
     rng_value_t oldRngState = gRngValue;
     enum Species species;
+
+    if (!gSaveBlock3Ptr->randomizerEnabled)
+    return wildMonInfo->wildPokemon[wildMonIndex].species;
 
     struct FilterFuncArgs filterArgs =
     {
