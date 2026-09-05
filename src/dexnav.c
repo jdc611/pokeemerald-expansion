@@ -1012,7 +1012,7 @@ static void RevealHiddenMon(void)
     }
 
 
-    if (!GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_SEEN))
+    if (FALSE)
     {
         u8 index;
 
