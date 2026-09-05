@@ -274,6 +274,13 @@ struct SaveBlock3
 #endif
 
     u32 worldSeed;
+
+    u8 randomizerEnabled;
+    u8 starterMode;
+    u8 rivalMode;
+    u8 filterMode;
+    u8 filterValue;
+    u8 futureEvolutionEligible;
 }; /* max size 1624 bytes */
 
 extern struct SaveBlock3 *gSaveBlock3Ptr;
