@@ -174,7 +174,7 @@
 
 static EWRAM_DATA bool8 sStartedPokeBallTask = 0;
 static EWRAM_DATA u16 sCurrItemAndOptionMenuCheck = 0;
-EWRAM_DATA bool8 gRunSetupRandomizerEnabled = TRUE;
+EWRAM_DATA bool8 gRunSetupRandomizerEnabled;
 
 static u8 sBirchSpeechMainTaskId;
 
