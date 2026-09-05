@@ -236,7 +236,6 @@ void NewGameInitData(void)
     ResetDexNav();
     gSaveBlock3Ptr->worldSeed = 12345678;
        
-gSaveBlock3Ptr->starterMode = RUN_STARTER_RANDOM;
 gSaveBlock3Ptr->rivalMode = RUN_RIVAL_NORMAL;
 gSaveBlock3Ptr->filterMode = RUN_FILTER_NONE;
 gSaveBlock3Ptr->filterValue = 0;
