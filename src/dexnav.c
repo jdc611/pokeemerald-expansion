@@ -2050,7 +2050,7 @@ static enum Species DexNavGetSpecies(void)
         return SPECIES_NONE;
     }
 
-    if (!GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_SEEN))
+    if (FALSE)
         return SPECIES_NONE;
 
     return species;
