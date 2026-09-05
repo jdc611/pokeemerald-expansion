@@ -26,6 +26,7 @@
 #include "window.h"
 #include "constants/songs.h"
 #include "constants/rgb.h"
+#include "run_settings.h"
 
 #define STARTER_MON_COUNT   3
 
@@ -118,6 +119,13 @@ static u16 sStarterMon[STARTER_MON_COUNT];
 
 static void GenerateRandomStarters(void)
 {
+    if (gSaveBlock3Ptr->starterMode == RUN_STARTER_NORMAL)
+{
+    sStarterMon[0] = SPECIES_TREECKO;
+    sStarterMon[1] = SPECIES_TORCHIC;
+    sStarterMon[2] = SPECIES_MUDKIP;
+    return;
+}
     rng_value_t oldRngState = gRngValue;
 
     struct FilterFuncArgs filterArgs =
