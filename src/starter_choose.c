@@ -120,16 +120,21 @@ static u16 sStarterMon[STARTER_MON_COUNT];
 static void GenerateRandomStarters(void)
 {
     if (gSaveBlock3Ptr->starterMode == RUN_STARTER_NORMAL)
-{
-    sStarterMon[0] = SPECIES_TREECKO;
-    sStarterMon[1] = SPECIES_TORCHIC;
-    sStarterMon[2] = SPECIES_MUDKIP;
-    return;
-}
+    {
+        sStarterMon[0] = SPECIES_TREECKO;
+        sStarterMon[1] = SPECIES_TORCHIC;
+        sStarterMon[2] = SPECIES_MUDKIP;
+        return;
+    }
+
+    if (gSaveBlock3Ptr->starterMode != RUN_STARTER_RANDOM)
+        return;
+
     rng_value_t oldRngState = gRngValue;
 
     struct FilterFuncArgs filterArgs =
-    {
+{
+    
         .arg1 = FILTER_FUNC_ARG_NONE,
         .arg2 = FILTER_FUNC_ARG_NONE,
     };
