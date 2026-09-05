@@ -1744,7 +1744,7 @@ static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
         NewGameBirchSpeech_ClearWindow(0);
         StringCopy(gStringVar4, gText_RandomizerQuestion);
         AddTextPrinterForMessage(TRUE);
-        gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessRandomizerYesNo;
+        gTasks[taskId].func = Task_NewGameBirchSpeech_CreateRandomizerYesNo;
     }
 }
 
