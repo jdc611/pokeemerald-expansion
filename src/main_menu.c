@@ -1748,17 +1748,6 @@ static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
     }
 }
 
-static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
-{
-    if (!RunTextPrintersAndIsPrinter0Active())
-    {
-        NewGameBirchSpeech_ClearWindow(0);
-        StringCopy(gStringVar4, gText_RandomizerQuestion);
-        AddTextPrinterForMessage(TRUE);
-        gTasks[taskId].func = Task_NewGameBirchSpeech_CreateRandomizerYesNo;
-    }
-}
-
 static void Task_NewGameBirchSpeech_CreateRandomizerYesNo(u8 taskId)
 {
     if (!RunTextPrintersAndIsPrinter0Active())
