@@ -40,6 +40,7 @@
 #include "title_screen.h"
 #include "window.h"
 #include "mystery_gift_menu.h"
+#include "run_settings.h"
 
 /*
  * Main menu state machine
@@ -1764,6 +1765,7 @@ static void Task_NewGameBirchSpeech_ProcessRandomizerYesNo(u8 taskId)
     case 0:
         PlaySE(SE_SELECT);
         gSaveBlock3Ptr->randomizerEnabled = TRUE;
+        gSaveBlock3Ptr->starterMode = RUN_STARTER_RANDOM;
         gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
         break;
 
@@ -1771,6 +1773,7 @@ static void Task_NewGameBirchSpeech_ProcessRandomizerYesNo(u8 taskId)
     case 1:
         PlaySE(SE_SELECT);
         gSaveBlock3Ptr->randomizerEnabled = FALSE;
+        gSaveBlock3Ptr->starterMode = RUN_STARTER_NORMAL;
         gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
         break;
     }
