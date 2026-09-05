@@ -1,0 +1,27 @@
+#ifndef GUARD_RUN_SETTINGS_H
+#define GUARD_RUN_SETTINGS_H
+
+enum RunStarterMode
+{
+    RUN_STARTER_NORMAL,
+    RUN_STARTER_CHOOSE,
+    RUN_STARTER_RANDOM,
+};
+
+enum RunRivalMode
+{
+    RUN_RIVAL_NORMAL,
+    RUN_RIVAL_CHOOSE,
+    RUN_RIVAL_RANDOM,
+    RUN_RIVAL_COUNTER,
+};
+
+enum RunFilterMode
+{
+    RUN_FILTER_NONE,
+    RUN_FILTER_TYPE,
+    RUN_FILTER_ABILITY,
+    RUN_FILTER_GENERATION,
+};
+
+#endif // GUARD_RUN_SETTINGS_H
