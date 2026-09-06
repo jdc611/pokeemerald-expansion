@@ -56,6 +56,7 @@
 
 extern EWRAM_DATA bool8 gRunSetupRandomizerEnabled;
 extern EWRAM_DATA u8 gRunSetupStarterMode;
+extern EWRAM_DATA u32 gRunSetupWorldSeed;
 extern const u8 EventScript_ResetAllMapFlags[];
 extern const u8 EventScript_ResetAllMapFlagsFrlg[];
 
@@ -236,7 +237,7 @@ void NewGameInitData(void)
     SetCurrentDifficultyLevel(DIFFICULTY_NORMAL);
     ResetItemFlags();
     ResetDexNav();
-    gSaveBlock3Ptr->worldSeed = ((u32)Random() << 16) | Random();
+    gSaveBlock3Ptr->worldSeed = gRunSetupWorldSeed;
     gSaveBlock3Ptr->randomizerEnabled = gRunSetupRandomizerEnabled;
    
     gSaveBlock3Ptr->starterMode = gRunSetupStarterMode;
