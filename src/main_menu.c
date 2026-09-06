@@ -255,6 +255,9 @@ static void Task_NewGameBirchSpeech_AskStarterMode(u8 taskId);
 static void Task_NewGameBirchSpeech_CreateStarterModeYesNo(u8 taskId);
 static void Task_NewGameBirchSpeech_ProcessStarterModeYesNo(u8 taskId);
 static void Task_NewGameBirchSpeech_WaitForSeedA(u8 taskId);
+static void Task_NewGameBirchSpeech_AskCustomSeed(u8 taskId);
+static void Task_NewGameBirchSpeech_CreateCustomSeedYesNo(u8 taskId);
+static void Task_NewGameBirchSpeech_ProcessCustomSeedYesNo(u8 taskId);
 
 // .rodata
 
@@ -289,6 +292,7 @@ static const u8 gText_ContinueMenuBadges[] = _("BADGES");
 static const u8 gText_RandomizerQuestion[] = _("Use randomized Pokémon?");
 static const u8 gText_StarterModeQuestion[] = _("Use random starters?");
 static const u8 gText_SeedDisplay[] = _("Seed: {STR_VAR_1}");
+static const u8 gText_CustomSeedQuestion[] = _("Enter a custom seed?\nNO = random seed");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -1804,6 +1808,16 @@ static void Task_NewGameBirchSpeech_CreateStarterModeYesNo(u8 taskId)
         gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessStarterModeYesNo;
     }
 }
+static void Task_NewGameBirchSpeech_AskCustomSeed(u8 taskId)
+{
+    if (!RunTextPrintersAndIsPrinter0Active())
+    {
+        NewGameBirchSpeech_ClearWindow(0);
+        StringCopy(gStringVar4, gText_CustomSeedQuestion);
+        AddTextPrinterForMessage(TRUE);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_CreateCustomSeedYesNo;
+    }
+}
 static void Task_NewGameBirchSpeech_ShowSeed(u8 taskId)
 {
     NewGameBirchSpeech_ClearWindow(0);
@@ -1827,14 +1841,14 @@ static void Task_NewGameBirchSpeech_ProcessStarterModeYesNo(u8 taskId)
     case 0:
         PlaySE(SE_SELECT);
         gRunSetupStarterMode = RUN_STARTER_RANDOM;
-        gTasks[taskId].func = Task_NewGameBirchSpeech_ShowSeed;
+        gTasks[taskId].func = Task_NewGameBirchSpeech_AskCustomSeed;
         break;
 
     case MENU_B_PRESSED:
     case 1:
         PlaySE(SE_SELECT);
         gRunSetupStarterMode = RUN_STARTER_NORMAL;
-        gTasks[taskId].func = Task_NewGameBirchSpeech_ShowSeed;
+        gTasks[taskId].func = Task_NewGameBirchSpeech_AskCustomSeed;
         break;
     }
 }
