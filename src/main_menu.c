@@ -1831,6 +1831,9 @@ static void Task_NewGameBirchSpeech_ProcessStarterModeYesNo(u8 taskId)
 }
 static void Task_NewGameBirchSpeech_AreYouReady(u8 taskId)
 {
+    if (RunTextPrintersAndIsPrinter0Active())
+    return;
+    
     u8 spriteId;
 
     if (gTasks[taskId].tIsDoneFadingSprites)
