@@ -177,6 +177,7 @@ static EWRAM_DATA u16 sCurrItemAndOptionMenuCheck = 0;
 EWRAM_DATA bool8 gRunSetupRandomizerEnabled;
 EWRAM_DATA u8 gRunSetupStarterMode;
 EWRAM_DATA u32 gRunSetupWorldSeed;
+EWRAM_DATA bool8 gRunSetupEnteringCustomSeed;
 
 static u8 sBirchSpeechMainTaskId;
 
@@ -1834,7 +1835,10 @@ static void Task_NewGameBirchSpeech_ProcessCustomSeedYesNo(u8 taskId)
     {
     case 0:
         PlaySE(SE_SELECT);
-        gTasks[taskId].func = Task_NewGameBirchSpeech_ShowSeed;
+        gRunSetupEnteringCustomSeed = TRUE;
+FreeAllWindowBuffers();
+DestroyTask(taskId);
+DoNamingScreen(NAMING_SCREEN_CODE, gStringVar2, 0, 0, 0, CB2_NewGameBirchSpeech_ReturnFromNamingScreen);
         break;
 
     case MENU_B_PRESSED:
