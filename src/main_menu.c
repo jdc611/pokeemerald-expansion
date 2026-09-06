@@ -260,6 +260,7 @@ static void Task_NewGameBirchSpeech_ShowSeed(u8 taskId);
 static void Task_NewGameBirchSpeech_AskCustomSeed(u8 taskId);
 static void Task_NewGameBirchSpeech_CreateCustomSeedYesNo(u8 taskId);
 static void Task_NewGameBirchSpeech_ProcessCustomSeedYesNo(u8 taskId);
+static u32 ParseCustomSeed(const u8 *str);
 
 // .rodata
 
@@ -1810,6 +1811,21 @@ static void Task_NewGameBirchSpeech_CreateStarterModeYesNo(u8 taskId)
         gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessStarterModeYesNo;
     }
 }
+static u32 ParseCustomSeed(const u8 *str)
+{
+    u32 value = 0;
+
+    while (*str != EOS)
+    {
+        if (*str >= CHAR_0 && *str <= CHAR_9)
+            value = value * 10 + (*str - CHAR_0);
+
+        str++;
+    }
+
+    return value;
+}
+
 static void Task_NewGameBirchSpeech_AskCustomSeed(u8 taskId)
 {
     if (!RunTextPrintersAndIsPrinter0Active())
@@ -2454,7 +2470,16 @@ static void Task_NewGameBirchSpeech_ReturnFromNamingScreenShowTextbox(u8 taskId)
     if (gTasks[taskId].tTimer-- <= 0)
     {
         DrawDialogFrameWithCustomTile(0, TRUE, BIRCH_DLG_BASE_TILE_NUM);
-        gTasks[taskId].func = Task_NewGameBirchSpeech_SoItsPlayerName;
+        if (gRunSetupEnteringCustomSeed)
+{
+    gRunSetupWorldSeed = ParseCustomSeed(gStringVar2);
+    gRunSetupEnteringCustomSeed = FALSE;
+    gTasks[taskId].func = Task_NewGameBirchSpeech_ShowSeed;
+}
+else
+{
+    gTasks[taskId].func = Task_NewGameBirchSpeech_SoItsPlayerName;
+}
     }
 }
 
