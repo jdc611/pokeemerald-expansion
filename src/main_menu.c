@@ -1818,6 +1818,31 @@ static void Task_NewGameBirchSpeech_AskCustomSeed(u8 taskId)
         gTasks[taskId].func = Task_NewGameBirchSpeech_CreateCustomSeedYesNo;
     }
 }
+static void Task_NewGameBirchSpeech_CreateCustomSeedYesNo(u8 taskId)
+{
+    if (!RunTextPrintersAndIsPrinter0Active())
+    {
+        CreateYesNoMenuParameterized(2, 1, 0xF3, 0xDF, 2, 15);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessCustomSeedYesNo;
+    }
+}
+
+static void Task_NewGameBirchSpeech_ProcessCustomSeedYesNo(u8 taskId)
+{
+    switch (Menu_ProcessInputNoWrapClearOnChoose())
+    {
+    case 0:
+        PlaySE(SE_SELECT);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_ShowSeed;
+        break;
+
+    case MENU_B_PRESSED:
+    case 1:
+        PlaySE(SE_SELECT);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_ShowSeed;
+        break;
+    }
+}
 static void Task_NewGameBirchSpeech_ShowSeed(u8 taskId)
 {
     NewGameBirchSpeech_ClearWindow(0);
