@@ -1874,9 +1874,7 @@ static void Task_NewGameBirchSpeech_ShowSeed(u8 taskId)
 }
 static void Task_NewGameBirchSpeech_WaitForSeedA(u8 taskId)
 {
-    if (RunTextPrintersAndIsPrinter0Active())
-        return;
-
+    RunTextPrintersAndIsPrinter0Active();
     if (JOY_NEW(A_BUTTON))
         gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
 }
