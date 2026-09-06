@@ -1796,7 +1796,7 @@ static void Task_NewGameBirchSpeech_CreateStarterModeYesNo(u8 taskId)
 {
     if (!RunTextPrintersAndIsPrinter0Active())
     {
-        CreateYesNoMenu(&sWindowTemplates[0], 2, 1, 0);
+        CreateYesNoMenuParameterized(2, 1, 0xF3, 0xDF, 2, 15);
         gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessStarterModeYesNo;
     }
 }
