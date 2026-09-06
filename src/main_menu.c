@@ -292,7 +292,7 @@ static const u8 gText_ContinueMenuPokedex[] = _("POKéDEX");
 static const u8 gText_ContinueMenuBadges[] = _("BADGES");
 static const u8 gText_RandomizerQuestion[] = _("Use randomized Pokémon?");
 static const u8 gText_StarterModeQuestion[] = _("Use random starters?");
-static const u8 gText_SeedDisplay[] = _("Seed: {STR_VAR_1}");
+static const u8 gText_SeedDisplay[] = _("Seed:{STR_VAR_1}");
 static const u8 gText_CustomSeedQuestion[] = _("Enter a custom seed?\nNO = random seed");
 
 #define MENU_LEFT 2
