@@ -1759,7 +1759,7 @@ static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
 {
     if (!RunTextPrintersAndIsPrinter0Active())
     {
-        gRunSetupWorldSeed = ((u32)Random() << 16) | Random();
+        gRunSetupWorldSeed = (((u32)Random() << 16) | Random()) % 100000000;
         NewGameBirchSpeech_ClearWindow(0);
         StringCopy(gStringVar4, gText_RandomizerQuestion);
         AddTextPrinterForMessage(TRUE);
