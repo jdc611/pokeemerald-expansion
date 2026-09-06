@@ -1893,7 +1893,10 @@ static void Task_NewGameBirchSpeech_ProcessStarterModeYesNo(u8 taskId)
     case 1:
         PlaySE(SE_SELECT);
         gRunSetupStarterMode = RUN_STARTER_NORMAL;
-        gTasks[taskId].func = Task_NewGameBirchSpeech_AskCustomSeed;
+        if (gRunSetupRandomizerEnabled)
+    gTasks[taskId].func = Task_NewGameBirchSpeech_AskCustomSeed;
+else
+    gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
         break;
     }
 }
