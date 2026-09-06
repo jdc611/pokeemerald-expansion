@@ -175,6 +175,7 @@
 static EWRAM_DATA bool8 sStartedPokeBallTask = 0;
 static EWRAM_DATA u16 sCurrItemAndOptionMenuCheck = 0;
 EWRAM_DATA bool8 gRunSetupRandomizerEnabled;
+EWRAM_DATA u8 gRunSetupStarterMode;
 
 static u8 sBirchSpeechMainTaskId;
 
@@ -249,6 +250,9 @@ static void MainMenu_FormatSavegameBadges(void);
 static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId);
 static void Task_NewGameBirchSpeech_CreateRandomizerYesNo(u8 taskId);
 static void Task_NewGameBirchSpeech_ProcessRandomizerYesNo(u8 taskId);
+static void Task_NewGameBirchSpeech_AskStarterMode(u8 taskId);
+static void Task_NewGameBirchSpeech_CreateStarterModeYesNo(u8 taskId);
+static void Task_NewGameBirchSpeech_ProcessStarterModeYesNo(u8 taskId);
 
 // .rodata
 
@@ -281,6 +285,7 @@ static const u8 gText_ContinueMenuTime[] = _("TIME");
 static const u8 gText_ContinueMenuPokedex[] = _("POKéDEX");
 static const u8 gText_ContinueMenuBadges[] = _("BADGES");
 static const u8 gText_RandomizerQuestion[] = _("Use randomized Pokémon?");
+static const u8 gText_StarterModeQuestion[] = _("Use random starters?");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -1766,13 +1771,49 @@ static void Task_NewGameBirchSpeech_ProcessRandomizerYesNo(u8 taskId)
     case 0:
         PlaySE(SE_SELECT);
         gRunSetupRandomizerEnabled = TRUE;
-        gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
+        gTasks[taskId].func = Task_NewGameBirchSpeech_AskStarterMode;
         break;
 
     case MENU_B_PRESSED:
     case 1:
         PlaySE(SE_SELECT);
         gRunSetupRandomizerEnabled = FALSE;
+        gTasks[taskId].func = Task_NewGameBirchSpeech_AskStarterMode;
+        break;
+    }
+}
+static void Task_NewGameBirchSpeech_AskStarterMode(u8 taskId)
+{
+    if (!RunTextPrintersAndIsPrinter0Active())
+    {
+        NewGameBirchSpeech_ClearWindow(0);
+        StringCopy(gStringVar4, gText_StarterModeQuestion);
+        AddTextPrinterForMessage(TRUE);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_CreateStarterModeYesNo;
+    }
+}
+static void Task_NewGameBirchSpeech_CreateStarterModeYesNo(u8 taskId)
+{
+    if (!RunTextPrintersAndIsPrinter0Active())
+    {
+        CreateYesNoMenu(&sWindowTemplates[0], 2, 1, 0);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessStarterModeYesNo;
+    }
+}
+static void Task_NewGameBirchSpeech_ProcessStarterModeYesNo(u8 taskId)
+{
+    switch (Menu_ProcessInputNoWrapClearOnChoose())
+    {
+    case 0:
+        PlaySE(SE_SELECT);
+        gRunSetupStarterMode = RUN_STARTER_RANDOM;
+        gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
+        break;
+
+    case MENU_B_PRESSED:
+    case 1:
+        PlaySE(SE_SELECT);
+        gRunSetupStarterMode = RUN_STARTER_NORMAL;
         gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
         break;
     }
