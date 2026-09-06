@@ -176,6 +176,7 @@ static EWRAM_DATA bool8 sStartedPokeBallTask = 0;
 static EWRAM_DATA u16 sCurrItemAndOptionMenuCheck = 0;
 EWRAM_DATA bool8 gRunSetupRandomizerEnabled;
 EWRAM_DATA u8 gRunSetupStarterMode;
+EWRAM_DATA u32 gRunSetupWorldSeed;
 
 static u8 sBirchSpeechMainTaskId;
 
@@ -286,6 +287,7 @@ static const u8 gText_ContinueMenuPokedex[] = _("POKéDEX");
 static const u8 gText_ContinueMenuBadges[] = _("BADGES");
 static const u8 gText_RandomizerQuestion[] = _("Use randomized Pokémon?");
 static const u8 gText_StarterModeQuestion[] = _("Use random starters?");
+static const u8 gText_SeedDisplay[] = _("Seed: {STR_VAR_1}");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -1748,6 +1750,7 @@ static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
 {
     if (!RunTextPrintersAndIsPrinter0Active())
     {
+        gRunSetupWorldSeed = ((u32)Random() << 16) | Random();
         NewGameBirchSpeech_ClearWindow(0);
         StringCopy(gStringVar4, gText_RandomizerQuestion);
         AddTextPrinterForMessage(TRUE);
