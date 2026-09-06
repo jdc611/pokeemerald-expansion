@@ -236,7 +236,7 @@ void NewGameInitData(void)
     SetCurrentDifficultyLevel(DIFFICULTY_NORMAL);
     ResetItemFlags();
     ResetDexNav();
-    gSaveBlock3Ptr->worldSeed = 12345678;
+    gSaveBlock3Ptr->worldSeed = ((u32)Random() << 16) | Random();
     gSaveBlock3Ptr->randomizerEnabled = gRunSetupRandomizerEnabled;
    
     gSaveBlock3Ptr->starterMode = gRunSetupStarterMode;
