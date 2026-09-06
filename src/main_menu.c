@@ -255,6 +255,7 @@ static void Task_NewGameBirchSpeech_AskStarterMode(u8 taskId);
 static void Task_NewGameBirchSpeech_CreateStarterModeYesNo(u8 taskId);
 static void Task_NewGameBirchSpeech_ProcessStarterModeYesNo(u8 taskId);
 static void Task_NewGameBirchSpeech_WaitForSeedA(u8 taskId);
+static void Task_NewGameBirchSpeech_ShowSeed(u8 taskId);
 static void Task_NewGameBirchSpeech_AskCustomSeed(u8 taskId);
 static void Task_NewGameBirchSpeech_CreateCustomSeedYesNo(u8 taskId);
 static void Task_NewGameBirchSpeech_ProcessCustomSeedYesNo(u8 taskId);
