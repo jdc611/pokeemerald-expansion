@@ -231,6 +231,7 @@ static void Task_NewGameBirchSpeech_WaitForWhatsYourNameToPrint(u8);
 static void Task_NewGameBirchSpeech_WaitPressBeforeNameChoice(u8);
 static void Task_NewGameBirchSpeech_StartNamingScreen(u8);
 static void CB2_NewGameBirchSpeech_ReturnFromNamingScreen(void);
+static void CB2_NewGameBirchSpeech_ReturnFromCustomSeed(void);
 static void Task_NewGameBirchSpeech_CreateNameYesNo(u8);
 static void Task_NewGameBirchSpeech_ProcessNameYesNoMenu(u8);
 void CreateYesNoMenuParameterized(u8, u8, u16, u16, u8, u8);
@@ -1854,7 +1855,7 @@ static void Task_NewGameBirchSpeech_ProcessCustomSeedYesNo(u8 taskId)
         gRunSetupEnteringCustomSeed = TRUE;
 FreeAllWindowBuffers();
 DestroyTask(taskId);
-DoNamingScreen(NAMING_SCREEN_CODE, gStringVar2, 0, 0, 0, CB2_NewGameBirchSpeech_ReturnFromNamingScreen);
+DoNamingScreen(NAMING_SCREEN_CODE, gStringVar2, 0, 0, 0, CB2_NewGameBirchSpeech_ReturnFromCustomSeed);
         break;
 
     case MENU_B_PRESSED:
@@ -2055,6 +2056,12 @@ static void CB2_NewGameBirchSpeech_ReturnFromNamingScreen(void)
     LoadMessageBoxGfx(0, BIRCH_DLG_BASE_TILE_NUM, BG_PLTT_ID(15));
     PutWindowTilemap(0);
     CopyWindowToVram(0, COPYWIN_FULL);
+}
+
+static void CB2_NewGameBirchSpeech_ReturnFromCustomSeed(void)
+{
+    gRunSetupEnteringCustomSeed = TRUE;
+    CB2_NewGameBirchSpeech_ReturnFromNamingScreen();
 }
 
 static void SpriteCB_Null(struct Sprite *sprite)
