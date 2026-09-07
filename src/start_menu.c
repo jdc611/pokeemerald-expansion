@@ -155,6 +155,8 @@ static const struct WindowTemplate sWindowTemplate_SafariBalls = {
     .paletteNum = 15,
     .baseBlock = 0x8
 };
+static const u8 sText_ExitPage1[] = _("EXIT  1/2");
+static const u8 sText_ExitPage2[] = _("EXIT  2/2");
 
 static const u8 *const sPyramidFloorNames[FRONTIER_STAGES_PER_CHALLENGE + 1] =
 {
