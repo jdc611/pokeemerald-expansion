@@ -2490,7 +2490,7 @@ static void Task_NewGameBirchSpeech_ReturnFromNamingScreenShowTextbox(u8 taskId)
 {
     gRunSetupWorldSeed = ParseCustomSeed(gStringVar2);
     gRunSetupEnteringCustomSeed = FALSE;
-    gTasks[taskId].tIsDoneFadingSprites = TRUE;
+    gTasks[taskId].data[5] = TRUE;
     gTasks[taskId].func = Task_NewGameBirchSpeech_ShowSeed;
 }
 else
