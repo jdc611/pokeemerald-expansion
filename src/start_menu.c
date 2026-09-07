@@ -89,6 +89,7 @@ EWRAM_DATA static u8 sBattlePyramidFloorWindowId = 0;
 EWRAM_DATA static u8 sStartMenuCursorPos = 0;
 EWRAM_DATA static u8 sNumStartMenuActions = 0;
 EWRAM_DATA static u8 sCurrentStartMenuActions[9] = {0};
+EWRAM_DATA static u8 sStartMenuPage = 0;
 EWRAM_DATA static s8 sInitStartMenuData[2] = {0};
 
 EWRAM_DATA static u8 (*sSaveDialogCallback)(void) = NULL;
@@ -324,24 +325,31 @@ static void AddStartMenuAction(u8 action)
 
 static void BuildNormalStartMenu(void)
 {
-    if (FlagGet(FLAG_SYS_POKEDEX_GET) == TRUE)
-        AddStartMenuAction(MENU_ACTION_POKEDEX);
+    if (sStartMenuPage == 0)
+    {
+        if (FlagGet(FLAG_SYS_POKEDEX_GET) == TRUE)
+            AddStartMenuAction(MENU_ACTION_POKEDEX);
 
-    if (DEXNAV_ENABLED)
-    AddStartMenuAction(MENU_ACTION_DEXNAV);
+        if (DEXNAV_ENABLED)
+            AddStartMenuAction(MENU_ACTION_DEXNAV);
 
-    if (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
-        AddStartMenuAction(MENU_ACTION_POKEMON);
+        if (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
+            AddStartMenuAction(MENU_ACTION_POKEMON);
 
-    AddStartMenuAction(MENU_ACTION_BAG);
+        AddStartMenuAction(MENU_ACTION_BAG);
 
-    if (FlagGet(FLAG_SYS_POKENAV_GET) == TRUE)
-        AddStartMenuAction(MENU_ACTION_POKENAV);
+        if (FlagGet(FLAG_SYS_POKENAV_GET) == TRUE)
+            AddStartMenuAction(MENU_ACTION_POKENAV);
 
-    AddStartMenuAction(MENU_ACTION_PLAYER);
-    AddStartMenuAction(MENU_ACTION_SAVE);
-    AddStartMenuAction(MENU_ACTION_OPTION);
-    AddStartMenuAction(MENU_ACTION_EXIT);
+        AddStartMenuAction(MENU_ACTION_PLAYER);
+        AddStartMenuAction(MENU_ACTION_SAVE);
+        AddStartMenuAction(MENU_ACTION_OPTION);
+        AddStartMenuAction(MENU_ACTION_EXIT);
+    }
+    else
+    {
+        AddStartMenuAction(MENU_ACTION_EXIT);
+    }
 }
 
 static void BuildDebugStartMenu(void)
@@ -637,7 +645,20 @@ static bool8 HandleStartMenuInput(void)
         PlaySE(SE_SELECT);
         sStartMenuCursorPos = Menu_MoveCursor(1);
     }
+if (JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
+{
+    PlaySE(SE_SELECT);
 
+    sStartMenuPage ^= 1;
+    sStartMenuCursorPos = 0;
+    sNumStartMenuActions = 0;
+
+    BuildNormalStartMenu();
+    HideStartMenu();
+    ShowStartMenu();
+
+    return FALSE;
+}
     if (JOY_NEW(A_BUTTON))
     {
         PlaySE(SE_SELECT);
