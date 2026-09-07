@@ -1546,17 +1546,10 @@ static bool8 StartMenuDexNavCallback(void)
 
 static bool8 StartMenu_PCStorage(void)
 {
-    if (!gPaletteFade.active)
-    {
-        PlayRainStoppingSoundEffect();
-        RemoveExtraStartMenuWindows();
-        CleanupOverworldWindowsAndTilemaps();
-        ShowPokemonStorageSystemPC();
-
-        return TRUE;
-    }
-
-    return FALSE;
+    PlaySE(SE_SELECT);
+    HideStartMenu();
+    ScriptContext_SetupScript(EventScript_AccessPokemonBoxLink);
+    return TRUE;
 }
 
 void Script_ForceSaveGame(struct ScriptContext *ctx)
