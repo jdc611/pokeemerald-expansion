@@ -1871,12 +1871,20 @@ static void Task_NewGameBirchSpeech_ShowSeed(u8 taskId)
     ConvertIntToDecimalStringN(gStringVar1, gRunSetupWorldSeed, STR_CONV_MODE_LEFT_ALIGN, 10);
     StringExpandPlaceholders(gStringVar4, gText_SeedDisplay);
     AddTextPrinterForMessage(TRUE);
-    gTasks[taskId].func = Task_NewGameBirchSpeech_WaitForSeedA;
+gTasks[taskId].tTimer = 10;
+gTasks[taskId].func = Task_NewGameBirchSpeech_WaitForSeedA;
 }
 static void Task_NewGameBirchSpeech_WaitForSeedA(u8 taskId)
 {
     RunTextPrintersAndIsPrinter0Active();
-    if (JOY_NEW(A_BUTTON))
+
+    if (gTasks[taskId].tTimer != 0)
+    {
+        gTasks[taskId].tTimer--;
+        return;
+    }
+
+    if (JOY_HELD(A_BUTTON))
         gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
 }
 static void Task_NewGameBirchSpeech_ProcessStarterModeYesNo(u8 taskId)
