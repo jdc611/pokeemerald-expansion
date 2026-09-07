@@ -502,7 +502,17 @@ static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
         }
         else
         {
-            StringExpandPlaceholders(gStringVar4, sStartMenuItems[sCurrentStartMenuActions[index]].text);
+            if (sCurrentStartMenuActions[index] == MENU_ACTION_EXIT)
+{
+    if (sStartMenuPage == 0)
+        StringCopy(gStringVar4, sText_ExitPage1);
+    else
+        StringCopy(gStringVar4, sText_ExitPage2);
+}
+else
+{
+    StringExpandPlaceholders(gStringVar4, sStartMenuItems[sCurrentStartMenuActions[index]].text);
+}
             AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_NORMAL, gStringVar4, 8, (index << 4) + 9, TEXT_SKIP_DRAW, NULL);
         }
 
