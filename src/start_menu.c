@@ -653,11 +653,13 @@ if (JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
     sStartMenuCursorPos = 0;
     sNumStartMenuActions = 0;
 
-    BuildNormalStartMenu();
-    HideStartMenu();
-    ShowStartMenu();
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+    RemoveStartMenuWindow();
+
+    InitStartMenu();
 
     return FALSE;
+
 }
     if (JOY_NEW(A_BUTTON))
     {
