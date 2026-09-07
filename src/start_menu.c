@@ -31,6 +31,7 @@
 #include "party_menu.h"
 #include "pokedex.h"
 #include "pokenav.h"
+#include "pokemon_storage_system.h"
 #include "safari_zone.h"
 #include "save.h"
 #include "scanline_effect.h"
@@ -69,6 +70,7 @@ enum
     MENU_ACTION_PYRAMID_BAG,
     MENU_ACTION_DEBUG,
     MENU_ACTION_DEXNAV,
+    MENU_ACTION_PC_STORAGE,
 };
 
 // Save status
@@ -112,6 +114,7 @@ static bool8 StartMenuBattlePyramidRetireCallback(void);
 static bool8 StartMenuBattlePyramidBagCallback(void);
 static bool8 StartMenuDebugCallback(void);
 static bool8 StartMenuDexNavCallback(void);
+static bool8 StartMenu_PCStorage(void);
 
 // Menu callbacks
 static bool8 SaveStartCallback(void);
@@ -209,6 +212,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_PYRAMID_BAG]     = {gText_MenuBag,     {.u8_void = StartMenuBattlePyramidBagCallback}},
     [MENU_ACTION_DEBUG]           = {sText_MenuDebug,   {.u8_void = StartMenuDebugCallback}},
     [MENU_ACTION_DEXNAV]          = {gText_MenuDexNav,  {.u8_void = StartMenuDexNavCallback}},
+    [MENU_ACTION_PC_STORAGE] = {COMPOUND_STRING("PC STORAGE"), {.u8_void = StartMenu_PCStorage}},
 };
 
 static const struct BgTemplate sBgTemplates_LinkBattleSave[] =
@@ -349,9 +353,10 @@ static void BuildNormalStartMenu(void)
         AddStartMenuAction(MENU_ACTION_EXIT);
     }
     else
-    {
-        AddStartMenuAction(MENU_ACTION_EXIT);
-    }
+{
+    AddStartMenuAction(MENU_ACTION_PC_STORAGE);
+    AddStartMenuAction(MENU_ACTION_EXIT);
+}
 }
 
 static void BuildDebugStartMenu(void)
@@ -1537,6 +1542,21 @@ static bool8 StartMenuDexNavCallback(void)
 {
     CreateTask(Task_OpenDexNavFromStartMenu, 0);
     return TRUE;
+}
+
+static bool8 StartMenu_PCStorage(void)
+{
+    if (!gPaletteFade.active)
+    {
+        PlayRainStoppingSoundEffect();
+        RemoveExtraStartMenuWindows();
+        CleanupOverworldWindowsAndTilemaps();
+        ShowPokemonStorageSystemPC();
+
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 void Script_ForceSaveGame(struct ScriptContext *ctx)
