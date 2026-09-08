@@ -10,6 +10,7 @@
 #include "event_object_lock.h"
 #include "event_scripts.h"
 #include "fieldmap.h"
+#include "field_message_box.h"
 #include "field_effect.h"
 #include "field_player_avatar.h"
 #include "field_specials.h"
@@ -197,6 +198,7 @@ static const struct WindowTemplate sWindowTemplate_PyramidPeak = {
 };
 
 static const u8 sText_MenuDebug[] = _("DEBUG");
+static const u8 sText_PokeVialHealed[] = _("Your POKéMON were fully healed!");
 
 static const struct MenuAction sStartMenuItems[] =
 {
@@ -1570,6 +1572,7 @@ static bool8 StartMenuPokeVial(void)
         PlaySE(SE_USE_ITEM);
         RemoveExtraStartMenuWindows();
         HideStartMenu();
+        ShowFieldMessage(sText_PokeVialHealed);
         return TRUE;
     }
 
