@@ -36,6 +36,7 @@
 #include "save.h"
 #include "scanline_effect.h"
 #include "script.h"
+#include "script_pokemon_util.h"
 #include "sound.h"
 #include "start_menu.h"
 #include "strings.h"
@@ -1558,6 +1559,20 @@ static bool8 StartMenu_PCStorage(void)
         ScriptContext_SetupScript(EventScript_AccessPokemonBoxLink);
         return TRUE;
     }
+    return FALSE;
+}
+
+static bool8 StartMenuPokeVial(void)
+{
+    if (!gPaletteFade.active)
+    {
+        HealPlayerParty();
+        PlaySE(SE_USE_ITEM);
+        RemoveExtraStartMenuWindows();
+        HideStartMenu();
+        return TRUE;
+    }
+
     return FALSE;
 }
 
