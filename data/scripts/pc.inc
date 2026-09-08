@@ -71,3 +71,9 @@ EventScript_AccessPokemonBoxLink::
 	special ShowPokemonStorageSystemPC
 	goto EventScript_TurnOffPC
 	end
+
+EventScript_UsePokeVial::
+    special HealPlayerParty
+    playse SE_USE_ITEM
+    msgbox gText_MonsHealed, MSGBOX_DEFAULT
+    end
