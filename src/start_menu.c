@@ -212,7 +212,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_PYRAMID_BAG]     = {gText_MenuBag,     {.u8_void = StartMenuBattlePyramidBagCallback}},
     [MENU_ACTION_DEBUG]           = {sText_MenuDebug,   {.u8_void = StartMenuDebugCallback}},
     [MENU_ACTION_DEXNAV]          = {gText_MenuDexNav,  {.u8_void = StartMenuDexNavCallback}},
-    [MENU_ACTION_PC_STORAGE] = {COMPOUND_STRING("PC STORAGE"), {.u8_void = StartMenu_PCStorage}},
+    [MENU_ACTION_PC_STORAGE] = {COMPOUND_STRING("PC"), {.u8_void = StartMenu_PCStorage}},
 };
 
 static const struct BgTemplate sBgTemplates_LinkBattleSave[] =
@@ -1550,7 +1550,6 @@ static bool8 StartMenu_PCStorage(void)
     {
         RemoveExtraStartMenuWindows();
         HideStartMenu();
-        FadeInFromBlack();
         ScriptContext_SetupScript(EventScript_AccessPokemonBoxLink);
         return TRUE;
     }
