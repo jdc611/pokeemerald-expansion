@@ -1550,6 +1550,7 @@ static bool8 StartMenu_PCStorage(void)
     {
         RemoveExtraStartMenuWindows();
         HideStartMenu();
+        FadeScreen(FADE_FROM_BLACK, 0);
         ScriptContext_SetupScript(EventScript_AccessPokemonBoxLink);
         return TRUE;
     }
