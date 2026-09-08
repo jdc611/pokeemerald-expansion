@@ -10402,6 +10402,10 @@ const u32 gObjectEventPic_Substitute[] = INCGFX_COMP("graphics/pokemon/question_
 #endif //P_GENDER_DIFFERENCES
 #endif //P_FAMILY_LOTAD
 
+// Synkith
+const u32 gMonFrontPic_Synkith[] = INCGFX_U32("graphics/pokemon/synkith/anim_front_gba.png", ".4bpp.smol");
+const u16 gMonPalette_Synkith[] = INCGFX_U16("graphics/pokemon/synkith/normal_gba.pal", ".gbapal");
+
 #if P_FAMILY_SEEDOT
 #if !P_GBA_STYLE_SPECIES_GFX
     const u32 gMonFrontPic_Seedot[] = INCGFX_U32("graphics/pokemon/seedot/anim_front.png", ".4bpp.smol");
