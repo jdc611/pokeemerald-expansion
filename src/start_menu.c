@@ -1555,6 +1555,7 @@ static bool8 StartMenu_PCStorage(void)
         return TRUE;
     }
     return FALSE;
+}
 
 void Script_ForceSaveGame(struct ScriptContext *ctx)
 {
