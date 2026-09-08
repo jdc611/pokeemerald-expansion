@@ -1546,11 +1546,15 @@ static bool8 StartMenuDexNavCallback(void)
 
 static bool8 StartMenu_PCStorage(void)
 {
-    PlaySE(SE_SELECT);
-    HideStartMenu();
-    ScriptContext_SetupScript(EventScript_AccessPokemonBoxLink);
-    return TRUE;
-}
+    if (!gPaletteFade.active)
+    {
+        RemoveExtraStartMenuWindows();
+        HideStartMenu();
+        FadeInFromBlack();
+        ScriptContext_SetupScript(EventScript_AccessPokemonBoxLink);
+        return TRUE;
+    }
+    return FALSE;
 
 void Script_ForceSaveGame(struct ScriptContext *ctx)
 {
