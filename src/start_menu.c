@@ -704,10 +704,11 @@ if (JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
             && gMenuCallback != StartMenuDebugCallback
             && gMenuCallback != StartMenuSafariZoneRetireCallback
             && gMenuCallback != StartMenuBattlePyramidRetireCallback
-            && gMenuCallback != StartMenu_PCStorage)
-        {
-           FadeScreen(FADE_TO_BLACK, 0);
-        }
+            && gMenuCallback != StartMenu_PCStorage
+            && gMenuCallback != StartMenuPokeVial)
+{
+    FadeScreen(FADE_TO_BLACK, 0);
+}
 
         return FALSE;
     }
