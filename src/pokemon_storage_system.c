@@ -7158,7 +7158,7 @@ static u8 InBoxInput_Normal(void)
         sStorage->cursorHorizontalWrap = 0;
         sStorage->cursorFlipTimer = 0;
 
-        if (JOY_REPEAT(DPAD_UP))
+        if (JOY_NEW(DPAD_UP))
         {
             retVal = INPUT_MOVE_CURSOR;
             if (sCursorPosition >= IN_BOX_COLUMNS)
@@ -7172,7 +7172,7 @@ static u8 InBoxInput_Normal(void)
             }
             break;
         }
-        else if (JOY_REPEAT(DPAD_DOWN))
+        else if (JOY_NEW(DPAD_DOWN))
         {
             retVal = INPUT_MOVE_CURSOR;
             cursorPosition += IN_BOX_COLUMNS;
@@ -7186,7 +7186,7 @@ static u8 InBoxInput_Normal(void)
             }
             break;
         }
-        else if (JOY_REPEAT(DPAD_LEFT))
+        else if (JOY_NEW(DPAD_LEFT))
         {
             retVal = INPUT_MOVE_CURSOR;
             if (sCursorPosition % IN_BOX_COLUMNS != 0)
@@ -7200,7 +7200,7 @@ static u8 InBoxInput_Normal(void)
             }
             break;
         }
-        else if (JOY_REPEAT(DPAD_RIGHT))
+        else if (JOY_NEW(DPAD_RIGHT))
         {
             retVal = INPUT_MOVE_CURSOR;
             if ((sCursorPosition + 1) % IN_BOX_COLUMNS != 0)
