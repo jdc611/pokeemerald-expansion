@@ -248,12 +248,12 @@ const struct SpeciesInfo gSpeciesInfo[] =
     */
     [SPECIES_SYNKITH] =
     {
-        .baseHP        = 70,
-        .baseAttack    = 55,
-        .baseDefense   = 65,
-        .baseSpeed     = 95,
-        .baseSpAttack  = 105,
-        .baseSpDefense = 90,
+        .baseHP        = 55,
+        .baseAttack    = 35,
+        .baseDefense   = 45,
+        .baseSpeed     = 115,
+        .baseSpAttack  = 75,
+        .baseSpDefense = 85,
         .types = MON_TYPES(TYPE_PSYCHIC, TYPE_NORMAL),
         .catchRate = 45,
         .expYield = 180,
