@@ -282,7 +282,11 @@ const struct SpeciesInfo gSpeciesInfo[] =
         .frontPic = gMonFrontPic_Synkith,
         .frontPicSize = MON_COORDS_SIZE(64, 64),
         .frontPicYOffset = 0,
-        .frontAnimFrames = sAnims_None,
+        .frontAnimFrames = ANIM_FRAMES(
+    ANIMCMD_FRAME(1, 33),
+    ANIMCMD_FRAME(0, 5),
+),
+.frontAnimId = ANIM_V_STRETCH,
         .backPic = gMonBackPic_CircledQuestionMark,
         .backPicSize = MON_COORDS_SIZE(64, 64),
         .backPicYOffset = 7,
