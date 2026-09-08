@@ -73,7 +73,9 @@ EventScript_AccessPokemonBoxLink::
 	end
 
 EventScript_UsePokeVial::
+    lockall
     special HealPlayerParty
     playse SE_USE_ITEM
     msgbox gText_MonsHealed, MSGBOX_DEFAULT
+    releaseall
     end
