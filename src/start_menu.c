@@ -1568,10 +1568,9 @@ static bool8 StartMenuPokeVial(void)
 {
     if (!gPaletteFade.active)
     {
-        HealPlayerParty();
-        PlaySE(SE_USE_ITEM);
         RemoveExtraStartMenuWindows();
         HideStartMenu();
+        ScriptContext_SetupScript(EventScript_UsePokeVial);
         return TRUE;
     }
 
