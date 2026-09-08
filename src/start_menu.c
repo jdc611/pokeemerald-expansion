@@ -358,6 +358,7 @@ static void BuildNormalStartMenu(void)
     else
 {
     AddStartMenuAction(MENU_ACTION_PC_STORAGE);
+    AddStartMenuAction(MENU_ACTION_POKEVIAL);
     AddStartMenuAction(MENU_ACTION_EXIT);
 }
 }
