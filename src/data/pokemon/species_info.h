@@ -246,6 +246,54 @@ const struct SpeciesInfo gSpeciesInfo[] =
         //.perfectIVCount = NUM_STATS,
     },
     */
+    [SPECIES_SYNKITH] =
+    {
+        .baseHP        = 70,
+        .baseAttack    = 55,
+        .baseDefense   = 65,
+        .baseSpeed     = 95,
+        .baseSpAttack  = 105,
+        .baseSpDefense = 90,
+        .types = MON_TYPES(TYPE_PSYCHIC, TYPE_NORMAL),
+        .catchRate = 45,
+        .expYield = 180,
+        .genderRatio = PERCENT_FEMALE(50),
+        .eggCycles = 20,
+        .friendship = STANDARD_FRIENDSHIP,
+        .growthRate = GROWTH_MEDIUM_FAST,
+        .eggGroups = MON_EGG_GROUPS(EGG_GROUP_FIELD),
+        .abilities = { ABILITY_SYNCHRONIZE, ABILITY_TELEPATHY, ABILITY_NONE },
+        .bodyColor = BODY_COLOR_BLACK,
+        .speciesName = _("Synkith"),
+        .cryId = CRY_NONE,
+        .natDexNum = NATIONAL_DEX_NONE,
+        .categoryName = _("Harmonizer"),
+        .height = 6,
+        .weight = 115,
+        .description = COMPOUND_STRING(
+            "A mysterious Pokémon that senses\n"
+            "emotional and energetic disturbances.\n"
+            "Its glowing markings brighten as it\n"
+            "restores balance around it."),
+        .pokemonScale = 256,
+        .pokemonOffset = 0,
+        .trainerScale = 256,
+        .trainerOffset = 0,
+        .frontPic = gMonFrontPic_Synkith,
+        .frontPicSize = MON_COORDS_SIZE(64, 64),
+        .frontPicYOffset = 0,
+        .frontAnimFrames = sAnims_None,
+        .backPic = gMonBackPic_CircledQuestionMark,
+        .backPicSize = MON_COORDS_SIZE(64, 64),
+        .backPicYOffset = 7,
+        .backAnimId = BACK_ANIM_NONE,
+        .palette = gMonPalette_Synkith,
+        .shinyPalette = gMonPalette_Synkith,
+        .iconSprite = gMonIcon_QuestionMark,
+        .iconPalIndex = 0,
+        .levelUpLearnset = sNoneLevelUpLearnset,
+        .teachableLearnset = sNoneTeachableLearnset,
+    },
 };
 
 const struct EggData gEggDatas[EGG_ID_COUNT] =
