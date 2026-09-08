@@ -1753,7 +1753,7 @@ static u16 PartyMenuButtonHandler(s8 *slotPtr)
 {
     s8 movementDir;
 
-    switch (gMain.newAndRepeatedKeys)
+    switch (gMain.newKeys)
     {
     case DPAD_UP:
         movementDir = MENU_DIR_UP;
