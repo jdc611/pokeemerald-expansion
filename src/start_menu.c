@@ -1572,7 +1572,6 @@ static bool8 StartMenuPokeVial(void)
         PlaySE(SE_USE_ITEM);
         RemoveExtraStartMenuWindows();
         HideStartMenu();
-        ShowFieldMessage(sText_PokeVialHealed);
         return TRUE;
     }
 
