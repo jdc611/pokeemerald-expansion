@@ -82,6 +82,7 @@ EventScript_UsePokeVial::
 
 EventScript_ChangeNature::
     special ChoosePartyMon
+    waitstate
     goto_if_ge VAR_0x8004, PARTY_SIZE, EventScript_ChangeNature_Close
     specialvar VAR_RESULT, ScriptGetPartyMonSpecies
     goto_if_eq VAR_RESULT, SPECIES_EGG, EventScript_ChangeNature_Close
