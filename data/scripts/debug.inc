@@ -606,55 +606,59 @@ Debug_EventScript_InflictStatus1_Text_KO:
 	.string "KO$"
 
 Debug_EventScript_ChangeNature_Text_Hardy:
-	.string "Hardy$"
+    .string "Hardy  Neutral$"
 Debug_EventScript_ChangeNature_Text_Lonely:
-	.string "Lonely$"
+    .string "Lonely  ATK+ DEF-$"
 Debug_EventScript_ChangeNature_Text_Brave:
-	.string "Brave$"
+    .string "Brave  ATK+ SPE-$"
 Debug_EventScript_ChangeNature_Text_Adamant:
-	.string "Adamant$"
+    .string "Adamant  ATK+ SpA-$"
 Debug_EventScript_ChangeNature_Text_Naughty:
-	.string "Naughty$"
+    .string "Naughty  ATK+ SpD-$"
+
 Debug_EventScript_ChangeNature_Text_Bold:
-	.string "Bold$"
+    .string "Bold  DEF+ ATK-$"
 Debug_EventScript_ChangeNature_Text_Docile:
-	.string "Docile$"
+    .string "Docile  Neutral$"
 Debug_EventScript_ChangeNature_Text_Relaxed:
-	.string "Relaxed$"
+    .string "Relaxed  DEF+ SPE-$"
 Debug_EventScript_ChangeNature_Text_Impish:
-	.string "Impish$"
+    .string "Impish  DEF+ SpA-$"
 Debug_EventScript_ChangeNature_Text_Lax:
-	.string "Lax$"
+    .string "Lax  DEF+ SpD-$"
+
 Debug_EventScript_ChangeNature_Text_Timid:
-	.string "Timid$"
+    .string "Timid  SPE+ ATK-$"
 Debug_EventScript_ChangeNature_Text_Hasty:
-	.string "Hasty$"
+    .string "Hasty  SPE+ DEF-$"
 Debug_EventScript_ChangeNature_Text_Serious:
-	.string "Serious$"
+    .string "Serious  Neutral$"
 Debug_EventScript_ChangeNature_Text_Jolly:
-	.string "Jolly$"
+    .string "Jolly  SPE+ SpA-$"
 Debug_EventScript_ChangeNature_Text_Naive:
-	.string "Naive$"
+    .string "Naive  SPE+ SpD-$"
+
 Debug_EventScript_ChangeNature_Text_Modest:
-	.string "Modest$"
+    .string "Modest  SpA+ ATK-$"
 Debug_EventScript_ChangeNature_Text_Mild:
-	.string "Mild$"
+    .string "Mild  SpA+ DEF-$"
 Debug_EventScript_ChangeNature_Text_Quiet:
-	.string "Quiet$"
+    .string "Quiet  SpA+ SPE-$"
 Debug_EventScript_ChangeNature_Text_Bashful:
-	.string "Bashful$"
+    .string "Bashful  Neutral$"
 Debug_EventScript_ChangeNature_Text_Rash:
-	.string "Rash$"
+    .string "Rash  SpA+ SpD-$"
+
 Debug_EventScript_ChangeNature_Text_Calm:
-	.string "Calm$"
+    .string "Calm  SpD+ ATK-$"
 Debug_EventScript_ChangeNature_Text_Gentle:
-	.string "Gentle$"
+    .string "Gentle  SpD+ DEF-$"
 Debug_EventScript_ChangeNature_Text_Sassy:
-	.string "Sassy$"
+    .string "Sassy  SpD+ SPE-$"
 Debug_EventScript_ChangeNature_Text_Careful:
-	.string "Careful$"
+    .string "Careful  SpD+ SpA-$"
 Debug_EventScript_ChangeNature_Text_Quirky:
-	.string "Quirky$"
+    .string "Quirky  Neutral$"
 
 Debug_EventScript_EWRAMCounters::
 	callnative CheckEWRAMCounters
