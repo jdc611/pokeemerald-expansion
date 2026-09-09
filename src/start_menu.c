@@ -365,6 +365,7 @@ static void BuildNormalStartMenu(void)
 {
     AddStartMenuAction(MENU_ACTION_PC_STORAGE);
     AddStartMenuAction(MENU_ACTION_POKEVIAL);
+    AddStartMenuAction(MENU_ACTION_CHANGE_NATURE);
     AddStartMenuAction(MENU_ACTION_EXIT);
 }
 }
@@ -708,7 +709,8 @@ if (JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
             && gMenuCallback != StartMenuSafariZoneRetireCallback
             && gMenuCallback != StartMenuBattlePyramidRetireCallback
             && gMenuCallback != StartMenu_PCStorage
-            && gMenuCallback != StartMenuPokeVial)
+            && gMenuCallback != StartMenuPokeVial
+            && gMenuCallback != StartMenuChangeNature)
 {
     FadeScreen(FADE_TO_BLACK, 0);
 }
@@ -1575,6 +1577,19 @@ static bool8 StartMenuPokeVial(void)
         RemoveExtraStartMenuWindows();
         HideStartMenu();
         ScriptContext_SetupScript(EventScript_UsePokeVial);
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool8 StartMenuChangeNature(void)
+{
+    if (!gPaletteFade.active)
+    {
+        RemoveExtraStartMenuWindows();
+        HideStartMenu();
+        ScriptContext_SetupScript(EventScript_ChangeNature);
         return TRUE;
     }
 
