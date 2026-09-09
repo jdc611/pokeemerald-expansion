@@ -381,12 +381,12 @@ s32 ListMenu_ProcessInput(u8 listTaskId)
     {
         return LIST_CANCEL;
     }
-    else if (JOY_REPEAT(DPAD_UP))
+    else if (JOY_NEW(DPAD_UP))
     {
         ListMenuChangeSelection(list, TRUE, 1, FALSE);
         return LIST_NOTHING_CHOSEN;
     }
-    else if (JOY_REPEAT(DPAD_DOWN))
+    else if (JOY_NEW(DPAD_DOWN))
     {
         ListMenuChangeSelection(list, TRUE, 1, TRUE);
         return LIST_NOTHING_CHOSEN;
