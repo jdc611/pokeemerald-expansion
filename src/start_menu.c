@@ -74,6 +74,7 @@ enum
     MENU_ACTION_DEXNAV,
     MENU_ACTION_PC_STORAGE,
     MENU_ACTION_POKEVIAL,
+    MENU_ACTION_CHANGE_NATURE,
 };
 
 // Save status
@@ -119,6 +120,7 @@ static bool8 StartMenuDebugCallback(void);
 static bool8 StartMenuDexNavCallback(void);
 static bool8 StartMenu_PCStorage(void);
 static bool8 StartMenuPokeVial(void);
+static bool8 StartMenuChangeNature(void);
 
 // Menu callbacks
 static bool8 SaveStartCallback(void);
@@ -219,6 +221,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_DEXNAV]          = {gText_MenuDexNav,  {.u8_void = StartMenuDexNavCallback}},
     [MENU_ACTION_PC_STORAGE] = {COMPOUND_STRING("PC"), {.u8_void = StartMenu_PCStorage}},
     [MENU_ACTION_POKEVIAL] = {COMPOUND_STRING("POKéVIAL"), {.u8_void = StartMenuPokeVial}},
+    [MENU_ACTION_CHANGE_NATURE] = {COMPOUND_STRING("NATURE"), {.u8_void = StartMenuChangeNature}},
 };
 
 static const struct BgTemplate sBgTemplates_LinkBattleSave[] =
