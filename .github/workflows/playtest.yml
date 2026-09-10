@@ -1,6 +1,14 @@
 name: Build Playtest ROM
 
 "on":
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - ".github/workflows/apply-*.yml"
+      - ".github/scripts/**"
   workflow_dispatch: {}
 
 env:
@@ -15,8 +23,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout latest master
         uses: actions/checkout@v4
+        with:
+          ref: master
 
       - name: Install build tools
         run: |
@@ -31,5 +41,5 @@ jobs:
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
         with:
-          name: our-rom-playtest
+          name: our-rom-playtest-${{ github.sha }}
           path: pokeemerald.gba
