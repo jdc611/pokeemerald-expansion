@@ -41,4 +41,10 @@ bool32 CheckPartyHasSpecies(enum Species);
 bool8 CutMoveRuinValleyCheck(void);
 void CutMoveOpenDottedHoleDoor(void);
 
+// The original gender changer implementation in field_specials.c writes a new
+// personality directly, which corrupts encrypted BoxPokemon data. Rename that
+// implementation at compile time so the safe implementation in gender_changer.c
+// can own the SetSelectedMonGender symbol used by data/specials.inc.
+#define SetSelectedMonGender SetSelectedMonGenderUnsafe
+
 #endif // GUARD_FIELD_SPECIALS_H
