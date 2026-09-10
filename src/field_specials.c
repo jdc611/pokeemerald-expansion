@@ -53,6 +53,7 @@
 #include "text.h"
 #include "text_window.h"
 #include "tilesets.h"
+#include "trainer_util.h"
 #include "tv.h"
 #include "wallclock.h"
 #include "window.h"
@@ -4586,6 +4587,22 @@ void SetHiddenNature(void)
     u32 hiddenNature = gSpecialVar_Result;
     SetMonData(&gParties[B_TRAINER_PLAYER][gSpecialVar_0x8004], MON_DATA_HIDDEN_NATURE, &hiddenNature);
     CalculateMonStats(&gParties[B_TRAINER_PLAYER][gSpecialVar_0x8004]);
+}
+
+void SetSelectedMonGender(void)
+{
+    struct Pokemon *mon = &gParties[B_TRAINER_PLAYER][gSpecialVar_0x8004];
+    u32 species = GetMonData(mon, MON_DATA_SPECIES);
+    u32 gender;
+    u32 personality;
+
+    if (gSpecialVar_Result == 0)
+        gender = MON_MALE;
+    else
+        gender = MON_FEMALE;
+
+    personality = GeneratePersonalityForGender(gender, species);
+    SetMonData(mon, MON_DATA_PERSONALITY, &personality);
 }
 
 void SetAbility(void)
