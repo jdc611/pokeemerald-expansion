@@ -53,6 +53,7 @@
 #include "constants/battle_frontier.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
+#include "constants/type_hints.h"
 
 // Menu actions
 enum
@@ -76,6 +77,7 @@ enum
     MENU_ACTION_POKEVIAL,
     MENU_ACTION_CHANGE_NATURE,
     MENU_ACTION_CHANGE_GENDER,
+    MENU_ACTION_TYPE_HINTS,
 };
 
 // Save status
@@ -123,6 +125,7 @@ static bool8 StartMenu_PCStorage(void);
 static bool8 StartMenuPokeVial(void);
 static bool8 StartMenuChangeNature(void);
 static bool8 StartMenuChangeGender(void);
+static bool8 StartMenuTypeHints(void);
 
 // Menu callbacks
 static bool8 SaveStartCallback(void);
@@ -168,6 +171,10 @@ static const struct WindowTemplate sWindowTemplate_SafariBalls = {
 };
 static const u8 sText_ExitPage1[] = _("EXIT  1/2");
 static const u8 sText_ExitPage2[] = _("EXIT  2/2");
+static const u8 sText_TypeHintsSeen[] = _("TYPE HINTS: SEEN");
+static const u8 sText_TypeHintsAlways[] = _("TYPE HINTS: ALWAYS");
+static const u8 sText_TypeHintsCaught[] = _("TYPE HINTS: CAUGHT");
+static const u8 sText_TypeHintsOff[] = _("TYPE HINTS: OFF");
 
 static const u8 *const sPyramidFloorNames[FRONTIER_STAGES_PER_CHALLENGE + 1] =
 {
@@ -225,6 +232,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_POKEVIAL] = {COMPOUND_STRING("POKéVIAL"), {.u8_void = StartMenuPokeVial}},
     [MENU_ACTION_CHANGE_NATURE] = {COMPOUND_STRING("NATURE"), {.u8_void = StartMenuChangeNature}},
     [MENU_ACTION_CHANGE_GENDER] = {COMPOUND_STRING("GENDER"), {.u8_void = StartMenuChangeGender}},
+    [MENU_ACTION_TYPE_HINTS] = {COMPOUND_STRING("TYPE HINTS"), {.u8_void = StartMenuTypeHints}},
 };
 
 static const struct BgTemplate sBgTemplates_LinkBattleSave[] =
@@ -370,6 +378,7 @@ static void BuildNormalStartMenu(void)
     AddStartMenuAction(MENU_ACTION_POKEVIAL);
     AddStartMenuAction(MENU_ACTION_CHANGE_NATURE);
     AddStartMenuAction(MENU_ACTION_CHANGE_GENDER);
+    AddStartMenuAction(MENU_ACTION_TYPE_HINTS);
     AddStartMenuAction(MENU_ACTION_EXIT);
 }
 }
@@ -528,6 +537,25 @@ static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
         StringCopy(gStringVar4, sText_ExitPage1);
     else
         StringCopy(gStringVar4, sText_ExitPage2);
+}
+else if (sCurrentStartMenuActions[index] == MENU_ACTION_TYPE_HINTS)
+{
+    switch (VarGet(VAR_TYPE_HINTS_MODE))
+    {
+    case TYPE_HINTS_ALWAYS:
+        StringCopy(gStringVar4, sText_TypeHintsAlways);
+        break;
+    case TYPE_HINTS_CAUGHT:
+        StringCopy(gStringVar4, sText_TypeHintsCaught);
+        break;
+    case TYPE_HINTS_OFF:
+        StringCopy(gStringVar4, sText_TypeHintsOff);
+        break;
+    case TYPE_HINTS_SEEN:
+    default:
+        StringCopy(gStringVar4, sText_TypeHintsSeen);
+        break;
+    }
 }
 else
 {
@@ -715,7 +743,8 @@ if (JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
             && gMenuCallback != StartMenu_PCStorage
             && gMenuCallback != StartMenuPokeVial
             && gMenuCallback != StartMenuChangeNature
-            && gMenuCallback != StartMenuChangeGender)
+            && gMenuCallback != StartMenuChangeGender
+            && gMenuCallback != StartMenuTypeHints)
 {
     FadeScreen(FADE_TO_BLACK, 0);
 }
@@ -1611,6 +1640,35 @@ static bool8 StartMenuChangeGender(void)
         return TRUE;
     }
 
+    return FALSE;
+}
+
+static bool8 StartMenuTypeHints(void)
+{
+    u16 mode = VarGet(VAR_TYPE_HINTS_MODE);
+
+    switch (mode)
+    {
+    case TYPE_HINTS_SEEN:
+        mode = TYPE_HINTS_CAUGHT;
+        break;
+    case TYPE_HINTS_CAUGHT:
+        mode = TYPE_HINTS_OFF;
+        break;
+    case TYPE_HINTS_OFF:
+        mode = TYPE_HINTS_ALWAYS;
+        break;
+    case TYPE_HINTS_ALWAYS:
+    default:
+        mode = TYPE_HINTS_SEEN;
+        break;
+    }
+
+    VarSet(VAR_TYPE_HINTS_MODE, mode);
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+    RemoveStartMenuWindow();
+    InitStartMenu();
+    gMenuCallback = HandleStartMenuInput;
     return FALSE;
 }
 

@@ -12,6 +12,7 @@
 #include "battle_gimmick.h"
 #include "bg.h"
 #include "data.h"
+#include "event_data.h"
 #include "item.h"
 #include "item_menu.h"
 #include "link.h"
@@ -41,6 +42,8 @@
 #include "constants/party_menu.h"
 #include "constants/songs.h"
 #include "constants/trainers.h"
+#include "constants/type_hints.h"
+#include "constants/vars.h"
 #include "constants/rgb.h"
 #include "caps.h"
 #include "menu.h"
@@ -1674,6 +1677,14 @@ static void MoveSelectionDisplayMoveNames(enum BattlerId battler)
 static void MoveSelectionDisplayPPString(enum BattlerId battler)
 {
     StringCopy(gDisplayedStringBattle, gText_MoveInterfacePP);
+    // DYNAMIC_COLOR1 is reserved here as the resistance-hint yellow.
+    // The other hint colors use the standard GREEN and RED text slots.
+    {
+        u16 yellow = RGB_YELLOW;
+        u32 paletteNum = GetWindowAttribute(B_WIN_PP, WINDOW_PALETTE_NUM);
+        LoadPalette(&yellow, BG_PLTT_ID(paletteNum) + 10, sizeof(yellow));
+    }
+
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_PP);
 }
 
@@ -2362,16 +2373,23 @@ enum
 
 static bool32 ShouldShowTypeEffectiveness(u32 targetId)
 {
+    u16 mode = VarGet(VAR_TYPE_HINTS_MODE);
+
     if (IsGhostBattleWithoutScope())
         return FALSE;
 
-    if (B_SHOW_EFFECTIVENESS == SHOW_EFFECTIVENESS_CAUGHT)
+    switch (mode)
+    {
+    case TYPE_HINTS_ALWAYS:
+        return TRUE;
+    case TYPE_HINTS_CAUGHT:
         return GetSetPokedexFlag(SpeciesToNationalPokedexNum(gBattleMons[targetId].species), FLAG_GET_CAUGHT);
-
-    if (B_SHOW_EFFECTIVENESS == SHOW_EFFECTIVENESS_SEEN)
+    case TYPE_HINTS_OFF:
+        return FALSE;
+    case TYPE_HINTS_SEEN:
+    default:
         return GetSetPokedexFlag(SpeciesToNationalPokedexNum(gBattleMons[targetId].species), FLAG_GET_SEEN);
-
-    return TRUE;
+    }
 }
 
 static u32 CheckTypeEffectiveness(enum BattlerId battlerAtk, enum BattlerId battlerDef)
@@ -2429,12 +2447,12 @@ static u32 CheckTargetTypeEffectiveness(enum BattlerId battler)
 static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, enum BattlerId battler)
 {
     static const u8 noIcon[] =  _("");
-    static const u8 effectiveIcon[] =  _("{CIRCLE_HOLLOW}");
-    static const u8 extremeleyEffectiveIcon[] =  _("{STAR}");
-    static const u8 superEffectiveIcon[] =  _("{CIRCLE_DOT}");
-    static const u8 notVeryEffectiveIcon[] =  _("{TRIANGLE}");
-    static const u8 mostlyIneffectiveIcon[] =  _("{TRIANGLE_UPSIDE_DOWN}");
-    static const u8 immuneIcon[] =  _("{BIG_MULT_X}");
+    static const u8 effectiveIcon[] =  _("");
+    static const u8 extremeleyEffectiveIcon[] =  _("{COLOR GREEN}{UP_ARROW}+");
+    static const u8 superEffectiveIcon[] =  _("{COLOR GREEN}{UP_ARROW}");
+    static const u8 notVeryEffectiveIcon[] =  _("{COLOR DYNAMIC_COLOR1}{DOWN_ARROW}");
+    static const u8 mostlyIneffectiveIcon[] =  _("{COLOR DYNAMIC_COLOR1}{DOWN_ARROW}-");
+    static const u8 immuneIcon[] =  _("{COLOR RED}X");
     struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
     u8 *txtPtr;
 
