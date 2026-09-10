@@ -131,8 +131,33 @@ EventScript_ChangeGender::
     multichoice 0, 0, MULTI_GENDER, FALSE
     switch VAR_RESULT
     case MULTI_B_PRESSED, EventScript_ChangeGender_Close
-    special SetSelectedMonGender
+        special SetSelectedMonGender
+    goto_if_eq VAR_RESULT, 2, EventScript_ChangeGender_Genderless
+    goto_if_eq VAR_RESULT, 3, EventScript_ChangeGender_MaleOnly
+    goto_if_eq VAR_RESULT, 4, EventScript_ChangeGender_FemaleOnly
+    goto EventScript_ChangeGender_Close
+
+EventScript_ChangeGender_Genderless::
+    msgbox EventScript_Text_Genderless, MSGBOX_DEFAULT
+    goto EventScript_ChangeGender_Close
+
+EventScript_ChangeGender_MaleOnly::
+    msgbox EventScript_Text_MaleOnly, MSGBOX_DEFAULT
+    goto EventScript_ChangeGender_Close
+
+EventScript_ChangeGender_FemaleOnly::
+    msgbox EventScript_Text_FemaleOnly, MSGBOX_DEFAULT
+    goto EventScript_ChangeGender_Close
 
 EventScript_ChangeGender_Close::
     releaseall
     end
+
+EventScript_Text_Genderless:
+    .string "This Pokémon has no gender.$"
+
+EventScript_Text_MaleOnly:
+    .string "This Pokémon can only be male.$"
+
+EventScript_Text_FemaleOnly:
+    .string "This Pokémon can only be female.$"
