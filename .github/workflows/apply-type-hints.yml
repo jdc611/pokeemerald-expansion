@@ -1,0 +1,31 @@
+name: Apply Type Hints Patch
+
+"on":
+  push:
+    paths:
+      - ".github/workflows/apply-type-hints.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Apply Type Hints patch
+        run: python3 .github/scripts/apply_type_hints_patch.py
+
+      - name: Commit patched source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add include/constants/vars.h src/start_menu.c src/battle_controller_player.c
+          git commit -m "Add runtime battle Type Hints indicators"
+          git push origin master
