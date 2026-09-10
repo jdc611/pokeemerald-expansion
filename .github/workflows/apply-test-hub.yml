@@ -1,0 +1,31 @@
+name: Apply Debug Test Hub Patch
+
+"on":
+  push:
+    paths:
+      - ".github/workflows/apply-test-hub.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Apply Test Hub patch
+        run: python3 .github/scripts/apply_test_hub_patch.py
+
+      - name: Commit patched source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/debug.c
+          git commit -m "Add debug Test Hub menu"
+          git push origin master
