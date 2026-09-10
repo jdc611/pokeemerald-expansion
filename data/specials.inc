@@ -564,6 +564,7 @@ gSpecials::
 	def_special EnterCode
 	def_special GetCodeFeedback
 	def_special SetHiddenNature
+    def_special SetSelectedMonGender
 	def_special SetAbility
 	def_special CanTeachMoveBoxMon
 	def_special ObjectEventInteractionGetApricornTreeData
