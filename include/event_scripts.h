@@ -598,6 +598,7 @@ extern const u8 EventScript_UseDiveUnderwater[];
 extern const u8 EventScript_UseRockClimb[];
 extern const u8 EventScript_UsePokeVial[];
 extern const u8 EventScript_ChangeNature[];
+extern const u8 EventScript_ChangeGender[];
 extern const u8 EventScript_FallDownHole[];
 extern const u8 EventScript_FieldPoison[];
 extern const u8 EventScript_EggHatch[];
