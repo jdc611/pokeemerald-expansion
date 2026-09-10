@@ -121,3 +121,18 @@ EventScript_ChangeNature::
 EventScript_ChangeNature_Close::
     releaseall
     end
+
+EventScript_ChangeGender::
+    special ChoosePartyMon
+    waitstate
+    goto_if_ge VAR_0x8004, PARTY_SIZE, EventScript_ChangeGender_Close
+    specialvar VAR_RESULT, ScriptGetPartyMonSpecies
+    goto_if_eq VAR_RESULT, SPECIES_EGG, EventScript_ChangeGender_Close
+    multichoice 0, 0, MULTI_GENDER, FALSE
+    switch VAR_RESULT
+    case MULTI_B_PRESSED, EventScript_ChangeGender_Close
+    special SetSelectedMonGender
+
+EventScript_ChangeGender_Close::
+    releaseall
+    end
