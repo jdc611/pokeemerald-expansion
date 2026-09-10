@@ -75,6 +75,7 @@ enum
     MENU_ACTION_PC_STORAGE,
     MENU_ACTION_POKEVIAL,
     MENU_ACTION_CHANGE_NATURE,
+    MENU_ACTION_CHANGE_GENDER,
 };
 
 // Save status
@@ -121,6 +122,7 @@ static bool8 StartMenuDexNavCallback(void);
 static bool8 StartMenu_PCStorage(void);
 static bool8 StartMenuPokeVial(void);
 static bool8 StartMenuChangeNature(void);
+static bool8 StartMenuChangeGender(void);
 
 // Menu callbacks
 static bool8 SaveStartCallback(void);
@@ -222,6 +224,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_PC_STORAGE] = {COMPOUND_STRING("PC"), {.u8_void = StartMenu_PCStorage}},
     [MENU_ACTION_POKEVIAL] = {COMPOUND_STRING("POKéVIAL"), {.u8_void = StartMenuPokeVial}},
     [MENU_ACTION_CHANGE_NATURE] = {COMPOUND_STRING("NATURE"), {.u8_void = StartMenuChangeNature}},
+    [MENU_ACTION_CHANGE_GENDER] = {COMPOUND_STRING("GENDER"), {.u8_void = StartMenuChangeGender}},
 };
 
 static const struct BgTemplate sBgTemplates_LinkBattleSave[] =
@@ -366,6 +369,7 @@ static void BuildNormalStartMenu(void)
     AddStartMenuAction(MENU_ACTION_PC_STORAGE);
     AddStartMenuAction(MENU_ACTION_POKEVIAL);
     AddStartMenuAction(MENU_ACTION_CHANGE_NATURE);
+    AddStartMenuAction(MENU_ACTION_CHANGE_GENDER);
     AddStartMenuAction(MENU_ACTION_EXIT);
 }
 }
@@ -710,7 +714,8 @@ if (JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
             && gMenuCallback != StartMenuBattlePyramidRetireCallback
             && gMenuCallback != StartMenu_PCStorage
             && gMenuCallback != StartMenuPokeVial
-            && gMenuCallback != StartMenuChangeNature)
+            && gMenuCallback != StartMenuChangeNature
+            && gMenuCallback != StartMenuChangeGender)
 {
     FadeScreen(FADE_TO_BLACK, 0);
 }
@@ -1590,6 +1595,19 @@ static bool8 StartMenuChangeNature(void)
         RemoveExtraStartMenuWindows();
         HideStartMenu();
         ScriptContext_SetupScript(EventScript_ChangeNature);
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool8 StartMenuChangeGender(void)
+{
+    if (!gPaletteFade.active)
+    {
+        RemoveExtraStartMenuWindows();
+        HideStartMenu();
+        ScriptContext_SetupScript(EventScript_ChangeGender);
         return TRUE;
     }
 
