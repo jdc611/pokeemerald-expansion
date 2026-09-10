@@ -4593,16 +4593,36 @@ void SetSelectedMonGender(void)
 {
     struct Pokemon *mon = &gParties[B_TRAINER_PLAYER][gSpecialVar_0x8004];
     u32 species = GetMonData(mon, MON_DATA_SPECIES);
-    u32 gender;
+    u32 requestedGender;
     u32 personality;
+    bool32 wasShiny = GetMonData(mon, MON_DATA_IS_SHINY);
+    u8 genderRatio = gSpeciesInfo[species].genderRatio;
 
-    if (gSpecialVar_Result == 0)
-        gender = MON_MALE;
-    else
-        gender = MON_FEMALE;
+    if (genderRatio == MON_GENDERLESS)
+    {
+        gSpecialVar_Result = 2;
+        return;
+    }
 
-    personality = GeneratePersonalityForGender(gender, species);
+    if (genderRatio == MON_MALE)
+    {
+        gSpecialVar_Result = 3;
+        return;
+    }
+
+    if (genderRatio == MON_FEMALE)
+    {
+        gSpecialVar_Result = 4;
+        return;
+    }
+
+    requestedGender = (gSpecialVar_Result == 0) ? MON_MALE : MON_FEMALE;
+
+    personality = GeneratePersonalityForGender(requestedGender, species);
     SetMonData(mon, MON_DATA_PERSONALITY, &personality);
+    SetMonData(mon, MON_DATA_IS_SHINY, &wasShiny);
+
+    gSpecialVar_Result = 0;
 }
 
 void SetAbility(void)
