@@ -112,7 +112,7 @@ EventScript_ChangeNature::
     dynmultipush Debug_EventScript_ChangeNature_Text_Sassy, 22
     dynmultipush Debug_EventScript_ChangeNature_Text_Careful, 23
     dynmultipush Debug_EventScript_ChangeNature_Text_Quirky, 24
-    dynmultistack 0, 0, TRUE, 7, FALSE, 0, NULL
+    dynmultistack 0, 0, FALSE, 7, FALSE, 0, NULL
 
     switch VAR_RESULT
     case MULTI_B_PRESSED, EventScript_ChangeNature_Close
@@ -131,7 +131,7 @@ EventScript_ChangeGender::
     multichoice 0, 0, MULTI_GENDER, FALSE
     switch VAR_RESULT
     case MULTI_B_PRESSED, EventScript_ChangeGender_Close
-        special SetSelectedMonGender
+    special SetSelectedMonGender
     goto_if_eq VAR_RESULT, 2, EventScript_ChangeGender_Genderless
     goto_if_eq VAR_RESULT, 3, EventScript_ChangeGender_MaleOnly
     goto_if_eq VAR_RESULT, 4, EventScript_ChangeGender_FemaleOnly
