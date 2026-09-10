@@ -37,12 +37,14 @@ void SetSelectedMonGender(void)
     }
 
     // Single-gender species already have the requested gender. For mixed-gender
-    // species, use the expansion's personality generator so the new PID has the
-    // requested gender while retaining the Pokemon's current nature.
+    // species, generate a PID with the requested gender and preserve the current
+    // nature, then use the expansion's safe personality update routine. This
+    // correctly rearranges/re-encrypts BoxPokemon substructures and prevents
+    // checksum corruption / Bad Eggs.
     if (genderRatio != MON_MALE && genderRatio != MON_FEMALE)
     {
         personality = GetMonPersonality(species, requestedGender, nature, RANDOM_UNOWN_LETTER);
-        SetMonData(mon, MON_DATA_PERSONALITY, &personality);
+        UpdateMonPersonality(&mon->box, personality);
         CalculateMonStats(mon);
     }
 
