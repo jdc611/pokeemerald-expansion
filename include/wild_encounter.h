@@ -61,7 +61,6 @@ void FishingWildEncounter(u8 rod);
 u16 GetLocalWildMon(bool8 *isWaterMon);
 u16 GetLocalWaterMon(void);
 bool8 UpdateRepelCounter(void);
-bool8 TryUseAutoRepel(void);
 bool8 IsWildLevelAllowedByRepel(u8 wildLevel);
 bool8 IsAbilityAllowingEncounter(u8 level);
 bool8 TryDoDoubleWildBattle(void);

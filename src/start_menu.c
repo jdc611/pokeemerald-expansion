@@ -1757,8 +1757,8 @@ static bool8 StartMenuAutoRepel(void)
     bool8 enabled = !VarGet(VAR_AUTO_REPEL_ENABLED);
 
     VarSet(VAR_AUTO_REPEL_ENABLED, enabled);
-    if (enabled && VarGet(VAR_REPEL_STEP_COUNT) == 0)
-        TryUseAutoRepel();
+    if (enabled)
+        DespawnAllOverworldWildEncounters(OWE_GENERATED, WILD_CHECK_REPEL);
 
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();

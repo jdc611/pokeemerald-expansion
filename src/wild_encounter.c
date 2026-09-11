@@ -1073,6 +1073,8 @@ bool8 UpdateRepelCounter(void)
         return FALSE;
     if (InUnionRoom() == TRUE)
         return FALSE;
+    if (VarGet(VAR_AUTO_REPEL_ENABLED))
+        return FALSE;
 
     if (steps != 0)
     {
@@ -1082,8 +1084,6 @@ bool8 UpdateRepelCounter(void)
             VarSet(VAR_REPEL_STEP_COUNT, steps);
             if (steps == 0)
             {
-                if (TryUseAutoRepel())
-                    return FALSE;
                 ScriptContext_SetupScript(EventScript_SprayWoreOff);
                 return TRUE;
             }
@@ -1102,36 +1102,13 @@ bool8 UpdateRepelCounter(void)
     return FALSE;
 }
 
-bool8 TryUseAutoRepel(void)
-{
-    static const enum Item sRepels[] =
-    {
-        ITEM_MAX_REPEL,
-        ITEM_SUPER_REPEL,
-        ITEM_REPEL,
-    };
-
-    if (!VarGet(VAR_AUTO_REPEL_ENABLED))
-        return FALSE;
-
-    for (u32 i = 0; i < ARRAY_COUNT(sRepels); i++)
-    {
-        enum Item item = sRepels[i];
-        if (CheckBagHasItem(item, 1))
-        {
-            RemoveBagItem(item, 1);
-            VarSet(VAR_REPEL_STEP_COUNT, GetItemHoldEffectParam(item));
-            PlaySE(SE_REPEL);
-            return TRUE;
-        }
-    }
-
-    return FALSE;
-}
-
 bool8 IsWildLevelAllowedByRepel(u8 wildLevel)
 {
     u8 i;
+
+    // Auto Repel is an unlimited encounter toggle and does not consume items.
+    if (VarGet(VAR_AUTO_REPEL_ENABLED))
+        return FALSE;
 
     if (!REPEL_STEP_COUNT)
         return TRUE;
