@@ -2479,5 +2479,29 @@ static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, enum Bat
         }
     }
 
+    // DYNAMIC_COLOR1 is recolored for the active hint so every battle text
+    // palette displays the arrows and immunity marker consistently.
+    {
+        u16 hintColor;
+        u32 paletteNum = GetWindowAttribute(B_WIN_PP, WINDOW_PALETTE_NUM);
+
+        switch (foeEffectiveness)
+        {
+        case EFFECTIVENESS_SUPER_EFFECTIVE:
+        case EFFECTIVENESS_EXTREMELY_EFFECTIVE:
+            hintColor = RGB(0, 31, 0);
+            break;
+        case EFFECTIVENESS_NO_EFFECT:
+            hintColor = RGB(31, 0, 0);
+            break;
+        case EFFECTIVENESS_NOT_VERY_EFFECTIVE:
+        case EFFECTIVENESS_MOSTLY_INEFFECTIVE:
+        default:
+            hintColor = RGB(31, 24, 0);
+            break;
+        }
+        LoadPalette(&hintColor, BG_PLTT_ID(paletteNum) + TEXT_DYNAMIC_COLOR_1, sizeof(hintColor));
+    }
+
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_PP);
 }

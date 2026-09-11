@@ -22,6 +22,7 @@
 #include "roamer.h"
 #include "safari_zone.h"
 #include "script.h"
+#include "sound.h"
 #include "tv.h"
 #include "wild_encounter.h"
 #include "battle_debug.h"
@@ -50,6 +51,7 @@ extern const u8 EventScript_SprayWoreOff[];
 
 static u16 FeebasRandom(void);
 static void FeebasSeedRng(u16 seed);
+static bool8 TryUseAutoRepel(void);
 static void ApplyFluteEncounterRateMod(u32 *encRate);
 static void ApplyCleanseTagEncounterRateMod(u32 *encRate);
 static u8 GetMaxLevelOfSpeciesInWildTable(const struct WildPokemon *wildMon, enum Species species, enum WildPokemonArea area);
@@ -1080,6 +1082,8 @@ bool8 UpdateRepelCounter(void)
             VarSet(VAR_REPEL_STEP_COUNT, steps);
             if (steps == 0)
             {
+                if (TryUseAutoRepel())
+                    return FALSE;
                 ScriptContext_SetupScript(EventScript_SprayWoreOff);
                 return TRUE;
             }
@@ -1095,6 +1099,33 @@ bool8 UpdateRepelCounter(void)
         }
 
     }
+    return FALSE;
+}
+
+static bool8 TryUseAutoRepel(void)
+{
+    static const enum Item sRepels[] =
+    {
+        ITEM_MAX_REPEL,
+        ITEM_SUPER_REPEL,
+        ITEM_REPEL,
+    };
+
+    if (!VarGet(VAR_AUTO_REPEL_ENABLED))
+        return FALSE;
+
+    for (u32 i = 0; i < ARRAY_COUNT(sRepels); i++)
+    {
+        enum Item item = sRepels[i];
+        if (CheckBagHasItem(item, 1))
+        {
+            RemoveBagItem(item, 1);
+            VarSet(VAR_REPEL_STEP_COUNT, GetItemHoldEffectParam(item));
+            PlaySE(SE_REPEL);
+            return TRUE;
+        }
+    }
+
     return FALSE;
 }
 

@@ -194,8 +194,8 @@ static const u8 sText_MonLevel[] = _("{LV}. {STR_VAR_1}");
 static const u8 sText_EggMove[] = _("MOVE: {STR_VAR_1}");
 static const u8 sText_HeldItem[] = _("{STR_VAR_1}");
 static const u8 sText_StartExit[] = _("{START_BUTTON} EXIT");
-static const u8 sText_DexNavChain[] = _("{NO} {STR_VAR_1}");
-static const u8 sText_DexNavChainLong[] = _("{NO}{STR_VAR_1}");
+static const u8 sText_DexNavChain[] = _("CHAIN {STR_VAR_1}");
+static const u8 sText_DexNavChainLong[] = _("CHAIN {STR_VAR_1}");
 
 static const u8 sText_ArrowLeft[] = _("{LEFT_ARROW}");
 static const u8 sText_ArrowRight[] = _("{RIGHT_ARROW}");
@@ -507,7 +507,7 @@ static void AddSearchWindowText(enum Species species, u8 proximity, u8 searchLev
         StringExpandPlaceholders(gStringVar4, sText_DexNavChainLong);
     else
         StringExpandPlaceholders(gStringVar4, sText_DexNavChain);
-    AddTextPrinterParameterized3(windowId, FONT_SMALL, SEARCH_ARROW_X - 16, 12, sSearchFontColor, TEXT_SKIP_DRAW, gStringVar4);
+    AddTextPrinterParameterized3(windowId, FONT_SMALL, SEARCH_ARROW_X - 48, 12, sSearchFontColor, TEXT_SKIP_DRAW, gStringVar4);
 
     CopyWindowToVram(sDexNavSearchDataPtr->windowId, 2);
 }
@@ -980,6 +980,7 @@ void EndDexNavSearch(void)
 static void EndDexNavSearchSetupScript(const u8 *script)
 {
     gSaveBlock3Ptr->dexNavChain = 0;   //reset chain
+    VarSet(VAR_DEXNAV_CHAIN_SPECIES, SPECIES_NONE);
     EndDexNavSearch();
     ScriptContext_SetupScript(script);
 }
@@ -2490,6 +2491,9 @@ static void Task_DexNavMain(u8 taskId)
             gSpecialVar_0x8000 = species;
             gSpecialVar_0x8001 = sDexNavUiDataPtr->environment;
             gSpecialVar_0x8002 = (sDexNavUiDataPtr->cursorRow == ROW_HIDDEN) ? TRUE : FALSE;
+            // Selecting a Pokémon also registers it for one-button repeat
+            // searches from the overworld with R.
+            VarSet(DN_VAR_SPECIES, ((sDexNavUiDataPtr->environment << 14) | species));
             PlaySE(SE_DEX_SEARCH);
             BeginNormalPaletteFade(0xFFFFFFFF, 0, 0, 16, RGB_BLACK);
             task->func = Task_DexNavExitAndSearch;
@@ -2675,12 +2679,15 @@ static void DexNavDrawHiddenIcons(void)
 /////////////////////////
 u32 CalculateDexNavShinyRolls(void)
 {
-    u32 chainBonus, rndBonus;
+    u32 chainBonus;
     u8 chain = gSaveBlock3Ptr->dexNavChain;
 
-    chainBonus = (chain >= 100) ? 10 : (chain >= 50) ? 5 : 0;
-    rndBonus = (Random() % 100 < 4) ? 4 : 0;
-    return chainBonus + rndBonus;
+    // Smoothly scale from 0 to 5 extra rolls by chain 100. The partial
+    // remainder gives every successful link a small average improvement.
+    chainBonus = chain / 20;
+    if ((Random() % 20) < (chain % 20))
+        chainBonus++;
+    return chainBonus;
 }
 
 void TryIncrementSpeciesSearchLevel()
@@ -2694,6 +2701,7 @@ void TryIncrementSpeciesSearchLevel()
 void ResetDexNavSearch(void)
 {
     gSaveBlock3Ptr->dexNavChain = 0;    //reset dex nav chaining on new map
+    VarSet(VAR_DEXNAV_CHAIN_SPECIES, SPECIES_NONE);
     VarSet(DN_VAR_STEP_COUNTER, 0); //reset hidden Pokémon step counter
     if (FlagGet(DN_FLAG_SEARCHING))
         EndDexNavSearch();   //moving to new map ends dexnav search
@@ -2701,6 +2709,11 @@ void ResetDexNavSearch(void)
 
 void IncrementDexNavChain(void)
 {
-    if (gSaveBlock3Ptr->dexNavChain < DEXNAV_CHAIN_MAX)
+    if (VarGet(VAR_DEXNAV_CHAIN_SPECIES) != gDexNavSpecies)
+    {
+        VarSet(VAR_DEXNAV_CHAIN_SPECIES, gDexNavSpecies);
+        gSaveBlock3Ptr->dexNavChain = 1;
+    }
+    else if (gSaveBlock3Ptr->dexNavChain < DEXNAV_CHAIN_MAX)
         gSaveBlock3Ptr->dexNavChain++;
 }

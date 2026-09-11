@@ -78,6 +78,8 @@ enum
     MENU_ACTION_CHANGE_NATURE,
     MENU_ACTION_CHANGE_GENDER,
     MENU_ACTION_TYPE_HINTS,
+    MENU_ACTION_TIME_CHANGER,
+    MENU_ACTION_AUTO_REPEL,
 };
 
 // Save status
@@ -126,6 +128,8 @@ static bool8 StartMenuPokeVial(void);
 static bool8 StartMenuChangeNature(void);
 static bool8 StartMenuChangeGender(void);
 static bool8 StartMenuTypeHints(void);
+static bool8 StartMenuTimeChanger(void);
+static bool8 StartMenuAutoRepel(void);
 
 // Menu callbacks
 static bool8 SaveStartCallback(void);
@@ -210,6 +214,13 @@ static const struct WindowTemplate sWindowTemplate_PyramidPeak = {
 
 static const u8 sText_MenuDebug[] = _("DEBUG");
 static const u8 sText_PokeVialHealed[] = _("Your POKéMON were fully healed!");
+static const u8 sText_TimeReal[] = _("TIME: REAL");
+static const u8 sText_TimeMorning[] = _("TIME: MORNING");
+static const u8 sText_TimeDay[] = _("TIME: DAY");
+static const u8 sText_TimeEvening[] = _("TIME: EVENING");
+static const u8 sText_TimeNight[] = _("TIME: NIGHT");
+static const u8 sText_AutoRepelOn[] = _("AUTO REPEL: ON");
+static const u8 sText_AutoRepelOff[] = _("AUTO REPEL: OFF");
 
 static const struct MenuAction sStartMenuItems[] =
 {
@@ -233,6 +244,8 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_CHANGE_NATURE] = {COMPOUND_STRING("NATURE"), {.u8_void = StartMenuChangeNature}},
     [MENU_ACTION_CHANGE_GENDER] = {COMPOUND_STRING("GENDER"), {.u8_void = StartMenuChangeGender}},
     [MENU_ACTION_TYPE_HINTS] = {COMPOUND_STRING("TYPE HINTS"), {.u8_void = StartMenuTypeHints}},
+    [MENU_ACTION_TIME_CHANGER] = {COMPOUND_STRING("TIME"), {.u8_void = StartMenuTimeChanger}},
+    [MENU_ACTION_AUTO_REPEL] = {COMPOUND_STRING("AUTO REPEL"), {.u8_void = StartMenuAutoRepel}},
 };
 
 static const struct BgTemplate sBgTemplates_LinkBattleSave[] =
@@ -378,6 +391,8 @@ static void BuildNormalStartMenu(void)
     AddStartMenuAction(MENU_ACTION_POKEVIAL);
     AddStartMenuAction(MENU_ACTION_CHANGE_NATURE);
     AddStartMenuAction(MENU_ACTION_CHANGE_GENDER);
+    AddStartMenuAction(MENU_ACTION_TIME_CHANGER);
+    AddStartMenuAction(MENU_ACTION_AUTO_REPEL);
     AddStartMenuAction(MENU_ACTION_EXIT);
 }
 }
@@ -555,6 +570,21 @@ else if (sCurrentStartMenuActions[index] == MENU_ACTION_TYPE_HINTS)
         StringCopy(gStringVar4, sText_TypeHintsSeen);
         break;
     }
+}
+else if (sCurrentStartMenuActions[index] == MENU_ACTION_TIME_CHANGER)
+{
+    switch (VarGet(VAR_TIME_OVERRIDE_HOUR))
+    {
+    case 6:  StringCopy(gStringVar4, sText_TimeMorning); break;
+    case 12: StringCopy(gStringVar4, sText_TimeDay); break;
+    case 18: StringCopy(gStringVar4, sText_TimeEvening); break;
+    case 22: StringCopy(gStringVar4, sText_TimeNight); break;
+    default: StringCopy(gStringVar4, sText_TimeReal); break;
+    }
+}
+else if (sCurrentStartMenuActions[index] == MENU_ACTION_AUTO_REPEL)
+{
+    StringCopy(gStringVar4, VarGet(VAR_AUTO_REPEL_ENABLED) ? sText_AutoRepelOn : sText_AutoRepelOff);
 }
 else
 {
@@ -743,7 +773,9 @@ if (JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
             && gMenuCallback != StartMenuPokeVial
             && gMenuCallback != StartMenuChangeNature
             && gMenuCallback != StartMenuChangeGender
-            && gMenuCallback != StartMenuTypeHints)
+            && gMenuCallback != StartMenuTypeHints
+            && gMenuCallback != StartMenuTimeChanger
+            && gMenuCallback != StartMenuAutoRepel)
 {
     FadeScreen(FADE_TO_BLACK, 0);
 }
@@ -1664,6 +1696,38 @@ static bool8 StartMenuTypeHints(void)
     }
 
     VarSet(VAR_TYPE_HINTS_MODE, mode);
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+    RemoveStartMenuWindow();
+    InitStartMenu();
+    gMenuCallback = HandleStartMenuInput;
+    return FALSE;
+}
+
+static bool8 StartMenuTimeChanger(void)
+{
+    u16 hour;
+
+    switch (VarGet(VAR_TIME_OVERRIDE_HOUR))
+    {
+    case 0:  hour = 6;  break;
+    case 6:  hour = 12; break;
+    case 12: hour = 18; break;
+    case 18: hour = 22; break;
+    default: hour = 0;  break;
+    }
+
+    SetTimeOfDay(hour);
+    UpdateTimeOfDay(TRUE);
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+    RemoveStartMenuWindow();
+    InitStartMenu();
+    gMenuCallback = HandleStartMenuInput;
+    return FALSE;
+}
+
+static bool8 StartMenuAutoRepel(void)
+{
+    VarSet(VAR_AUTO_REPEL_ENABLED, !VarGet(VAR_AUTO_REPEL_ENABLED));
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();
     InitStartMenu();

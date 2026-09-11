@@ -1702,8 +1702,13 @@ void UpdateTimeOfDay(bool32 updateBlend)
 {
     s32 hours, minutes;
     RtcCalcLocalTime();
-    hours = sHoursOverride ? sHoursOverride : gLocalTime.hours;
-    minutes = sHoursOverride ? 0 : gLocalTime.minutes;
+    hours = VarGet(VAR_TIME_OVERRIDE_HOUR);
+    minutes = 0;
+    if (hours == 0 || hours > 23)
+    {
+        hours = gLocalTime.hours;
+        minutes = gLocalTime.minutes;
+    }
 
     if (IsBetweenHours(hours, MORNING_HOUR_BEGIN, MORNING_HOUR_MIDDLE)) // night->morning
     {
@@ -3835,6 +3840,7 @@ u16 SetTimeOfDay(u16 hours)
 {
     u16 oldHours = sHoursOverride;
     sHoursOverride = hours;
+    VarSet(VAR_TIME_OVERRIDE_HOUR, hours);
     gTimeUpdateCounter = 0;
     return oldHours;
 }

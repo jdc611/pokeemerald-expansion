@@ -270,4 +270,7 @@ static void ResetDexNav(void)
     memset(gSaveBlock3Ptr->dexNavSearchLevels, 0, sizeof(gSaveBlock3Ptr->dexNavSearchLevels));
 #endif
     gSaveBlock3Ptr->dexNavChain = 0;
+    VarSet(VAR_DEXNAV_CHAIN_SPECIES, SPECIES_NONE);
+    VarSet(VAR_AUTO_REPEL_ENABLED, FALSE);
+    VarSet(VAR_TIME_OVERRIDE_HOUR, 0);
 }

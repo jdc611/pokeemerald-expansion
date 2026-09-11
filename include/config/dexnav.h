@@ -12,7 +12,7 @@
 #define DN_VAR_STEP_COUNTER     VAR_UNUSED_0x409B
 
 // Search parameters
-#define DEXNAV_TIMEOUT                  15  // 15 seconds is the time out. Max of 1092 seconds allowed
+#define DEXNAV_TIMEOUT                  45  // Give players time to reach the hidden Pokémon comfortably
 #define SNEAKING_PROXIMITY              4   // Tile amount
 #define CREEPING_PROXIMITY              2
 #define MAX_PROXIMITY                   20

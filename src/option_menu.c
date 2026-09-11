@@ -47,13 +47,14 @@ enum
     WIN_OPTIONS
 };
 
-#define YPOS_TEXTSPEED    (MENUITEM_TEXTSPEED * 16)
-#define YPOS_BATTLESCENE  (MENUITEM_BATTLESCENE * 16)
-#define YPOS_BATTLESTYLE  (MENUITEM_BATTLESTYLE * 16)
-#define YPOS_SOUND        (MENUITEM_SOUND * 16)
-#define YPOS_BUTTONMODE   (MENUITEM_BUTTONMODE * 16)
-#define YPOS_FRAMETYPE    (MENUITEM_FRAMETYPE * 16)
-#define YPOS_TYPEHINTS    (MENUITEM_TYPEHINTS * 16)
+#define OPTION_ROW_HEIGHT 14
+#define YPOS_TEXTSPEED    (MENUITEM_TEXTSPEED * OPTION_ROW_HEIGHT)
+#define YPOS_BATTLESCENE  (MENUITEM_BATTLESCENE * OPTION_ROW_HEIGHT)
+#define YPOS_BATTLESTYLE  (MENUITEM_BATTLESTYLE * OPTION_ROW_HEIGHT)
+#define YPOS_SOUND        (MENUITEM_SOUND * OPTION_ROW_HEIGHT)
+#define YPOS_BUTTONMODE   (MENUITEM_BUTTONMODE * OPTION_ROW_HEIGHT)
+#define YPOS_FRAMETYPE    (MENUITEM_FRAMETYPE * OPTION_ROW_HEIGHT)
+#define YPOS_TYPEHINTS    (MENUITEM_TYPEHINTS * OPTION_ROW_HEIGHT)
 
 static void Task_OptionMenuFadeIn(u8 taskId);
 static void Task_OptionMenuProcessInput(u8 taskId);
@@ -130,9 +131,9 @@ static const struct WindowTemplate sOptionMenuWinTemplates[] =
     [WIN_OPTIONS] = {
         .bg = 0,
         .tilemapLeft = 2,
-        .tilemapTop = 4,
+        .tilemapTop = 5,
         .width = 26,
-        .height = 16,
+        .height = 14,
         .paletteNum = 1,
         .baseBlock = 0x36
     },
@@ -412,7 +413,7 @@ static void Task_OptionMenuFadeOut(u8 taskId)
 static void HighlightOptionMenuItem(u8 index)
 {
     SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(16, DISPLAY_WIDTH - 16));
-    SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(index * 16 + 40, index * 16 + 56));
+    SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(index * OPTION_ROW_HEIGHT + 40, index * OPTION_ROW_HEIGHT + 54));
 }
 
 static void DrawOptionMenuChoice(const u8 *text, u8 x, u8 y, u8 style)
@@ -604,7 +605,7 @@ static void FrameType_DrawChoices(u8 selection)
     text[i] = EOS;
 
     DrawOptionMenuChoice(gText_FrameType, 104, YPOS_FRAMETYPE, 0);
-    DrawOptionMenuChoice(text, 128, YPOS_FRAMETYPE, 1);
+    DrawOptionMenuChoice(text, 136, YPOS_FRAMETYPE, 1);
 }
 
 static u8 ButtonMode_ProcessInput(u8 selection)
@@ -671,7 +672,7 @@ static u8 TypeHints_ProcessInput(u8 selection)
 static void TypeHints_DrawChoices(u8 selection)
 {
     const u8 *text;
-    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 110, YPOS_TYPEHINTS, 90, 16);
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 110, YPOS_TYPEHINTS, 90, OPTION_ROW_HEIGHT);
     switch (selection)
     {
     case TYPE_HINTS_ALWAYS: text = gText_TypeHintsAlways; break;
@@ -696,7 +697,7 @@ static void DrawOptionMenuTexts(void)
 
     FillWindowPixelBuffer(WIN_OPTIONS, PIXEL_FILL(1));
     for (i = 0; i < MENUITEM_COUNT; i++)
-        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sOptionMenuItemsNames[i], 8, (i * 16) + 1, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sOptionMenuItemsNames[i], 8, (i * OPTION_ROW_HEIGHT) + 1, TEXT_SKIP_DRAW, NULL);
     CopyWindowToVram(WIN_OPTIONS, COPYWIN_FULL);
 }
 
@@ -726,8 +727,8 @@ static void DrawBgWindowFrames(void)
     FillBgTilemapBufferRect(1, TILE_TOP_CORNER_L,  1,  4,  1,  1,  7);
     FillBgTilemapBufferRect(1, TILE_TOP_EDGE,      2,  4, 26,  1,  7);
     FillBgTilemapBufferRect(1, TILE_TOP_CORNER_R, 28,  4,  1,  1,  7);
-    FillBgTilemapBufferRect(1, TILE_LEFT_EDGE,     1,  5,  1, 18,  7);
-    FillBgTilemapBufferRect(1, TILE_RIGHT_EDGE,   28,  5,  1, 18,  7);
+    FillBgTilemapBufferRect(1, TILE_LEFT_EDGE,     1,  5,  1, 14,  7);
+    FillBgTilemapBufferRect(1, TILE_RIGHT_EDGE,   28,  5,  1, 14,  7);
     FillBgTilemapBufferRect(1, TILE_BOT_CORNER_L,  1, 19,  1,  1,  7);
     FillBgTilemapBufferRect(1, TILE_BOT_EDGE,      2, 19, 26,  1,  7);
     FillBgTilemapBufferRect(1, TILE_BOT_CORNER_R, 28, 19,  1,  1,  7);

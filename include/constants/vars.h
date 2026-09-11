@@ -97,7 +97,7 @@
 #define VAR_POKELOT_RND1                                 0x404B // Unused if OW_USE_DAILY_SEED_FOR_VANILLA_VARIABLES is TRUE
 #define VAR_POKELOT_RND2                                 0x404C // Unused if OW_USE_DAILY_SEED_FOR_VANILLA_VARIABLES is TRUE
 #define VAR_POKELOT_PRIZE_PLACE                          0x404D
-#define VAR_TYPE_HINTS_MODE                              0x404E // 0=Seen, 1=Always, 2=Caught, 3=Off
+#define VAR_TYPE_HINTS_MODE                              0x404E // 0=Always, 1=Seen, 2=Caught, 3=Off
 #define VAR_LOTAD_SIZE_RECORD                            0x404F
 #define VAR_LITTLEROOT_TOWN_STATE                        0x4050
 #define VAR_OLDALE_TOWN_STATE                            0x4051
@@ -150,7 +150,7 @@
 #define VAR_ROUTE133_STATE                               0x4080 // Unused Var
 #define VAR_ROUTE134_STATE                               0x4081 // Unused Var
 #define VAR_LITTLEROOT_HOUSES_STATE_MAY                  0x4082
-#define VAR_UNUSED_0x4083                                0x4083 // Unused Var
+#define VAR_TIME_OVERRIDE_HOUR                           0x4083 // 0=real clock; otherwise forced hour
 #define VAR_BIRCH_LAB_STATE                              0x4084
 #define VAR_PETALBURG_GYM_STATE                          0x4085 // 0-1: Wally tutorial, 2-6: 0-4 badges, 7: Defeated Norman, 8: Rematch Norman
 #define VAR_CONTEST_HALL_STATE                           0x4086
@@ -176,11 +176,11 @@
 #define VAR_RUSTURF_TUNNEL_STATE                         0x409A
 #define VAR_UNUSED_0x409B                                0x409B // Unused Var
 #define VAR_ELITE_4_STATE                                0x409C
-#define VAR_UNUSED_0x409D                                0x409D // Unused Var
+#define VAR_DEXNAV_CHAIN_SPECIES                         0x409D // Species currently being chained
 #define VAR_MOSSDEEP_SPACE_CENTER_STAIR_GUARD_STATE      0x409E
 #define VAR_MOSSDEEP_SPACE_CENTER_STATE                  0x409F
 #define VAR_SLATEPORT_HARBOR_STATE                       0x40A0
-#define VAR_UNUSED_0x40A1                                0x40A1 // Unused var
+#define VAR_AUTO_REPEL_ENABLED                           0x40A1 // Automatically consume another Repel
 #define VAR_SEAFLOOR_CAVERN_STATE                        0x40A2
 #define VAR_CABLE_CAR_STATION_STATE                      0x40A3
 #define VAR_SAFARI_ZONE_STATE                            0x40A4  // 0: In or out of SZ, 1: Player exiting SZ, 2: Player entering SZ
