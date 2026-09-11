@@ -1,0 +1,31 @@
+name: Apply Current ROM Cleanup
+
+"on":
+  push:
+    paths:
+      - ".github/workflows/apply-current-cleanup.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Apply cleanup patch
+        run: python3 .github/scripts/apply_current_cleanup.py
+
+      - name: Commit implemented source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/start_menu.c src/option_menu.c src/battle_controller_player.c src/debug.c src/dexnav.c
+          git commit -m "Implement test hub and Type Hints cleanup"
+          git push origin master
