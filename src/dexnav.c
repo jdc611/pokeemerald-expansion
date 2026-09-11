@@ -151,6 +151,7 @@ static enum Item DexNavGenerateHeldItem(enum Species species, u8 searchLevel);
 static u8 DexNavGetAbilityNum(enum Species species, u8 searchLevel);
 static u8 DexNavGeneratePotential(u8 searchLevel);
 static u8 DexNavTryGenerateMonLevel(enum Species species, enum EncounterType environment);
+static enum Species GetDexNavSeededSpecies(enum WildPokemonArea area, u8 wildMonIndex);
 static u8 GetEncounterLevelFromMapData(enum Species species, enum EncounterType environment);
 static void CreateDexNavWildMon(enum Species species, u8 potential, u8 level, u8 abilityNum, enum Item item, enum Move *moves);
 static u8 GetPlayerDistance(s16 x, s16 y);
