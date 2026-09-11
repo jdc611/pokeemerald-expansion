@@ -33,6 +33,7 @@
 #include "constants/item.h"
 #include "constants/items.h"
 #include "constants/layouts.h"
+#include "constants/songs.h"
 #include "constants/weather.h"
 #include "run_settings.h"
 
