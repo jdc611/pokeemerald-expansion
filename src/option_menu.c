@@ -1,6 +1,7 @@
 #include "global.h"
 #include "option_menu.h"
 #include "bg.h"
+#include "difficulty.h"
 #include "gpu_regs.h"
 #include "international_string_util.h"
 #include "main.h"
@@ -260,7 +261,9 @@ void CB2_InitOptionMenu(void)
         gTasks[taskId].tMenuSelection = 0;
         gTasks[taskId].tTextSpeed = gSaveBlock2Ptr->optionsTextSpeed;
         gTasks[taskId].tBattleSceneOff = gSaveBlock2Ptr->optionsBattleSceneOff;
-        gTasks[taskId].tBattleStyle = gSaveBlock2Ptr->optionsBattleStyle;
+        gTasks[taskId].tBattleStyle = GetCurrentDifficultyLevel() == DIFFICULTY_EASY
+                                    ? OPTIONS_BATTLE_STYLE_SHIFT
+                                    : OPTIONS_BATTLE_STYLE_SET;
         gTasks[taskId].tSound = gSaveBlock2Ptr->optionsSound;
         gTasks[taskId].tButtonMode = gSaveBlock2Ptr->optionsButtonMode;
         gTasks[taskId].tWindowFrameType = gSaveBlock2Ptr->optionsWindowFrameType;
@@ -505,13 +508,9 @@ static void BattleScene_DrawChoices(u8 selection)
 
 static u8 BattleStyle_ProcessInput(u8 selection)
 {
-    if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
-    {
-        selection ^= 1;
-        sArrowPressed = TRUE;
-    }
-
-    return selection;
+    return GetCurrentDifficultyLevel() == DIFFICULTY_EASY
+         ? OPTIONS_BATTLE_STYLE_SHIFT
+         : OPTIONS_BATTLE_STYLE_SET;
 }
 
 static void BattleStyle_DrawChoices(u8 selection)

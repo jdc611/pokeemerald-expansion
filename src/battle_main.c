@@ -22,6 +22,7 @@
 #include "debug.h"
 #include "decompress.h"
 #include "dexnav.h"
+#include "difficulty.h"
 #include "dma3.h"
 #include "event_data.h"
 #include "evolution_scene.h"
@@ -2757,7 +2758,11 @@ static void ClearSetBScriptingStruct(void)
     memset(&gBattleScripting, 0, sizeof(gBattleScripting));
 
     gBattleScripting.windowsType = temp;
-    gBattleScripting.battleStyle = gSaveBlock2Ptr->optionsBattleStyle;
+    // The free switch after an opposing Pokémon faints is an Easy Mode assist.
+    // Normal and harder modes always use Set style.
+    gBattleScripting.battleStyle = GetCurrentDifficultyLevel() == DIFFICULTY_EASY
+                                 ? OPTIONS_BATTLE_STYLE_SHIFT
+                                 : OPTIONS_BATTLE_STYLE_SET;
     #if TESTING
     gBattleScripting.battleStyle = OPTIONS_BATTLE_STYLE_SET;
     #endif

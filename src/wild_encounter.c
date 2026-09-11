@@ -52,7 +52,6 @@ extern const u8 EventScript_SprayWoreOff[];
 
 static u16 FeebasRandom(void);
 static void FeebasSeedRng(u16 seed);
-static bool8 TryUseAutoRepel(void);
 static void ApplyFluteEncounterRateMod(u32 *encRate);
 static void ApplyCleanseTagEncounterRateMod(u32 *encRate);
 static u8 GetMaxLevelOfSpeciesInWildTable(const struct WildPokemon *wildMon, enum Species species, enum WildPokemonArea area);
@@ -1103,7 +1102,7 @@ bool8 UpdateRepelCounter(void)
     return FALSE;
 }
 
-static bool8 TryUseAutoRepel(void)
+bool8 TryUseAutoRepel(void)
 {
     static const enum Item sRepels[] =
     {

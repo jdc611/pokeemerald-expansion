@@ -1754,7 +1754,12 @@ static bool8 StartMenuTimeChanger(void)
 
 static bool8 StartMenuAutoRepel(void)
 {
-    VarSet(VAR_AUTO_REPEL_ENABLED, !VarGet(VAR_AUTO_REPEL_ENABLED));
+    bool8 enabled = !VarGet(VAR_AUTO_REPEL_ENABLED);
+
+    VarSet(VAR_AUTO_REPEL_ENABLED, enabled);
+    if (enabled && VarGet(VAR_REPEL_STEP_COUNT) == 0)
+        TryUseAutoRepel();
+
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();
     InitStartMenu();
