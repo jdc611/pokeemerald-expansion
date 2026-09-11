@@ -32,7 +32,6 @@ if 'MENUITEM_TYPEHINTS' not in text:
     text = must_replace(text, old_case, new_case, 'option input case')
     text = must_replace(text, '    gSaveBlock2Ptr->optionsWindowFrameType = gTasks[taskId].tWindowFrameType;\n', '    gSaveBlock2Ptr->optionsWindowFrameType = gTasks[taskId].tWindowFrameType;\n    VarSet(VAR_TYPE_HINTS_MODE, gTasks[taskId].tTypeHints);\n', 'option save')
 
-    # Insert simple single-choice renderer before DrawHeaderText.
     anchor = 'static void DrawHeaderText(void)\n'
     impl = '''static u8 TypeHints_ProcessInput(u8 selection)\n{\n    if (JOY_NEW(DPAD_RIGHT))\n    {\n        selection = (selection + 1) % TYPE_HINTS_COUNT;\n        sArrowPressed = TRUE;\n    }\n    else if (JOY_NEW(DPAD_LEFT))\n    {\n        selection = (selection + TYPE_HINTS_COUNT - 1) % TYPE_HINTS_COUNT;\n        sArrowPressed = TRUE;\n    }\n    return selection;\n}\n\nstatic void TypeHints_DrawChoices(u8 selection)\n{\n    const u8 *text;\n    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 110, YPOS_TYPEHINTS, 90, 16);\n    switch (selection)\n    {\n    case TYPE_HINTS_ALWAYS: text = gText_TypeHintsAlways; break;\n    case TYPE_HINTS_CAUGHT: text = gText_TypeHintsCaught; break;\n    case TYPE_HINTS_OFF: text = gText_TypeHintsOff; break;\n    case TYPE_HINTS_SEEN:\n    default: text = gText_TypeHintsSeen; break;\n    }\n    AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, text, 110, YPOS_TYPEHINTS + 1, TEXT_SKIP_DRAW, NULL);\n}\n\n'''
     idx = text.rfind(anchor)
@@ -41,18 +40,16 @@ if 'MENUITEM_TYPEHINTS' not in text:
     text = text[:idx] + impl + text[idx:]
     p.write_text(text)
 
-# ---------------- Battle UI: force a dedicated dynamic palette color ----------------
+# ---------------- Battle UI ----------------
 p = Path('src/battle_controller_player.c')
 text = p.read_text()
 text = text.replace('_("{COLOR GREEN}{UP_ARROW}+")', '_("{COLOR DYNAMIC_COLOR1}{UP_ARROW}+")')
 text = text.replace('_("{COLOR GREEN}{UP_ARROW}")', '_("{COLOR DYNAMIC_COLOR1}{UP_ARROW}")')
 text = text.replace('_("{COLOR RED}X")', '_("{COLOR DYNAMIC_COLOR1}X")')
-old = '''    // DYNAMIC_COLOR1 is reserved here as the resistance-hint yellow.\n    // The other hint colors use the standard GREEN and RED text slots.\n    {\n        u16 yellow = RGB_YELLOW;\n        u32 paletteNum = GetWindowAttribute(B_WIN_PP, WINDOW_PALETTE_NUM);\n        LoadPalette(&yellow, BG_PLTT_ID(paletteNum) + 10, sizeof(yellow));\n    }\n'''
-new = '''    // Use one known battle-text palette slot and recolor it for the current hint.\n    {\n        u16 hintColor;\n        u32 paletteNum = GetWindowAttribute(B_WIN_PP, WINDOW_PALETTE_NUM);\n        switch (foeEffectiveness)\n        {\n        case EFFECTIVENESS_SUPER_EFFECTIVE:\n        case EFFECTIVENESS_EXTREMELY_EFFECTIVE:\n            hintColor = RGB(0, 31, 0);\n            break;\n        case EFFECTIVENESS_NO_EFFECT:\n            hintColor = RGB(31, 0, 0);\n            break;\n        case EFFECTIVENESS_NOT_VERY_EFFECTIVE:\n        case EFFECTIVENESS_MOSTLY_INEFFECTIVE:\n        default:\n            hintColor = RGB(31, 31, 0);\n            break;\n        }\n        LoadPalette(&hintColor, BG_PLTT_ID(paletteNum) + 10, sizeof(hintColor));\n    }\n'''
-if old in text:
-    text = text.replace(old, new, 1)
-elif 'u16 hintColor;' not in text:
-    raise SystemExit('Battle color block not found')
+
+# Remove the palette block that was accidentally inserted into MoveSelectionDisplayPPString.
+bad_block = '''    // Use one known battle-text palette slot and recolor it for the current hint.\n    {\n        u16 hintColor;\n        u32 paletteNum = GetWindowAttribute(B_WIN_PP, WINDOW_PALETTE_NUM);\n        switch (foeEffectiveness)\n        {\n        case EFFECTIVENESS_SUPER_EFFECTIVE:\n        case EFFECTIVENESS_EXTREMELY_EFFECTIVE:\n            hintColor = RGB(0, 31, 0);\n            break;\n        case EFFECTIVENESS_NO_EFFECT:\n            hintColor = RGB(31, 0, 0);\n            break;\n        case EFFECTIVENESS_NOT_VERY_EFFECTIVE:\n        case EFFECTIVENESS_MOSTLY_INEFFECTIVE:\n        default:\n            hintColor = RGB(31, 31, 0);\n            break;\n        }\n        LoadPalette(&hintColor, BG_PLTT_ID(paletteNum) + 10, sizeof(hintColor));\n    }\n\n'''
+text = text.replace(bad_block, '', 1)
 p.write_text(text)
 
 # ---------------- Debug Test Hub ----------------
@@ -67,14 +64,13 @@ if 'sDebugMenu_Actions_TestHub' not in text:
     text = text.replace(anchor + '    { COMPOUND_STRING("Utilities…"),', anchor + '    { COMPOUND_STRING("TEST HUB…"),      DebugAction_OpenSubMenu, sDebugMenu_Actions_TestHub, },\n    { COMPOUND_STRING("Utilities…"),', 1)
     p.write_text(text)
 
-# ---------------- DexNav: use randomized slot species when deriving encounter level ----------------
+# ---------------- DexNav: randomized encounter levels ----------------
 p = Path('src/dexnav.c')
 text = p.read_text()
 if 'DEXNAV_RANDOMIZER_LEVEL_FIX' not in text:
     start = text.find('static u8 GetEncounterLevelFromMapData(enum Species species, enum EncounterType environment)\n{')
     if start < 0:
         raise SystemExit('DexNav level function not found')
-    # Find function end with brace counting.
     brace = text.find('{', start)
     depth = 0
     end = None
@@ -86,8 +82,6 @@ if 'DEXNAV_RANDOMIZER_LEVEL_FIX' not in text:
                 end = i + 1
                 break
     body = text[start:end]
-    # Replace direct slot-species expressions inside this function with the same seeded species mapping used by the GUI.
-    # Preserve original slot levels; only species identity is randomized.
     def repl_land(m):
         expr = m.group(0)
         return '(gSaveBlock3Ptr->randomizerEnabled ? GetDexNavSeededSpecies(WILD_AREA_LAND, i) : ' + expr + ')'
@@ -95,7 +89,6 @@ if 'DEXNAV_RANDOMIZER_LEVEL_FIX' not in text:
         expr = m.group(0)
         return '(gSaveBlock3Ptr->randomizerEnabled ? GetDexNavSeededSpecies(WILD_AREA_WATER, i) : ' + expr + ')'
     original = body
-    # Variable names differ by expansion version; key off land/water info identifiers on each expression.
     body = re.sub(r'land[A-Za-z0-9_]*->wildPokemon\[i\]\.species', repl_land, body)
     body = re.sub(r'water[A-Za-z0-9_]*->wildPokemon\[i\]\.species', repl_water, body)
     if body == original:
