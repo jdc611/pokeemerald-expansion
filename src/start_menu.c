@@ -378,7 +378,6 @@ static void BuildNormalStartMenu(void)
     AddStartMenuAction(MENU_ACTION_POKEVIAL);
     AddStartMenuAction(MENU_ACTION_CHANGE_NATURE);
     AddStartMenuAction(MENU_ACTION_CHANGE_GENDER);
-    AddStartMenuAction(MENU_ACTION_TYPE_HINTS);
     AddStartMenuAction(MENU_ACTION_EXIT);
 }
 }

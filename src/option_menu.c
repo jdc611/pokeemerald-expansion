@@ -15,6 +15,9 @@
 #include "window.h"
 #include "gba/m4a_internal.h"
 #include "constants/rgb.h"
+#include "event_data.h"
+#include "constants/type_hints.h"
+#include "constants/vars.h"
 
 #define tMenuSelection data[0]
 #define tTextSpeed data[1]
@@ -23,6 +26,7 @@
 #define tSound data[4]
 #define tButtonMode data[5]
 #define tWindowFrameType data[6]
+#define tTypeHints data[7]
 
 enum
 {
@@ -32,6 +36,7 @@ enum
     MENUITEM_SOUND,
     MENUITEM_BUTTONMODE,
     MENUITEM_FRAMETYPE,
+    MENUITEM_TYPEHINTS,
     MENUITEM_CANCEL,
     MENUITEM_COUNT,
 };
@@ -48,6 +53,7 @@ enum
 #define YPOS_SOUND        (MENUITEM_SOUND * 16)
 #define YPOS_BUTTONMODE   (MENUITEM_BUTTONMODE * 16)
 #define YPOS_FRAMETYPE    (MENUITEM_FRAMETYPE * 16)
+#define YPOS_TYPEHINTS    (MENUITEM_TYPEHINTS * 16)
 
 static void Task_OptionMenuFadeIn(u8 taskId);
 static void Task_OptionMenuProcessInput(u8 taskId);
@@ -66,6 +72,8 @@ static u8 FrameType_ProcessInput(u8 selection);
 static void FrameType_DrawChoices(u8 selection);
 static u8 ButtonMode_ProcessInput(u8 selection);
 static void ButtonMode_DrawChoices(u8 selection);
+static u8 TypeHints_ProcessInput(u8 selection);
+static void TypeHints_DrawChoices(u8 selection);
 static void DrawHeaderText(void);
 static void DrawOptionMenuTexts(void);
 static void DrawBgWindowFrames(void);
@@ -87,6 +95,10 @@ static const u8 gText_FrameTypeNumber[]    = _("{COLOR GREEN}{SHADOW LIGHT_GREEN
 static const u8 gText_ButtonTypeNormal[]   = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}NORMAL");
 static const u8 gText_ButtonTypeLR[]       = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}LR");
 static const u8 gText_ButtonTypeLEqualsA[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}L=A");
+static const u8 gText_TypeHintsAlways[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}ALWAYS");
+static const u8 gText_TypeHintsSeen[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}SEEN");
+static const u8 gText_TypeHintsCaught[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}CAUGHT");
+static const u8 gText_TypeHintsOff[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}OFF");
 
 static const u16 sOptionMenuText_Pal[] = INCGFX_U16("graphics/interface/option_menu_text.pal", ".gbapal");
 // note: this is only used in the Japanese release
@@ -100,6 +112,7 @@ static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
     [MENUITEM_SOUND]       = COMPOUND_STRING("SOUND"),
     [MENUITEM_BUTTONMODE]  = COMPOUND_STRING("BUTTON MODE"),
     [MENUITEM_FRAMETYPE]   = COMPOUND_STRING("FRAME"),
+    [MENUITEM_TYPEHINTS]   = COMPOUND_STRING("TYPE HINTS"),
     [MENUITEM_CANCEL]      = COMPOUND_STRING("CANCEL"),
 };
 
@@ -117,9 +130,9 @@ static const struct WindowTemplate sOptionMenuWinTemplates[] =
     [WIN_OPTIONS] = {
         .bg = 0,
         .tilemapLeft = 2,
-        .tilemapTop = 5,
+        .tilemapTop = 4,
         .width = 26,
-        .height = 14,
+        .height = 16,
         .paletteNum = 1,
         .baseBlock = 0x36
     },
@@ -250,6 +263,7 @@ void CB2_InitOptionMenu(void)
         gTasks[taskId].tSound = gSaveBlock2Ptr->optionsSound;
         gTasks[taskId].tButtonMode = gSaveBlock2Ptr->optionsButtonMode;
         gTasks[taskId].tWindowFrameType = gSaveBlock2Ptr->optionsWindowFrameType;
+        gTasks[taskId].tTypeHints = VarGet(VAR_TYPE_HINTS_MODE);
 
         TextSpeed_DrawChoices(gTasks[taskId].tTextSpeed);
         BattleScene_DrawChoices(gTasks[taskId].tBattleSceneOff);
@@ -257,6 +271,7 @@ void CB2_InitOptionMenu(void)
         Sound_DrawChoices(gTasks[taskId].tSound);
         ButtonMode_DrawChoices(gTasks[taskId].tButtonMode);
         FrameType_DrawChoices(gTasks[taskId].tWindowFrameType);
+        TypeHints_DrawChoices(gTasks[taskId].tTypeHints);
         HighlightOptionMenuItem(gTasks[taskId].tMenuSelection);
 
         CopyWindowToVram(WIN_OPTIONS, COPYWIN_FULL);
@@ -352,6 +367,12 @@ static void Task_OptionMenuProcessInput(u8 taskId)
             if (previousOption != gTasks[taskId].tWindowFrameType)
                 FrameType_DrawChoices(gTasks[taskId].tWindowFrameType);
             break;
+        case MENUITEM_TYPEHINTS:
+            previousOption = gTasks[taskId].tTypeHints;
+            gTasks[taskId].tTypeHints = TypeHints_ProcessInput(gTasks[taskId].tTypeHints);
+            if (previousOption != gTasks[taskId].tTypeHints)
+                TypeHints_DrawChoices(gTasks[taskId].tTypeHints);
+            break;
         default:
             return;
         }
@@ -372,6 +393,7 @@ static void Task_OptionMenuSave(u8 taskId)
     gSaveBlock2Ptr->optionsSound = gTasks[taskId].tSound;
     gSaveBlock2Ptr->optionsButtonMode = gTasks[taskId].tButtonMode;
     gSaveBlock2Ptr->optionsWindowFrameType = gTasks[taskId].tWindowFrameType;
+    VarSet(VAR_TYPE_HINTS_MODE, gTasks[taskId].tTypeHints);
 
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
     gTasks[taskId].func = Task_OptionMenuFadeOut;
@@ -629,6 +651,36 @@ static void ButtonMode_DrawChoices(u8 selection)
     DrawOptionMenuChoice(gText_ButtonTypeLR, xLR, YPOS_BUTTONMODE, styles[1]);
 
     DrawOptionMenuChoice(gText_ButtonTypeLEqualsA, GetStringRightAlignXOffset(FONT_NORMAL, gText_ButtonTypeLEqualsA, 198), YPOS_BUTTONMODE, styles[2]);
+}
+
+static u8 TypeHints_ProcessInput(u8 selection)
+{
+    if (JOY_NEW(DPAD_RIGHT))
+    {
+        selection = (selection + 1) % TYPE_HINTS_COUNT;
+        sArrowPressed = TRUE;
+    }
+    else if (JOY_NEW(DPAD_LEFT))
+    {
+        selection = (selection + TYPE_HINTS_COUNT - 1) % TYPE_HINTS_COUNT;
+        sArrowPressed = TRUE;
+    }
+    return selection;
+}
+
+static void TypeHints_DrawChoices(u8 selection)
+{
+    const u8 *text;
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 110, YPOS_TYPEHINTS, 90, 16);
+    switch (selection)
+    {
+    case TYPE_HINTS_ALWAYS: text = gText_TypeHintsAlways; break;
+    case TYPE_HINTS_CAUGHT: text = gText_TypeHintsCaught; break;
+    case TYPE_HINTS_OFF: text = gText_TypeHintsOff; break;
+    case TYPE_HINTS_SEEN:
+    default: text = gText_TypeHintsSeen; break;
+    }
+    AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, text, 110, YPOS_TYPEHINTS + 1, TEXT_SKIP_DRAW, NULL);
 }
 
 static void DrawHeaderText(void)

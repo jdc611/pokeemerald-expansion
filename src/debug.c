@@ -778,8 +778,23 @@ static const u8 *const sDebugMenu_Actions_BagUse_Options[] =
     COMPOUND_STRING("No Bag: {STR_VAR_1}Invalid value"),
 };
 
+static const struct DebugMenuOption sDebugMenu_Actions_TestHub[] =
+{
+    { COMPOUND_STRING("Early Free Roam"),       DebugAction_Util_CheatStart },
+    { COMPOUND_STRING("Fly / Checkpoints…"),    DebugAction_Util_Fly },
+    { COMPOUND_STRING("Set Test Party"),        DebugAction_Party_SetParty },
+    { COMPOUND_STRING("Heal Party"),            DebugAction_Party_HealParty },
+    { COMPOUND_STRING("Fill Bag…"),             DebugAction_OpenSubMenu, sDebugMenu_Actions_PCBag_Fill },
+    { COMPOUND_STRING("Give X…"),               DebugAction_OpenSubMenu, sDebugMenu_Actions_Give },
+    { COMPOUND_STRING("Progress / Flags…"),     DebugAction_OpenSubMenuFlagsVars, sDebugMenu_Actions_Flags },
+    { COMPOUND_STRING("Starter Test"),          DebugAction_Util_StarterTest },
+    { COMPOUND_STRING("Start Debug Battle"),    DebugAction_Party_BattleSingle },
+    { NULL }
+};
+
 static const struct DebugMenuOption sDebugMenu_Actions_Main[] =
 {
+    { COMPOUND_STRING("TEST HUB…"),      DebugAction_OpenSubMenu, sDebugMenu_Actions_TestHub, },
     { COMPOUND_STRING("Utilities…"),    DebugAction_OpenSubMenu, sDebugMenu_Actions_Utilities, },
     { COMPOUND_STRING("PC/Bag…"),       DebugAction_OpenSubMenu, sDebugMenu_Actions_PCBag, },
     { COMPOUND_STRING("Party…"),        DebugAction_OpenSubMenu, sDebugMenu_Actions_Party, },

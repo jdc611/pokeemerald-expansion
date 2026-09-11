@@ -1677,12 +1677,26 @@ static void MoveSelectionDisplayMoveNames(enum BattlerId battler)
 static void MoveSelectionDisplayPPString(enum BattlerId battler)
 {
     StringCopy(gDisplayedStringBattle, gText_MoveInterfacePP);
-    // DYNAMIC_COLOR1 is reserved here as the resistance-hint yellow.
-    // The other hint colors use the standard GREEN and RED text slots.
+    // Use one known battle-text palette slot and recolor it for the current hint.
     {
-        u16 yellow = RGB_YELLOW;
+        u16 hintColor;
         u32 paletteNum = GetWindowAttribute(B_WIN_PP, WINDOW_PALETTE_NUM);
-        LoadPalette(&yellow, BG_PLTT_ID(paletteNum) + 10, sizeof(yellow));
+        switch (foeEffectiveness)
+        {
+        case EFFECTIVENESS_SUPER_EFFECTIVE:
+        case EFFECTIVENESS_EXTREMELY_EFFECTIVE:
+            hintColor = RGB(0, 31, 0);
+            break;
+        case EFFECTIVENESS_NO_EFFECT:
+            hintColor = RGB(31, 0, 0);
+            break;
+        case EFFECTIVENESS_NOT_VERY_EFFECTIVE:
+        case EFFECTIVENESS_MOSTLY_INEFFECTIVE:
+        default:
+            hintColor = RGB(31, 31, 0);
+            break;
+        }
+        LoadPalette(&hintColor, BG_PLTT_ID(paletteNum) + 10, sizeof(hintColor));
     }
 
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_PP);
@@ -2448,11 +2462,11 @@ static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, enum Bat
 {
     static const u8 noIcon[] =  _("");
     static const u8 effectiveIcon[] =  _("");
-    static const u8 extremeleyEffectiveIcon[] =  _("{COLOR GREEN}{UP_ARROW}+");
-    static const u8 superEffectiveIcon[] =  _("{COLOR GREEN}{UP_ARROW}");
+    static const u8 extremeleyEffectiveIcon[] =  _("{COLOR DYNAMIC_COLOR1}{UP_ARROW}+");
+    static const u8 superEffectiveIcon[] =  _("{COLOR DYNAMIC_COLOR1}{UP_ARROW}");
     static const u8 notVeryEffectiveIcon[] =  _("{COLOR DYNAMIC_COLOR1}{DOWN_ARROW}");
     static const u8 mostlyIneffectiveIcon[] =  _("{COLOR DYNAMIC_COLOR1}{DOWN_ARROW}-");
-    static const u8 immuneIcon[] =  _("{COLOR RED}X");
+    static const u8 immuneIcon[] =  _("{COLOR DYNAMIC_COLOR1}X");
     struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
     u8 *txtPtr;
 

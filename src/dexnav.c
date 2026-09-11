@@ -1471,6 +1471,7 @@ static u8 DexNavGeneratePotential(u8 searchLevel)
 
 static u8 GetEncounterLevelFromMapData(enum Species species, enum EncounterType environment)
 {
+    // DEXNAV_RANDOMIZER_LEVEL_FIX: search uses the same seeded species slots as the GUI.
     u32 headerId = GetCurrentMapWildMonHeaderId();
     enum TimeOfDay timeOfDay;
     u8 min = MAX_LEVEL;
@@ -1491,7 +1492,7 @@ static u8 GetEncounterLevelFromMapData(enum Species species, enum EncounterType 
 
         for (i = 0; i < NUM_LAND_MONS_ENCOUNTER_SLOTS; i++)
         {
-            if (landMonsInfo->wildPokemon[i].species == species)
+            if ((gSaveBlock3Ptr->randomizerEnabled ? GetDexNavSeededSpecies(WILD_AREA_LAND, i) : landMonsInfo->wildPokemon[i].species) == species)
             {
                 min = (min < landMonsInfo->wildPokemon[i].minLevel) ? min : landMonsInfo->wildPokemon[i].minLevel;
                 max = (max > landMonsInfo->wildPokemon[i].maxLevel) ? max : landMonsInfo->wildPokemon[i].maxLevel;
@@ -1507,7 +1508,7 @@ static u8 GetEncounterLevelFromMapData(enum Species species, enum EncounterType 
 
         for (i = 0; i < NUM_WATER_MONS_ENCOUNTER_SLOTS; i++)
         {
-            if (waterMonsInfo->wildPokemon[i].species == species)
+            if ((gSaveBlock3Ptr->randomizerEnabled ? GetDexNavSeededSpecies(WILD_AREA_WATER, i) : waterMonsInfo->wildPokemon[i].species) == species)
             {
                 min = (min < waterMonsInfo->wildPokemon[i].minLevel) ? min : waterMonsInfo->wildPokemon[i].minLevel;
                 max = (max > waterMonsInfo->wildPokemon[i].maxLevel) ? max : waterMonsInfo->wildPokemon[i].maxLevel;
