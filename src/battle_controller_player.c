@@ -1677,28 +1677,6 @@ static void MoveSelectionDisplayMoveNames(enum BattlerId battler)
 static void MoveSelectionDisplayPPString(enum BattlerId battler)
 {
     StringCopy(gDisplayedStringBattle, gText_MoveInterfacePP);
-    // Use one known battle-text palette slot and recolor it for the current hint.
-    {
-        u16 hintColor;
-        u32 paletteNum = GetWindowAttribute(B_WIN_PP, WINDOW_PALETTE_NUM);
-        switch (foeEffectiveness)
-        {
-        case EFFECTIVENESS_SUPER_EFFECTIVE:
-        case EFFECTIVENESS_EXTREMELY_EFFECTIVE:
-            hintColor = RGB(0, 31, 0);
-            break;
-        case EFFECTIVENESS_NO_EFFECT:
-            hintColor = RGB(31, 0, 0);
-            break;
-        case EFFECTIVENESS_NOT_VERY_EFFECTIVE:
-        case EFFECTIVENESS_MOSTLY_INEFFECTIVE:
-        default:
-            hintColor = RGB(31, 31, 0);
-            break;
-        }
-        LoadPalette(&hintColor, BG_PLTT_ID(paletteNum) + 10, sizeof(hintColor));
-    }
-
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_PP);
 }
 
