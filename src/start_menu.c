@@ -101,6 +101,7 @@ EWRAM_DATA static u8 sStartMenuCursorPos = 0;
 EWRAM_DATA static u8 sNumStartMenuActions = 0;
 EWRAM_DATA static u8 sCurrentStartMenuActions[9] = {0};
 EWRAM_DATA static u8 sStartMenuPage = 0;
+EWRAM_DATA static bool8 sQuickToolsMode = FALSE;
 EWRAM_DATA static s8 sInitStartMenuData[2] = {0};
 
 EWRAM_DATA static u8 (*sSaveDialogCallback)(void) = NULL;
@@ -175,6 +176,7 @@ static const struct WindowTemplate sWindowTemplate_SafariBalls = {
 };
 static const u8 sText_ExitPage1[] = _("EXIT  1/2");
 static const u8 sText_ExitPage2[] = _("EXIT  2/2");
+static const u8 sText_CloseTools[] = _("CLOSE");
 static const u8 sText_TypeHintsSeen[] = _("TYPE HINTS: SEEN");
 static const u8 sText_TypeHintsAlways[] = _("TYPE HINTS: ALWAYS");
 static const u8 sText_TypeHintsCaught[] = _("TYPE HINTS: CAUGHT");
@@ -364,13 +366,25 @@ static void AddStartMenuAction(u8 action)
 
 static void BuildNormalStartMenu(void)
 {
+    if (sQuickToolsMode)
+    {
+        AddStartMenuAction(MENU_ACTION_POKEVIAL);
+        AddStartMenuAction(MENU_ACTION_PC_STORAGE);
+        AddStartMenuAction(MENU_ACTION_TIME_CHANGER);
+        AddStartMenuAction(MENU_ACTION_AUTO_REPEL);
+        AddStartMenuAction(MENU_ACTION_CHANGE_NATURE);
+        AddStartMenuAction(MENU_ACTION_CHANGE_GENDER);
+        AddStartMenuAction(MENU_ACTION_EXIT);
+        return;
+    }
+
     if (sStartMenuPage == 0)
     {
-        if (FlagGet(FLAG_SYS_POKEDEX_GET) == TRUE)
-            AddStartMenuAction(MENU_ACTION_POKEDEX);
-
         if (DEXNAV_ENABLED)
             AddStartMenuAction(MENU_ACTION_DEXNAV);
+
+        if (FlagGet(FLAG_SYS_POKEDEX_GET) == TRUE)
+            AddStartMenuAction(MENU_ACTION_POKEDEX);
 
         if (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE)
             AddStartMenuAction(MENU_ACTION_POKEMON);
@@ -386,15 +400,10 @@ static void BuildNormalStartMenu(void)
         AddStartMenuAction(MENU_ACTION_EXIT);
     }
     else
-{
-    AddStartMenuAction(MENU_ACTION_PC_STORAGE);
-    AddStartMenuAction(MENU_ACTION_POKEVIAL);
-    AddStartMenuAction(MENU_ACTION_CHANGE_NATURE);
-    AddStartMenuAction(MENU_ACTION_CHANGE_GENDER);
-    AddStartMenuAction(MENU_ACTION_TIME_CHANGER);
-    AddStartMenuAction(MENU_ACTION_AUTO_REPEL);
-    AddStartMenuAction(MENU_ACTION_EXIT);
-}
+    {
+        // Reserved for Run Info, level caps, Move Relearner, and future rules tools.
+        AddStartMenuAction(MENU_ACTION_EXIT);
+    }
 }
 
 static void BuildDebugStartMenu(void)
@@ -546,50 +555,52 @@ static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
         else
         {
             if (sCurrentStartMenuActions[index] == MENU_ACTION_EXIT)
-{
-    if (sStartMenuPage == 0)
-        StringCopy(gStringVar4, sText_ExitPage1);
-    else
-        StringCopy(gStringVar4, sText_ExitPage2);
-}
-else if (sCurrentStartMenuActions[index] == MENU_ACTION_TYPE_HINTS)
-{
-    switch (VarGet(VAR_TYPE_HINTS_MODE))
-    {
-    case TYPE_HINTS_ALWAYS:
-        StringCopy(gStringVar4, sText_TypeHintsAlways);
-        break;
-    case TYPE_HINTS_CAUGHT:
-        StringCopy(gStringVar4, sText_TypeHintsCaught);
-        break;
-    case TYPE_HINTS_OFF:
-        StringCopy(gStringVar4, sText_TypeHintsOff);
-        break;
-    case TYPE_HINTS_SEEN:
-    default:
-        StringCopy(gStringVar4, sText_TypeHintsSeen);
-        break;
-    }
-}
-else if (sCurrentStartMenuActions[index] == MENU_ACTION_TIME_CHANGER)
-{
-    switch (VarGet(VAR_TIME_OVERRIDE_HOUR))
-    {
-    case 6:  StringCopy(gStringVar4, sText_TimeMorning); break;
-    case 12: StringCopy(gStringVar4, sText_TimeDay); break;
-    case 18: StringCopy(gStringVar4, sText_TimeEvening); break;
-    case 22: StringCopy(gStringVar4, sText_TimeNight); break;
-    default: StringCopy(gStringVar4, sText_TimeReal); break;
-    }
-}
-else if (sCurrentStartMenuActions[index] == MENU_ACTION_AUTO_REPEL)
-{
-    StringCopy(gStringVar4, VarGet(VAR_AUTO_REPEL_ENABLED) ? sText_AutoRepelOn : sText_AutoRepelOff);
-}
-else
-{
-    StringExpandPlaceholders(gStringVar4, sStartMenuItems[sCurrentStartMenuActions[index]].text);
-}
+            {
+                if (sQuickToolsMode)
+                    StringCopy(gStringVar4, sText_CloseTools);
+                else if (sStartMenuPage == 0)
+                    StringCopy(gStringVar4, sText_ExitPage1);
+                else
+                    StringCopy(gStringVar4, sText_ExitPage2);
+            }
+            else if (sCurrentStartMenuActions[index] == MENU_ACTION_TYPE_HINTS)
+            {
+                switch (VarGet(VAR_TYPE_HINTS_MODE))
+                {
+                case TYPE_HINTS_ALWAYS:
+                    StringCopy(gStringVar4, sText_TypeHintsAlways);
+                    break;
+                case TYPE_HINTS_CAUGHT:
+                    StringCopy(gStringVar4, sText_TypeHintsCaught);
+                    break;
+                case TYPE_HINTS_OFF:
+                    StringCopy(gStringVar4, sText_TypeHintsOff);
+                    break;
+                case TYPE_HINTS_SEEN:
+                default:
+                    StringCopy(gStringVar4, sText_TypeHintsSeen);
+                    break;
+                }
+            }
+            else if (sCurrentStartMenuActions[index] == MENU_ACTION_TIME_CHANGER)
+            {
+                switch (VarGet(VAR_TIME_OVERRIDE_HOUR))
+                {
+                case 6:  StringCopy(gStringVar4, sText_TimeMorning); break;
+                case 12: StringCopy(gStringVar4, sText_TimeDay); break;
+                case 18: StringCopy(gStringVar4, sText_TimeEvening); break;
+                case 22: StringCopy(gStringVar4, sText_TimeNight); break;
+                default: StringCopy(gStringVar4, sText_TimeReal); break;
+                }
+            }
+            else if (sCurrentStartMenuActions[index] == MENU_ACTION_AUTO_REPEL)
+            {
+                StringCopy(gStringVar4, VarGet(VAR_AUTO_REPEL_ENABLED) ? sText_AutoRepelOn : sText_AutoRepelOff);
+            }
+            else
+            {
+                StringExpandPlaceholders(gStringVar4, sStartMenuItems[sCurrentStartMenuActions[index]].text);
+            }
             AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_NORMAL, gStringVar4, 8, (index << 4) + 9, TEXT_SKIP_DRAW, NULL);
         }
 
@@ -623,7 +634,7 @@ static bool32 InitStartMenuStep(void)
         break;
     case 2:
         LoadMessageBoxAndBorderGfx();
-        DrawStdWindowFrame(AddStartMenuWindow(sNumStartMenuActions), FALSE);
+        DrawStdWindowFrame(sQuickToolsMode ? AddQuickToolsWindow(sNumStartMenuActions) : AddStartMenuWindow(sNumStartMenuActions), FALSE);
         sInitStartMenuData[1] = 0;
         sInitStartMenuData[0]++;
         break;
@@ -711,6 +722,23 @@ void Task_ShowStartMenu(u8 taskId)
 
 void ShowStartMenu(void)
 {
+    sQuickToolsMode = FALSE;
+    sStartMenuPage = 0;
+    if (!IsOverworldLinkActive())
+    {
+        FreezeObjectEvents();
+        PlayerFreeze();
+        StopPlayerAvatar();
+    }
+    CreateStartMenuTask(Task_ShowStartMenu);
+    LockPlayerFieldControls();
+}
+
+void ShowQuickToolsMenu(void)
+{
+    sQuickToolsMode = TRUE;
+    sStartMenuPage = 1;
+    sStartMenuCursorPos = 0;
     if (!IsOverworldLinkActive())
     {
         FreezeObjectEvents();
@@ -734,22 +762,20 @@ static bool8 HandleStartMenuInput(void)
         PlaySE(SE_SELECT);
         sStartMenuCursorPos = Menu_MoveCursor(1);
     }
-if (JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
-{
-    PlaySE(SE_SELECT);
+    if (!sQuickToolsMode && JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
+    {
+        PlaySE(SE_SELECT);
 
-    sStartMenuPage ^= 1;
-    sStartMenuCursorPos = 0;
-    sNumStartMenuActions = 0;
+        sStartMenuPage ^= 1;
+        sStartMenuCursorPos = 0;
+        sNumStartMenuActions = 0;
 
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
-    RemoveStartMenuWindow();
+        ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+        RemoveStartMenuWindow();
 
-    InitStartMenu();
-
-    return FALSE;
-
-}
+        InitStartMenu();
+        return FALSE;
+    }
     if (JOY_NEW(A_BUTTON))
     {
         PlaySE(SE_SELECT);
@@ -776,9 +802,9 @@ if (JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
             && gMenuCallback != StartMenuTypeHints
             && gMenuCallback != StartMenuTimeChanger
             && gMenuCallback != StartMenuAutoRepel)
-{
-    FadeScreen(FADE_TO_BLACK, 0);
-}
+        {
+            FadeScreen(FADE_TO_BLACK, 0);
+        }
 
         return FALSE;
     }
@@ -1718,6 +1744,7 @@ static bool8 StartMenuTimeChanger(void)
 
     SetTimeOfDay(hour);
     UpdateTimeOfDay(TRUE);
+    ApplyWeatherColorMapIfIdle(gWeatherPtr->colorMapIndex);
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();
     InitStartMenu();
