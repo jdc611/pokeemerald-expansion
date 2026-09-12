@@ -878,8 +878,8 @@ static void SpriteCB_StatStageMarker(struct Sprite *sprite)
             state |= 2;
     }
 
-    sprite->x = gSprites[healthboxId].x - 20;
-    sprite->y = gSprites[healthboxId].y + 8;
+    sprite->x = gSprites[healthboxId].x - (IsOnPlayerSide(battler) ? 12 : 16);
+    sprite->y = gSprites[healthboxId].y + (IsOnPlayerSide(battler) ? 8 : 6);
     sprite->x2 = gSprites[healthboxId].x2;
     sprite->y2 = gSprites[healthboxId].y2;
     sprite->oam.tileNum = GetSpriteTileStartByTag(TAG_STAGE_MARKER_GFX) + state * 2;
