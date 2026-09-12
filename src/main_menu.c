@@ -1802,6 +1802,7 @@ static u32 ParseCustomSeed(const u8 *str)
 static void CB2_RunSetup_Init(void)
 {
     u8 taskId;
+    u16 palette;
 
     SetVBlankCallback(NULL);
     SetGpuReg(REG_OFFSET_DISPCNT, 0);
@@ -1811,6 +1812,14 @@ static void CB2_RunSetup_Init(void)
     ResetPaletteFade();
     LoadPalette(sMainMenuBgPal, BG_PLTT_ID(0), PLTT_SIZE_4BPP);
     LoadPalette(sMainMenuTextPal, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
+    // The main-menu palette leaves its dynamic text colors black until the
+    // normal menu task fills them in. This screen must set them itself.
+    palette = RGB_WHITE;
+    LoadPalette(&palette, BG_PLTT_ID(15) + 10, PLTT_SIZEOF(1));
+    palette = RGB(12, 12, 12);
+    LoadPalette(&palette, BG_PLTT_ID(15) + 11, PLTT_SIZEOF(1));
+    palette = RGB(26, 26, 25);
+    LoadPalette(&palette, BG_PLTT_ID(15) + 12, PLTT_SIZEOF(1));
     ScanlineEffect_Stop();
     ResetTasks();
     ResetSpriteData();
