@@ -597,6 +597,8 @@ enum BattleEnvironments
 #define B_WIN_MOVE_DESCRIPTION   24
 #define B_WIN_OAK_OLD_MAN        25
 #define B_CATCH_OR_NOT           26
+#define B_WIN_STAGE_PANEL        27 // Full-width temporary battle stat view
+#define B_WIN_STAGE_TAB          28 // Attached YOU/FOE heading
 
 // The following are duplicate id values for windows that Battle Arena uses differently.
 #define ARENA_WIN_PLAYER_NAME      15

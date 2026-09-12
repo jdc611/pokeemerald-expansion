@@ -266,61 +266,59 @@ static void AppendBattleStatStage(u8 *line, enum BattlerId battler, u8 index)
     ConvertIntToDecimalStringN(StringAppend(line, sEmpty), stage < 0 ? -stage : stage, STR_CONV_MODE_LEFT_ALIGN, 1);
 }
 
-static void DrawBattleStageWindow(u8 windowId, enum BattlerId battler)
-{
-    static const u8 sYou[] = _("YOU ");
-    static const u8 sFoe[] = _("FOE ");
-    static const u8 sYou2[] = _("YOU2 ");
-    static const u8 sFoe2[] = _("FOE2 ");
-    static const u8 sSpace[] = _(" ");
-    static const u8 sEmpty[] = _("");
-    static const u8 sBack[] = _(" L:BACK");
-    static const u8 sNoMon[] = _("NO POKéMON");
-    static const u8 sPromptColors[] = { 15, 1, 6 };
-    static const u8 sMenuColors[] = { 14, 13, 15 };
-    bool8 isPrompt = windowId == B_WIN_ACTION_PROMPT;
-    const u8 *colors = isPrompt ? sPromptColors : sMenuColors;
-
-    FillWindowPixelBuffer(windowId, PIXEL_FILL(isPrompt ? 0xF : 0xE));
-    if (!IsBattlerAlive(battler))
-    {
-        AddTextPrinterParameterized3(windowId, FONT_SMALL, 2, 9, colors, 0, isPrompt ? sNoMon : sBack);
-    }
-    else
-    {
-        for (u8 row = 0; row < 2; row++)
-        {
-            u8 line[40];
-            u8 index = (isPrompt ? 0 : 4) + row * 2;
-            const u8 *prefix = sEmpty;
-
-            if (isPrompt && row == 0)
-                prefix = IsOnPlayerSide(battler) ? (sStagePanelSlot == 2 ? sYou2 : sYou) : (sStagePanelSlot == 3 ? sFoe2 : sFoe);
-            StringCopy(line, prefix);
-            AppendBattleStatStage(line, battler, index);
-            if (index + 1 < ARRAY_COUNT(sStagePanelStats))
-            {
-                StringAppend(line, sSpace);
-                AppendBattleStatStage(line, battler, index + 1);
-            }
-            else
-                StringAppend(line, sBack);
-            AddTextPrinterParameterized3(windowId, FONT_SMALL, 2, 1 + row * 16, colors, 0, line);
-        }
-    }
-    CopyWindowToVram(windowId, COPYWIN_GFX);
-}
-
 static void DrawBattleStagePanel(void)
 {
     static const enum BattlerPosition sPositions[] =
     {
         B_POSITION_PLAYER_LEFT, B_POSITION_OPPONENT_LEFT, B_POSITION_PLAYER_RIGHT, B_POSITION_OPPONENT_RIGHT
     };
-    enum BattlerId target = GetBattlerAtPosition(sPositions[sStagePanelSlot]);
+    static const u8 sYou[] = _("YOU");
+    static const u8 sFoe[] = _("FOE");
+    static const u8 sYou2[] = _("YOU 2");
+    static const u8 sFoe2[] = _("FOE 2");
+    static const u8 sBack[] = _("L:BACK");
+    static const u8 sNoMon[] = _("NO POKéMON");
+    static const u8 sPanelColors[] = { 14, 13, 15 };
+    static const u8 sTabColors[] = { 13, 14, 15 };
+    enum BattlerId battler = GetBattlerAtPosition(sPositions[sStagePanelSlot]);
+    const u8 *heading = IsOnPlayerSide(battler)
+        ? (sStagePanelSlot == 2 ? sYou2 : sYou)
+        : (sStagePanelSlot == 3 ? sFoe2 : sFoe);
+    u8 i;
 
-    DrawBattleStageWindow(B_WIN_ACTION_PROMPT, target);
-    DrawBattleStageWindow(B_WIN_ACTION_MENU, target);
+    // One continuous frame covers both halves and the divider of the action menu.
+    FillWindowPixelBuffer(B_WIN_STAGE_PANEL, PIXEL_FILL(14));
+    FillWindowPixelRect(B_WIN_STAGE_PANEL, PIXEL_FILL(13), 0, 0, 240, 2);
+    FillWindowPixelRect(B_WIN_STAGE_PANEL, PIXEL_FILL(13), 0, 0, 2, 40);
+    FillWindowPixelRect(B_WIN_STAGE_PANEL, PIXEL_FILL(13), 238, 0, 2, 40);
+    FillWindowPixelRect(B_WIN_STAGE_PANEL, PIXEL_FILL(13), 0, 38, 240, 2);
+
+    // A bookmark tab protrudes above the panel and joins its top border.
+    FillWindowPixelBuffer(B_WIN_STAGE_TAB, PIXEL_FILL(0));
+    FillWindowPixelRect(B_WIN_STAGE_TAB, PIXEL_FILL(13), 0, 1, 56, 15);
+    FillWindowPixelRect(B_WIN_STAGE_TAB, PIXEL_FILL(13), 56, 3, 4, 13);
+    FillWindowPixelRect(B_WIN_STAGE_TAB, PIXEL_FILL(13), 60, 5, 4, 11);
+    AddTextPrinterParameterized3(B_WIN_STAGE_TAB, FONT_SMALL, 8, 2, sTabColors, 0, heading);
+
+    if (!IsBattlerAlive(battler))
+        AddTextPrinterParameterized3(B_WIN_STAGE_PANEL, FONT_SMALL, 12, 11, sPanelColors, 0, sNoMon);
+    else
+    {
+        for (i = 0; i < ARRAY_COUNT(sStagePanelStats); i++)
+        {
+            u8 line[16] = { EOS };
+
+            AppendBattleStatStage(line, battler, i);
+            AddTextPrinterParameterized3(B_WIN_STAGE_PANEL, FONT_SMALL,
+                                         12 + (i % 4) * 58, 4 + (i / 4) * 18,
+                                         sPanelColors, 0, line);
+        }
+    }
+    AddTextPrinterParameterized3(B_WIN_STAGE_PANEL, FONT_SMALL, 186, 22, sPanelColors, 0, sBack);
+    PutWindowTilemap(B_WIN_STAGE_PANEL);
+    PutWindowTilemap(B_WIN_STAGE_TAB);
+    CopyWindowToVram(B_WIN_STAGE_PANEL, COPYWIN_FULL);
+    CopyWindowToVram(B_WIN_STAGE_TAB, COPYWIN_FULL);
 }
 
 static void HandleInputChooseAction(enum BattlerId battler)
@@ -343,6 +341,11 @@ static void HandleInputChooseAction(enum BattlerId battler)
         {
             PlaySE(SE_SELECT);
             sStagePanelOpen = FALSE;
+            ClearWindowTilemap(B_WIN_STAGE_TAB);
+            ClearWindowTilemap(B_WIN_STAGE_PANEL);
+            PutWindowTilemap(B_WIN_ACTION_PROMPT);
+            PutWindowTilemap(B_WIN_ACTION_MENU);
+            CopyBgTilemapBufferToVram(0);
             BattlePutTextOnWindow(gText_BattleMenu, B_WIN_ACTION_MENU);
             if (B_SHOW_PARTNER_TARGET && gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER
                 && IsBattlerAlive(GetBattlerAtPosition(B_POSITION_PLAYER_RIGHT)))

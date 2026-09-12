@@ -387,6 +387,14 @@ static const struct WindowTemplate sStandardBattleWindowTemplates[] =
         .paletteNum = 5,
         .baseBlock = 0x03BC,
     },
+    [B_WIN_STAGE_PANEL] = {
+        .bg = 0, .tilemapLeft = 0, .tilemapTop = 35,
+        .width = 30, .height = 5, .paletteNum = 5, .baseBlock = 0x01F8,
+    },
+    [B_WIN_STAGE_TAB] = {
+        .bg = 0, .tilemapLeft = 1, .tilemapTop = 33,
+        .width = 8, .height = 2, .paletteNum = 5, .baseBlock = 0x03E0,
+    },
     DUMMY_WIN_TEMPLATE
 };
 
@@ -626,6 +634,14 @@ static const struct WindowTemplate sKantoTutorialBattleWindowTemplates[] =
         .paletteNum = 7,
         .baseBlock = 0x090
     },
+    [B_WIN_STAGE_PANEL] = {
+        .bg = 0, .tilemapLeft = 0, .tilemapTop = 35,
+        .width = 30, .height = 5, .paletteNum = 5, .baseBlock = 0x01F8,
+    },
+    [B_WIN_STAGE_TAB] = {
+        .bg = 0, .tilemapLeft = 1, .tilemapTop = 33,
+        .width = 8, .height = 2, .paletteNum = 5, .baseBlock = 0x03E0,
+    },
     DUMMY_WIN_TEMPLATE
 };
 
@@ -846,6 +862,14 @@ static const struct WindowTemplate sBattleArenaWindowTemplates[] =
         .height = 6,
         .paletteNum = 5,
         .baseBlock = 0x0350,
+    },
+    [B_WIN_STAGE_PANEL] = {
+        .bg = 0, .tilemapLeft = 0, .tilemapTop = 35,
+        .width = 30, .height = 5, .paletteNum = 5, .baseBlock = 0x01F8,
+    },
+    [B_WIN_STAGE_TAB] = {
+        .bg = 0, .tilemapLeft = 1, .tilemapTop = 33,
+        .width = 8, .height = 2, .paletteNum = 5, .baseBlock = 0x03E0,
     },
     DUMMY_WIN_TEMPLATE
 };
@@ -1364,4 +1388,3 @@ void DrawTerrainTypeBattleBackground(void)
     else
         DrawMainBattleBackground();
 }
-
