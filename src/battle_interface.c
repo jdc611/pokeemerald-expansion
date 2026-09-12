@@ -226,13 +226,14 @@ static const struct OamData sOamData_64x32 =
     .affineParam = 0,
 };
 
-// The two arrows share a tile, so a Pokémon can show a boost and a drop at once.
-// Each 32-bit word is one row of eight 4bpp pixels (green = 1, red = 2).
-#define STAGE_UP_TOP     0x00000010
-#define STAGE_UP_WIDE    0x00000111
-#define STAGE_DOWN_STEM  0x02000000
-#define STAGE_DOWN_WIDE  0x22200000
-#define STAGE_BOTH(up, down) ((up) | (down))
+// Two 8x8 tiles make a 16x8 marker that fits below the HP-bar's left edge.
+// One 32-bit word is one row of 4bpp pixels (green = 1, red = 2).
+#define STAGE_UP_TIP    0x00001000
+#define STAGE_UP_MID    0x00011100
+#define STAGE_UP_WIDE   0x00111110
+#define STAGE_DOWN_STEM 0x00002000
+#define STAGE_DOWN_MID  0x00022200
+#define STAGE_DOWN_WIDE 0x00222220
 #define TAG_STAGE_MARKER_GFX 0xD7F0
 #define TAG_STAGE_MARKER_PAL 0xD7F1
 #define TAG_WEATHER_TURNS_GFX 0xD7F2
@@ -240,14 +241,22 @@ static const struct OamData sOamData_64x32 =
 
 static const u32 sStatStageMarkerGfx[] =
 {
-    // Neutral, up, down, both. One 8x8 tile per state.
+    // Neutral: blank left and right tiles.
     0, 0, 0, 0, 0, 0, 0, 0,
-    STAGE_UP_TOP, STAGE_UP_WIDE, STAGE_UP_TOP, STAGE_UP_TOP,
-    STAGE_UP_TOP, STAGE_UP_TOP, 0, 0,
-    0, STAGE_DOWN_STEM, STAGE_DOWN_STEM, STAGE_DOWN_STEM,
-    STAGE_DOWN_STEM, STAGE_DOWN_WIDE, STAGE_DOWN_STEM, 0,
-    STAGE_UP_TOP, STAGE_BOTH(STAGE_UP_WIDE, STAGE_DOWN_STEM), STAGE_BOTH(STAGE_UP_TOP, STAGE_DOWN_STEM), STAGE_BOTH(STAGE_UP_TOP, STAGE_DOWN_STEM),
-    STAGE_BOTH(STAGE_UP_TOP, STAGE_DOWN_STEM), STAGE_BOTH(STAGE_UP_TOP, STAGE_DOWN_WIDE), STAGE_DOWN_STEM, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    // Raised: larger green up arrow in the left tile.
+    STAGE_UP_TIP, STAGE_UP_MID, STAGE_UP_WIDE, STAGE_UP_TIP,
+    STAGE_UP_TIP, STAGE_UP_TIP, STAGE_UP_TIP, STAGE_UP_TIP,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    // Lowered: larger red down arrow in the right tile.
+    0, 0, 0, 0, 0, 0, 0, 0,
+    STAGE_DOWN_STEM, STAGE_DOWN_STEM, STAGE_DOWN_STEM, STAGE_DOWN_STEM,
+    STAGE_DOWN_STEM, STAGE_DOWN_WIDE, STAGE_DOWN_MID, STAGE_DOWN_STEM,
+    // Both: one arrow of each color.
+    STAGE_UP_TIP, STAGE_UP_MID, STAGE_UP_WIDE, STAGE_UP_TIP,
+    STAGE_UP_TIP, STAGE_UP_TIP, STAGE_UP_TIP, STAGE_UP_TIP,
+    STAGE_DOWN_STEM, STAGE_DOWN_STEM, STAGE_DOWN_STEM, STAGE_DOWN_STEM,
+    STAGE_DOWN_STEM, STAGE_DOWN_WIDE, STAGE_DOWN_MID, STAGE_DOWN_STEM,
 };
 
 static const u16 sStatStageMarkerPalette[16] = { RGB_BLACK, RGB(7, 27, 9), RGB(30, 8, 7), RGB_WHITE };
@@ -261,7 +270,7 @@ static const struct SpriteSheet sWeatherTurnSheet = { sWeatherTurnBlankGfx, size
 static const struct SpritePalette sWeatherTurnPal = { sWeatherTurnPalette, TAG_WEATHER_TURNS_PAL };
 static const union TextColor sWeatherTurnTextColor = { .background = 0, .foreground = 1, .shadow = 3, .accent = 0 };
 
-static const struct OamData sOamData_StageMarker = { .shape = SPRITE_SHAPE(8x8), .size = SPRITE_SIZE(8x8), .priority = 0 };
+static const struct OamData sOamData_StageMarker = { .shape = SPRITE_SHAPE(16x8), .size = SPRITE_SIZE(16x8), .priority = 0 };
 static const struct OamData sOamData_WeatherTurns = { .shape = SPRITE_SHAPE(64x32), .size = SPRITE_SIZE(64x32), .priority = 0 };
 static const struct SpriteTemplate sStatStageMarkerTemplate =
 {
@@ -278,11 +287,12 @@ static const struct SpriteTemplate sWeatherTurnTemplate =
     .callback = SpriteCB_WeatherTurnLabel,
 };
 
-#undef STAGE_UP_TOP
+#undef STAGE_UP_TIP
+#undef STAGE_UP_MID
 #undef STAGE_UP_WIDE
 #undef STAGE_DOWN_STEM
+#undef STAGE_DOWN_MID
 #undef STAGE_DOWN_WIDE
-#undef STAGE_BOTH
 
 static const struct SpriteTemplate sHealthboxPlayerSpriteTemplates[2] =
 {
@@ -868,11 +878,11 @@ static void SpriteCB_StatStageMarker(struct Sprite *sprite)
             state |= 2;
     }
 
-    sprite->x = gSprites[healthboxId].x + (GetBattlerCoordsIndex(battler) == BATTLE_COORDS_DOUBLES ? 56 : 68);
-    sprite->y = gSprites[healthboxId].y - 17;
+    sprite->x = gSprites[healthboxId].x - 20;
+    sprite->y = gSprites[healthboxId].y + 8;
     sprite->x2 = gSprites[healthboxId].x2;
     sprite->y2 = gSprites[healthboxId].y2;
-    sprite->oam.tileNum = GetSpriteTileStartByTag(TAG_STAGE_MARKER_GFX) + state;
+    sprite->oam.tileNum = GetSpriteTileStartByTag(TAG_STAGE_MARKER_GFX) + state * 2;
     sprite->invisible = state == 0;
 }
 
