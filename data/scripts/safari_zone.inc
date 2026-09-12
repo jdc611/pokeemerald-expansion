@@ -131,18 +131,14 @@ Route121_SafariZoneEntrance_Text_ComeInAndEnjoy:
 	.string "Come in and enjoy the SAFARI ZONE!$"
 
 Route121_SafariZoneEntrance_Text_FirstTimeInfo:
-	.string "When you enter the SAFARI ZONE, you\n"
-	.string "start with 30 SAFARI BALLS for\l"
-	.string "catching POKéMON.\p"
-	.string "The SAFARI Game is over when you run\n"
-	.string "out of SAFARI BALLS, or when you've\l"
-	.string "walked 500 steps.\p"
-	.string "Come in and enjoy the SAFARI ZONE!$"
+	.string "Wild POKéMON battle normally here.\n"
+	.string "Bring your team and your own POKé BALLS!\p"
+	.string "There's no entry fee or step limit.\n"
+	.string "Leave whenever you're ready!$"
 
 Route121_SafariZoneEntrance_Text_WouldYouLikeToPlay:
 	.string "Welcome to the SAFARI ZONE!\p"
-	.string "All you can catch for just ¥500!\n"
-	.string "Would you like to play a SAFARI Game?$"
+	.string "Would you like to go inside?$"
 
 Route121_SafariZoneEntrance_Text_PlayAnotherTime:
 	.string "Okay.\n"
@@ -162,10 +158,8 @@ Route121_SafariZoneEntrance_Text_Received30SafariBalls:
 	.string "{PLAYER} received 30 SAFARI BALLS.$"
 
 Route121_SafariZoneEntrance_Text_PleaseEnjoyYourself:
-	.string "We'll let you know when your game\n"
-	.string "is over.\p"
-	.string "So, until then, enjoy yourself, please!\n"
-	.string "Off you go on your wild excursion!$"
+	.string "Enjoy exploring! Come back to the\n"
+	.string "entrance whenever you want to leave.$"
 
 Route121_SafariZoneEntrance_Text_PCIsFull:
 	.string "Excuse me!\n"
@@ -181,18 +175,15 @@ Route121_SafariZoneEntrance_Text_YouNeedPokeblockCase:
 	.string "the LILYCOVE CONTEST HALL.$"
 
 SafariZone_South_Text_StillHaveTimeExit:
-	.string "You still have time left. Would you like\n"
-	.string "to exit the SAFARI ZONE now?$"
+	.string "Would you like to leave the\n"
+	.string "SAFARI ZONE now?$"
 
 SafariZone_South_Text_EnjoyTheRestOfYourAdventure:
 	.string "Please enjoy the rest of your wild\n"
 	.string "adventure!$"
 
 SafariZone_South_Text_ExitEarlyThankYouForPlaying:
-	.string "Okay.\p"
-	.string "I'll take back your remaining SAFARI\n"
-	.string "BALLS.\p"
-	.string "Thank you for playing.\n"
+	.string "Thanks for visiting!\n"
 	.string "We hope to see you again.$"
 
 SafariZone_South_Text_GoodLuck:
@@ -240,8 +231,8 @@ SafariZone_South_Text_Youngster:
 
 Route121_SafariZoneEntrance_Text_TrainerTip:
 	.string "SAFARI ZONE TRAINER TIP!\p"
-	.string "Throw {POKEBLOCK}S at wild POKéMON to make\n"
-	.string "them less likely to flee.$"
+	.string "Wild POKéMON battle normally here.\n"
+	.string "Bring your team and your own POKé BALLS!$"
 
 SafariZone_Southwest_Text_RestHouseSign:
 	.string "“Relieve your tired feet.”\n"
@@ -250,15 +241,11 @@ SafariZone_Southwest_Text_RestHouseSign:
 SafariZone_RestHouse_Text_Youngster:
 	.string "I don't have any {POKEBLOCK}S, but I caught\n"
 	.string "a good number of POKéMON.\p"
-	.string "You can improve your chances of making\n"
-	.string "a catch by getting closer to them\l"
-	.string "before throwing a SAFARI BALL.$"
+	.string "I brought plenty of POKé BALLS with me!$"
 
 SafariZone_RestHouse_Text_PsychicM:
-	.string "If you use {POKEBLOCK}S, wild POKéMON won't\n"
-	.string "be so quick to run away.\p"
-	.string "It's not much use to give {POKEBLOCK}S to\n"
-	.string "POKéMON that don't flee easily.$"
+	.string "You can battle wild POKéMON with your\n"
+	.string "own team throughout the SAFARI ZONE.$"
 
 SafariZone_RestHouse_Text_FatMan:
 	.string "If you put a {POKEBLOCK} on the FEEDER,\n"
@@ -294,7 +281,7 @@ SafariZone_Southeast_Text_RichBoy:
 	.string "from somewhere other than HOENN.$"
 
 SafariZone_Northeast_Text_Boy:
-	.string "I only have a couple SAFARI BALLS left.\p"
+	.string "I only have a couple POKé BALLS left.\p"
 	.string "I'm having a hard time trying to\n"
 	.string "decide what I should catch.$"
 
@@ -305,5 +292,5 @@ SafariZone_Northeast_Text_Woman:
 SafariZone_Northeast_Text_Girl:
 	.string "Oh, boo!\n"
 	.string "I can't seem to catch anything!\p"
-	.string "I'll end up wasting the admission\n"
-	.string "price if I don't catch something!$"
+	.string "Good thing there's no admission fee.\n"
+	.string "I can come back with more POKé BALLS!$"
