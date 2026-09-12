@@ -263,7 +263,7 @@ static const u16 sStatStageMarkerPalette[16] = { RGB_BLACK, RGB(7, 27, 9), RGB(3
 static const struct SpriteSheet sStatStageMarkerSheet = { sStatStageMarkerGfx, sizeof(sStatStageMarkerGfx), TAG_STAGE_MARKER_GFX };
 static const struct SpritePalette sStatStageMarkerPal = { sStatStageMarkerPalette, TAG_STAGE_MARKER_PAL };
 
-// Weather lives on a small tab attached to the upper-right edge of the battle menu.
+// Weather lives on a narrow tab tucked against the empty upper-right screen edge.
 static const u32 sWeatherTurnBlankGfx[256] = {0};
 static const u16 sWeatherTurnPalette[16] =
 {
@@ -797,8 +797,8 @@ u8 CreateBattlerHealthboxSprites(enum BattlerId battler)
             LoadSpriteSheet(&sWeatherTurnSheet);
             LoadSpritePalette(&sWeatherTurnPal);
         }
-        // Transparent sprite margins keep the badge exactly 16px high, flush with the menu at y=120.
-        u8 weatherSpriteId = CreateSprite(&sWeatherTurnTemplate, 208, 112, 0);
+        // Its 64x32 canvas is mostly transparent; only the top-right corner is drawn.
+        u8 weatherSpriteId = CreateSprite(&sWeatherTurnTemplate, 208, 16, 0);
         if (weatherSpriteId != MAX_SPRITES)
         {
             const u32 *spriteSrc = sWeatherTurnBlankGfx;
@@ -906,6 +906,7 @@ static void SpriteCB_WeatherTurnLabel(struct Sprite *sprite)
     static const u8 sPermanent[] = _("--");
     const u8 *name;
     u8 label[16];
+    u8 labelLeft;
 
     if (gBattleWeather == B_WEATHER_NONE)
     {
@@ -944,10 +945,14 @@ static void SpriteCB_WeatherTurnLabel(struct Sprite *sprite)
     else
         ConvertIntToDecimalStringN(end, gBattleStruct->weatherDuration, STR_CONV_MODE_LEFT_ALIGN, 2);
 
+    // Right-align the badge to the screen edge and size it to the current text.
+    // This avoids both HP bars and the move-description window below.
+    u16 textWidth = GetStringWidth(FONT_SMALL, label, 0);
+    labelLeft = textWidth <= 58 ? 58 - textWidth : 0;
     FillSpriteRectColor(sprite - gSprites, 0, 0, 64, 32, 0);
-    FillSpriteRectColor(sprite - gSprites, 0, 8, 64, 16, 5);
-    FillSpriteRectColor(sprite - gSprites, 1, 9, 62, 14, 4);
-    AddSpriteTextPrinterParameterized6(sprite - gSprites, FONT_SMALL, 5, 10, 0, 0, sWeatherTurnTextColor, 0, label);
+    FillSpriteRectColor(sprite - gSprites, labelLeft, 0, 64 - labelLeft, 14, 5);
+    FillSpriteRectColor(sprite - gSprites, labelLeft + 1, 0, 63 - labelLeft, 13, 4);
+    AddSpriteTextPrinterParameterized6(sprite - gSprites, FONT_SMALL, labelLeft + 3, 1, 0, 0, sWeatherTurnTextColor, 0, label);
     sprite->data[0] = gBattleWeather;
     sprite->data[1] = gBattleStruct->weatherDuration;
     sprite->invisible = FALSE;
