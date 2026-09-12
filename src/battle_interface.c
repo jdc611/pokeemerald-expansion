@@ -263,12 +263,16 @@ static const u16 sStatStageMarkerPalette[16] = { RGB_BLACK, RGB(7, 27, 9), RGB(3
 static const struct SpriteSheet sStatStageMarkerSheet = { sStatStageMarkerGfx, sizeof(sStatStageMarkerGfx), TAG_STAGE_MARKER_GFX };
 static const struct SpritePalette sStatStageMarkerPal = { sStatStageMarkerPalette, TAG_STAGE_MARKER_PAL };
 
-// The small weather label is drawn as sprite text, independent of the scrolling battle menu BG.
+// Weather lives on a small tab attached to the upper-right edge of the battle menu.
 static const u32 sWeatherTurnBlankGfx[256] = {0};
-static const u16 sWeatherTurnPalette[16] = { RGB_BLACK, RGB_WHITE, RGB(3, 3, 3), RGB(8, 8, 8) };
+static const u16 sWeatherTurnPalette[16] =
+{
+    RGB_BLACK, RGB_WHITE, RGB(3, 3, 3), RGB(8, 8, 8),
+    RGB(31, 31, 28), RGB(5, 5, 5)
+};
 static const struct SpriteSheet sWeatherTurnSheet = { sWeatherTurnBlankGfx, sizeof(sWeatherTurnBlankGfx), TAG_WEATHER_TURNS_GFX };
 static const struct SpritePalette sWeatherTurnPal = { sWeatherTurnPalette, TAG_WEATHER_TURNS_PAL };
-static const union TextColor sWeatherTurnTextColor = { .background = 0, .foreground = 1, .shadow = 3, .accent = 0 };
+static const union TextColor sWeatherTurnTextColor = { .background = 4, .foreground = 5, .shadow = 3, .accent = 4 };
 
 static const struct OamData sOamData_StageMarker = { .shape = SPRITE_SHAPE(16x8), .size = SPRITE_SIZE(16x8), .priority = 0 };
 static const struct OamData sOamData_WeatherTurns = { .shape = SPRITE_SHAPE(64x32), .size = SPRITE_SIZE(64x32), .priority = 0 };
@@ -793,7 +797,8 @@ u8 CreateBattlerHealthboxSprites(enum BattlerId battler)
             LoadSpriteSheet(&sWeatherTurnSheet);
             LoadSpritePalette(&sWeatherTurnPal);
         }
-        u8 weatherSpriteId = CreateSprite(&sWeatherTurnTemplate, 207, 18, 0);
+        // Transparent sprite margins keep the badge exactly 16px high, flush with the menu at y=120.
+        u8 weatherSpriteId = CreateSprite(&sWeatherTurnTemplate, 208, 112, 0);
         if (weatherSpriteId != MAX_SPRITES)
         {
             const u32 *spriteSrc = sWeatherTurnBlankGfx;
@@ -937,7 +942,9 @@ static void SpriteCB_WeatherTurnLabel(struct Sprite *sprite)
         ConvertIntToDecimalStringN(end, gBattleStruct->weatherDuration, STR_CONV_MODE_LEFT_ALIGN, 2);
 
     FillSpriteRectColor(sprite - gSprites, 0, 0, 64, 32, 0);
-    AddSpriteTextPrinterParameterized6(sprite - gSprites, FONT_SMALL, 0, 2, 0, 0, sWeatherTurnTextColor, 0, label);
+    FillSpriteRectColor(sprite - gSprites, 0, 8, 64, 16, 5);
+    FillSpriteRectColor(sprite - gSprites, 1, 9, 62, 14, 4);
+    AddSpriteTextPrinterParameterized6(sprite - gSprites, FONT_SMALL, 5, 10, 0, 0, sWeatherTurnTextColor, 0, label);
     sprite->data[0] = gBattleWeather;
     sprite->data[1] = gBattleStruct->weatherDuration;
     sprite->invisible = FALSE;
