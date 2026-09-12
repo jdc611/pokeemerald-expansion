@@ -268,11 +268,11 @@ static const u32 sWeatherTurnBlankGfx[256] = {0};
 static const u16 sWeatherTurnPalette[16] =
 {
     RGB_BLACK, RGB_WHITE, RGB(3, 3, 3), RGB(8, 8, 8),
-    RGB(31, 31, 28), RGB(5, 5, 5)
+    RGB(31, 31, 28), RGB(10, 10, 10)
 };
 static const struct SpriteSheet sWeatherTurnSheet = { sWeatherTurnBlankGfx, sizeof(sWeatherTurnBlankGfx), TAG_WEATHER_TURNS_GFX };
 static const struct SpritePalette sWeatherTurnPal = { sWeatherTurnPalette, TAG_WEATHER_TURNS_PAL };
-static const union TextColor sWeatherTurnTextColor = { .background = 4, .foreground = 5, .shadow = 3, .accent = 4 };
+static const union TextColor sWeatherTurnTextColor = { .background = 4, .foreground = 5, .shadow = 4, .accent = 4 };
 
 static const struct OamData sOamData_StageMarker = { .shape = SPRITE_SHAPE(16x8), .size = SPRITE_SIZE(16x8), .priority = 0 };
 static const struct OamData sOamData_WeatherTurns = { .shape = SPRITE_SHAPE(64x32), .size = SPRITE_SIZE(64x32), .priority = 0 };
@@ -869,10 +869,9 @@ static void SpriteCB_StatStageMarker(struct Sprite *sprite)
     enum BattlerId battler = sprite->data[1];
     u8 state = 0;
 
-    // Move information overlays the health boxes; don't draw markers through it.
-    if (gBattle_BG0_Y == DISPLAY_HEIGHT * 2
-        || gSprites[healthboxId].invisible
-        || !IsBattlerAlive(battler))
+    // Follow the visible health box throughout battle, including messages,
+    // action selection, and move selection. Other screens hide/recreate it.
+    if (gSprites[healthboxId].invisible || !IsBattlerAlive(battler))
     {
         sprite->invisible = TRUE;
         return;
@@ -950,9 +949,11 @@ static void SpriteCB_WeatherTurnLabel(struct Sprite *sprite)
     u16 textWidth = GetStringWidth(FONT_SMALL, label, 0);
     labelLeft = textWidth <= 58 ? 58 - textWidth : 0;
     FillSpriteRectColor(sprite - gSprites, 0, 0, 64, 32, 0);
-    FillSpriteRectColor(sprite - gSprites, labelLeft, 0, 64 - labelLeft, 14, 5);
-    FillSpriteRectColor(sprite - gSprites, labelLeft + 1, 0, 63 - labelLeft, 13, 4);
+    FillSpriteRectColor(sprite - gSprites, labelLeft, 0, 64 - labelLeft, 16, 5);
+    FillSpriteRectColor(sprite - gSprites, labelLeft + 1, 0, 63 - labelLeft, 15, 4);
     AddSpriteTextPrinterParameterized6(sprite - gSprites, FONT_SMALL, labelLeft + 3, 1, 0, 0, sWeatherTurnTextColor, 0, label);
+    // The text printer clears its background; redraw the bottom edge last.
+    FillSpriteRectColor(sprite - gSprites, labelLeft, 15, 64 - labelLeft, 1, 5);
     sprite->data[0] = gBattleWeather;
     sprite->data[1] = gBattleStruct->weatherDuration;
     sprite->invisible = FALSE;
