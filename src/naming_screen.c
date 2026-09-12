@@ -499,6 +499,14 @@ static void SetSpritesVisible(void)
         if (gSprites[i].inUse)
             gSprites[i].invisible = FALSE;
     }
+    if (sNamingScreen->templateNum == NAMING_SCREEN_SEED)
+    {
+        struct Sprite *swap = &gSprites[sNamingScreen->swapBtnFrameSpriteId];
+
+        swap->invisible = TRUE;
+        gSprites[swap->data[6]].invisible = TRUE;
+        gSprites[swap->data[7]].invisible = TRUE;
+    }
     SetCursorInvisibility(FALSE);
 }
 
@@ -628,13 +636,24 @@ static u8 CurrentPageToKeyboardId(void)
 static bool8 MainState_FadeIn(void)
 {
     DrawBgTilemap(3, gNamingScreenBackground_Tilemap);
-    sNamingScreen->currentPage = KBPAGE_LETTERS_UPPER;
-    DrawBgTilemap(2, gNamingScreenKeyboardLower_Tilemap);
-    DrawBgTilemap(1, gNamingScreenKeyboardUpper_Tilemap);
-    PrintKeyboardKeys(sNamingScreen->windows[WIN_KB_PAGE_2], KEYBOARD_LETTERS_LOWER);
-    PrintKeyboardKeys(sNamingScreen->windows[WIN_KB_PAGE_1], KEYBOARD_LETTERS_UPPER);
-    NamingScreen_Dummy(2, KEYBOARD_LETTERS_LOWER);
-    NamingScreen_Dummy(1, KEYBOARD_LETTERS_UPPER);
+    if (sNamingScreen->templateNum == NAMING_SCREEN_SEED)
+    {
+        sNamingScreen->currentPage = KBPAGE_SYMBOLS;
+        DrawBgTilemap(2, gNamingScreenKeyboardSymbols_Tilemap);
+        DrawBgTilemap(1, gNamingScreenKeyboardSymbols_Tilemap);
+        PrintKeyboardKeys(sNamingScreen->windows[WIN_KB_PAGE_2], KEYBOARD_SYMBOLS);
+        PrintKeyboardKeys(sNamingScreen->windows[WIN_KB_PAGE_1], KEYBOARD_SYMBOLS);
+    }
+    else
+    {
+        sNamingScreen->currentPage = KBPAGE_LETTERS_UPPER;
+        DrawBgTilemap(2, gNamingScreenKeyboardLower_Tilemap);
+        DrawBgTilemap(1, gNamingScreenKeyboardUpper_Tilemap);
+        PrintKeyboardKeys(sNamingScreen->windows[WIN_KB_PAGE_2], KEYBOARD_LETTERS_LOWER);
+        PrintKeyboardKeys(sNamingScreen->windows[WIN_KB_PAGE_1], KEYBOARD_LETTERS_UPPER);
+        NamingScreen_Dummy(2, KEYBOARD_LETTERS_LOWER);
+        NamingScreen_Dummy(1, KEYBOARD_LETTERS_UPPER);
+    }
     DrawTextEntry();
     DrawTextEntryBox();
     PrintControls();
@@ -1504,6 +1523,8 @@ static bool8 HandleKeyboardEvent(void)
     u8 input = GetInputEvent();
     u8 keyRole = GetKeyRoleAtCursorPos();
 
+    if (input == INPUT_SELECT && sNamingScreen->templateNum == NAMING_SCREEN_SEED)
+        return FALSE;
     if (input == INPUT_SELECT)
     {
         return SwapKeyboardPage();
@@ -1529,6 +1550,14 @@ static bool8 KeyboardKeyHandler_Character(u8 input)
     TryStartButtonFlash(BUTTON_COUNT, FALSE, FALSE);
     if (input == INPUT_A_BUTTON)
     {
+        if (sNamingScreen->templateNum == NAMING_SCREEN_SEED)
+        {
+            s16 x, y;
+
+            GetCursorPos(&x, &y);
+            if (y >= 2 || x >= 5)
+                return FALSE;
+        }
         bool8 textFull = AddTextCharacter();
 
         SwapKeyboardToLowerAfterFirstCapitalLetter();
@@ -1559,6 +1588,8 @@ static void SwapKeyboardToLowerAfterFirstCapitalLetter(void)
 
 static bool8 KeyboardKeyHandler_Page(u8 input)
 {
+    if (sNamingScreen->templateNum == NAMING_SCREEN_SEED)
+        return FALSE;
     TryStartButtonFlash(BUTTON_PAGE, TRUE, FALSE);
     if (input == INPUT_A_BUTTON)
         return SwapKeyboardPage();
@@ -1795,7 +1826,8 @@ static void (*const sDrawTextEntryBoxFuncs[])(void) =
     [NAMING_SCREEN_NICKNAME]   = DrawMonTextEntryBox,
     [NAMING_SCREEN_WALDA]      = DrawNormalTextEntryBox,
     [NAMING_SCREEN_CODE]       = DrawNormalTextEntryBox,
-    [NAMING_SCREEN_RIVAL]      = DrawNormalTextEntryBox
+    [NAMING_SCREEN_RIVAL]      = DrawNormalTextEntryBox,
+    [NAMING_SCREEN_SEED]       = DrawNormalTextEntryBox
 };
 
 static void DrawTextEntryBox(void)
@@ -2017,7 +2049,11 @@ static void PrintKeyboardKeys(u8 window, u8 page)
     FillWindowPixelBuffer(window, sFillValues[page]);
 
     for (i = 0; i < KBROW_COUNT; i++)
+    {
+        if (sNamingScreen->templateNum == NAMING_SCREEN_SEED && page == KEYBOARD_SYMBOLS && i >= 2)
+            continue;
         AddTextPrinterParameterized3(window, FONT_NORMAL, 0, i * 16 + 1, sKeyboardTextColors[page], 0, sNamingScreenKeyboardText[page][i]);
+    }
 
     PutWindowTilemap(window);
 }
@@ -2202,6 +2238,16 @@ static const struct NamingScreenTemplate sCodeScreenTemplate =
     .title = COMPOUND_STRING("Enter code:"),
 };
 
+static const struct NamingScreenTemplate sSeedScreenTemplate =
+{
+    .copyExistingString = FALSE,
+    .maxChars = 8,
+    .iconFunction = 5,
+    .addGenderIcon = FALSE,
+    .initialPage = KBPAGE_SYMBOLS,
+    .title = COMPOUND_STRING("Enter seed (digits):"),
+};
+
 static const struct NamingScreenTemplate sRivalNamingScreenTemplate =
 {
     .copyExistingString = FALSE,
@@ -2221,6 +2267,7 @@ static const struct NamingScreenTemplate *const sNamingScreenTemplates[] =
     [NAMING_SCREEN_WALDA]      = &sWaldaWordsScreenTemplate,
     [NAMING_SCREEN_CODE]       = &sCodeScreenTemplate,
     [NAMING_SCREEN_RIVAL]      = &sRivalNamingScreenTemplate,
+    [NAMING_SCREEN_SEED]       = &sSeedScreenTemplate,
 };
 
 static const struct OamData sOam_8x8 =

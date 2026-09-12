@@ -177,7 +177,13 @@ static EWRAM_DATA u16 sCurrItemAndOptionMenuCheck = 0;
 EWRAM_DATA bool8 gRunSetupRandomizerEnabled;
 EWRAM_DATA u8 gRunSetupStarterMode;
 EWRAM_DATA u32 gRunSetupWorldSeed;
-EWRAM_DATA bool8 gRunSetupEnteringCustomSeed;
+static EWRAM_DATA bool8 sRunSetupRandomizer;
+static EWRAM_DATA bool8 sRunSetupStarter;
+static EWRAM_DATA bool8 sRunSetupCustom;
+static EWRAM_DATA bool8 sRunSetupConfirm;
+static EWRAM_DATA bool8 sRunSetupReturnToBirch;
+static EWRAM_DATA bool8 sRunSetupEmptySeed;
+static EWRAM_DATA u32 sRunSetupSeed;
 
 static u8 sBirchSpeechMainTaskId;
 
@@ -231,7 +237,10 @@ static void Task_NewGameBirchSpeech_WaitForWhatsYourNameToPrint(u8);
 static void Task_NewGameBirchSpeech_WaitPressBeforeNameChoice(u8);
 static void Task_NewGameBirchSpeech_StartNamingScreen(u8);
 static void CB2_NewGameBirchSpeech_ReturnFromNamingScreen(void);
-static void CB2_NewGameBirchSpeech_ReturnFromCustomSeed(void);
+static void CB2_RunSetup_Init(void);
+static void CB2_RunSetup_ReturnFromSeed(void);
+static void Task_RunSetup_Input(u8 taskId);
+static void RunSetup_Draw(u8 cursor);
 static void Task_NewGameBirchSpeech_CreateNameYesNo(u8);
 static void Task_NewGameBirchSpeech_ProcessNameYesNoMenu(u8);
 void CreateYesNoMenuParameterized(u8, u8, u16, u16, u8, u8);
@@ -251,16 +260,6 @@ static void MainMenu_FormatSavegamePokedex(void);
 static void MainMenu_FormatSavegameTime(void);
 static void MainMenu_FormatSavegameBadges(void);
 static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId);
-static void Task_NewGameBirchSpeech_CreateRandomizerYesNo(u8 taskId);
-static void Task_NewGameBirchSpeech_ProcessRandomizerYesNo(u8 taskId);
-static void Task_NewGameBirchSpeech_AskStarterMode(u8 taskId);
-static void Task_NewGameBirchSpeech_CreateStarterModeYesNo(u8 taskId);
-static void Task_NewGameBirchSpeech_ProcessStarterModeYesNo(u8 taskId);
-static void Task_NewGameBirchSpeech_WaitForSeedA(u8 taskId);
-static void Task_NewGameBirchSpeech_ShowSeed(u8 taskId);
-static void Task_NewGameBirchSpeech_AskCustomSeed(u8 taskId);
-static void Task_NewGameBirchSpeech_CreateCustomSeedYesNo(u8 taskId);
-static void Task_NewGameBirchSpeech_ProcessCustomSeedYesNo(u8 taskId);
 static u32 ParseCustomSeed(const u8 *str);
 
 // .rodata
@@ -293,10 +292,20 @@ static const u8 gText_ContinueMenuPlayer[] = _("PLAYER");
 static const u8 gText_ContinueMenuTime[] = _("TIME");
 static const u8 gText_ContinueMenuPokedex[] = _("POKéDEX");
 static const u8 gText_ContinueMenuBadges[] = _("BADGES");
-static const u8 gText_RandomizerQuestion[] = _("Use randomized Pokémon?");
-static const u8 gText_StarterModeQuestion[] = _("Use random starters?");
-static const u8 gText_SeedDisplay[] = _("Seed:{STR_VAR_1}");
-static const u8 gText_CustomSeedQuestion[] = _("Enter a custom seed?\nNO = random seed");
+static const u8 sText_RunSetupTitle[] = _("RUN SETUP");
+static const u8 sText_RunSetupConfirm[] = _("CONFIRM RUN");
+static const u8 sText_RunSetupWild[] = _("WILD POKéMON");
+static const u8 sText_RunSetupStarters[] = _("STARTERS");
+static const u8 sText_RunSetupSeed[] = _("SEED");
+static const u8 sText_RunSetupSubmit[] = _("SUBMIT");
+static const u8 sText_RunSetupYes[] = _("YES");
+static const u8 sText_RunSetupNo[] = _("NO");
+static const u8 sText_RunSetupRandom[] = _("RANDOM");
+static const u8 sText_RunSetupCustom[] = _("CUSTOM");
+static const u8 sText_RunSetupAreYouSure[] = _("ARE YOU SURE?");
+static const u8 sText_RunSetupControls[] = _("A: SELECT  B: BACK");
+static const u8 sText_RunSetupNeedSeed[] = _("ENTER AT LEAST ONE DIGIT");
+static const u8 sText_RunSetupSeedNumber[] = _("VALUE: {STR_VAR_1}");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -447,6 +456,11 @@ static const struct WindowTemplate sNewGameBirchSpeechTextWindows[] =
 
 static const u16 sMainMenuBgPal[] = INCGFX_U16("graphics/interface/main_menu_bg.pal", ".gbapal");
 static const u16 sMainMenuTextPal[] = INCGFX_U16("graphics/interface/main_menu_text.pal", ".gbapal");
+
+static const struct WindowTemplate sRunSetupWindows[] = {
+    { .bg = 0, .tilemapLeft = 2, .tilemapTop = 2, .width = 26, .height = 16, .paletteNum = 15, .baseBlock = 1 },
+    DUMMY_WIN_TEMPLATE
+};
 
 static const u8 sTextColor_Headers[] = {TEXT_DYNAMIC_COLOR_1, TEXT_DYNAMIC_COLOR_2, TEXT_DYNAMIC_COLOR_3};
 static const u8 sTextColor_MenuInfo[] = {TEXT_DYNAMIC_COLOR_1, TEXT_COLOR_WHITE, TEXT_DYNAMIC_COLOR_3};
@@ -1759,59 +1773,18 @@ static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
 {
     if (!RunTextPrintersAndIsPrinter0Active())
     {
-        gRunSetupWorldSeed = (((u32)Random() << 16) | Random()) % 100000000;
-        NewGameBirchSpeech_ClearWindow(0);
-        StringCopy(gStringVar4, gText_RandomizerQuestion);
-        AddTextPrinterForMessage(TRUE);
-        gTasks[taskId].func = Task_NewGameBirchSpeech_CreateRandomizerYesNo;
+        sRunSetupRandomizer = FALSE;
+        sRunSetupStarter = FALSE;
+        sRunSetupCustom = FALSE;
+        sRunSetupConfirm = FALSE;
+        sRunSetupEmptySeed = FALSE;
+        sRunSetupSeed = (((u32)Random() << 16) | Random()) % 100000000;
+        FreeAllWindowBuffers();
+        DestroyTask(taskId);
+        SetMainCallback2(CB2_RunSetup_Init);
     }
 }
 
-static void Task_NewGameBirchSpeech_CreateRandomizerYesNo(u8 taskId)
-{
-    if (!RunTextPrintersAndIsPrinter0Active())
-    {
-        CreateYesNoMenuParameterized(2, 1, 0xF3, 0xDF, 2, 15);
-        gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessRandomizerYesNo;
-    }
-}
-
-static void Task_NewGameBirchSpeech_ProcessRandomizerYesNo(u8 taskId)
-{
-    switch (Menu_ProcessInputNoWrapClearOnChoose())
-    {
-    case 0:
-        PlaySE(SE_SELECT);
-        gRunSetupRandomizerEnabled = TRUE;
-        gTasks[taskId].func = Task_NewGameBirchSpeech_AskStarterMode;
-        break;
-
-    case MENU_B_PRESSED:
-    case 1:
-        PlaySE(SE_SELECT);
-        gRunSetupRandomizerEnabled = FALSE;
-        gTasks[taskId].func = Task_NewGameBirchSpeech_AskStarterMode;
-        break;
-    }
-}
-static void Task_NewGameBirchSpeech_AskStarterMode(u8 taskId)
-{
-    if (!RunTextPrintersAndIsPrinter0Active())
-    {
-        NewGameBirchSpeech_ClearWindow(0);
-        StringCopy(gStringVar4, gText_StarterModeQuestion);
-        AddTextPrinterForMessage(TRUE);
-        gTasks[taskId].func = Task_NewGameBirchSpeech_CreateStarterModeYesNo;
-    }
-}
-static void Task_NewGameBirchSpeech_CreateStarterModeYesNo(u8 taskId)
-{
-    if (!RunTextPrintersAndIsPrinter0Active())
-    {
-        CreateYesNoMenuParameterized(2, 1, 0xF3, 0xDF, 2, 15);
-        gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessStarterModeYesNo;
-    }
-}
 static u32 ParseCustomSeed(const u8 *str)
 {
     u32 value = 0;
@@ -1820,93 +1793,180 @@ static u32 ParseCustomSeed(const u8 *str)
     {
         if (*str >= CHAR_0 && *str <= CHAR_9)
             value = value * 10 + (*str - CHAR_0);
-
         str++;
     }
 
     return value;
 }
 
-static void Task_NewGameBirchSpeech_AskCustomSeed(u8 taskId)
+static void CB2_RunSetup_Init(void)
 {
-    if (!RunTextPrintersAndIsPrinter0Active())
-    {
-        NewGameBirchSpeech_ClearWindow(0);
-        StringCopy(gStringVar4, gText_CustomSeedQuestion);
-        AddTextPrinterForMessage(TRUE);
-        gTasks[taskId].func = Task_NewGameBirchSpeech_CreateCustomSeedYesNo;
-    }
-}
-static void Task_NewGameBirchSpeech_CreateCustomSeedYesNo(u8 taskId)
-{
-    if (!RunTextPrintersAndIsPrinter0Active())
-    {
-        CreateYesNoMenuParameterized(2, 1, 0xF3, 0xDF, 2, 15);
-        gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessCustomSeedYesNo;
-    }
+    u8 taskId;
+
+    SetVBlankCallback(NULL);
+    SetGpuReg(REG_OFFSET_DISPCNT, 0);
+    DmaFill16(3, 0, (void *)VRAM, VRAM_SIZE);
+    DmaFill32(3, 0, (void *)OAM, OAM_SIZE);
+    DmaFill16(3, 0, (void *)PLTT, PLTT_SIZE);
+    ResetPaletteFade();
+    LoadPalette(sMainMenuBgPal, BG_PLTT_ID(0), PLTT_SIZE_4BPP);
+    LoadPalette(sMainMenuTextPal, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
+    ScanlineEffect_Stop();
+    ResetTasks();
+    ResetSpriteData();
+    FreeAllSpritePalettes();
+    ResetBgsAndClearDma3BusyFlags(0);
+    InitBgsFromTemplates(0, sMainMenuBgTemplates, ARRAY_COUNT(sMainMenuBgTemplates));
+    ChangeBgX(0, 0, BG_COORD_SET);
+    ChangeBgY(0, 0, BG_COORD_SET);
+    InitWindows(sRunSetupWindows);
+    DeactivateAllTextPrinters();
+    LoadMainMenuWindowFrameTiles(0, MAIN_MENU_BORDER_TILE);
+    DrawMainMenuWindowBorder(&sRunSetupWindows[0], MAIN_MENU_BORDER_TILE);
+    SetGpuReg(REG_OFFSET_WIN0H, 0);
+    SetGpuReg(REG_OFFSET_WIN0V, 0);
+    SetGpuReg(REG_OFFSET_WININ, 0);
+    SetGpuReg(REG_OFFSET_WINOUT, 0);
+    SetGpuReg(REG_OFFSET_BLDCNT, 0);
+    SetGpuReg(REG_OFFSET_BLDALPHA, 0);
+    SetGpuReg(REG_OFFSET_BLDY, 0);
+    taskId = CreateTask(Task_RunSetup_Input, 0);
+    gTasks[taskId].data[0] = 0;
+    gTasks[taskId].data[1] = 0;
+    RunSetup_Draw(0);
+    SetVBlankCallback(VBlankCB_MainMenu);
+    SetMainCallback2(CB2_MainMenu);
+    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
+    ShowBg(0);
+    HideBg(1);
 }
 
-static void Task_NewGameBirchSpeech_ProcessCustomSeedYesNo(u8 taskId)
+static void RunSetup_Draw(u8 cursor)
 {
-    switch (Menu_ProcessInputNoWrapClearOnChoose())
-    {
-    case 0:
-        PlaySE(SE_SELECT);
-        gRunSetupEnteringCustomSeed = TRUE;
-FreeAllWindowBuffers();
-DestroyTask(taskId);
-DoNamingScreen(NAMING_SCREEN_CODE, gStringVar2, 0, 0, 0, CB2_NewGameBirchSpeech_ReturnFromCustomSeed);
-        break;
+    u8 i;
+    const u8 *const labels[] = {sText_RunSetupWild, sText_RunSetupStarters, sText_RunSetupSeed, sText_RunSetupSubmit};
+    const u8 *const values[] = {sRunSetupRandomizer ? sText_RunSetupYes : sText_RunSetupNo,
+                               sRunSetupStarter ? sText_RunSetupYes : sText_RunSetupNo,
+                               sRunSetupCustom ? sText_RunSetupCustom : sText_RunSetupRandom};
 
-    case MENU_B_PRESSED:
-    case 1:
-        PlaySE(SE_SELECT);
-        gTasks[taskId].func = Task_NewGameBirchSpeech_ShowSeed;
-        break;
+    FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
+    AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 3, sTextColor_Headers, TEXT_SKIP_DRAW,
+                                 sRunSetupConfirm ? sText_RunSetupConfirm : sText_RunSetupTitle);
+    for (i = 0; i < 3; i++)
+    {
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 10, 30 + 22 * i, sTextColor_Headers, TEXT_SKIP_DRAW, labels[i]);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 124, 30 + 22 * i, sTextColor_Headers, TEXT_SKIP_DRAW, values[i]);
     }
-}
-static void Task_NewGameBirchSpeech_ShowSeed(u8 taskId)
-{
-    NewGameBirchSpeech_ClearWindow(0);
-    ConvertIntToDecimalStringN(gStringVar1, gRunSetupWorldSeed, STR_CONV_MODE_LEFT_ALIGN, 10);
-    StringExpandPlaceholders(gStringVar4, gText_SeedDisplay);
-    AddTextPrinterForMessage(TRUE);
-gTasks[taskId].tTimer = 10;
-gTasks[taskId].func = Task_NewGameBirchSpeech_WaitForSeedA;
-}
-static void Task_NewGameBirchSpeech_WaitForSeedA(u8 taskId)
-{
-    RunTextPrintersAndIsPrinter0Active();
-
-    if (gTasks[taskId].tTimer != 0)
+    if (sRunSetupConfirm)
     {
-        gTasks[taskId].tTimer--;
+        ConvertIntToDecimalStringN(gStringVar1, sRunSetupSeed, STR_CONV_MODE_LEFT_ALIGN, 8);
+        StringExpandPlaceholders(gStringVar4, sText_RunSetupSeedNumber);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 10, 96, sTextColor_Headers, TEXT_SKIP_DRAW, gStringVar4);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 10, 112, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupAreYouSure);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 145, 112, sTextColor_Headers, TEXT_SKIP_DRAW,
+                                     cursor == 0 ? sText_RunSetupYes : sText_RunSetupNo);
+    }
+    else
+    {
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 10, 96, sTextColor_Headers, TEXT_SKIP_DRAW, labels[3]);
+        if (sRunSetupEmptySeed)
+            AddTextPrinterParameterized3(0, FONT_SMALL, 10, 116, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupNeedSeed);
+        else
+            AddTextPrinterParameterized3(0, FONT_SMALL, 10, 116, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupControls);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 0, 30 + 22 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
+    }
+    PutWindowTilemap(0);
+    CopyWindowToVram(0, COPYWIN_FULL);
+}
+
+static void CB2_RunSetup_ReturnFromSeed(void)
+{
+    if (gStringVar2[0] == EOS)
+    {
+        sRunSetupConfirm = FALSE;
+        sRunSetupEmptySeed = TRUE;
+    }
+    else
+    {
+        sRunSetupSeed = ParseCustomSeed(gStringVar2);
+        sRunSetupConfirm = TRUE;
+        sRunSetupEmptySeed = FALSE;
+    }
+    SetMainCallback2(CB2_RunSetup_Init);
+}
+
+static void Task_RunSetup_Input(u8 taskId)
+{
+    s16 *cursor = &gTasks[taskId].data[0];
+
+    if (sRunSetupConfirm)
+    {
+        if (JOY_NEW(LEFT_BUTTON | RIGHT_BUTTON | UP_BUTTON | DOWN_BUTTON))
+        {
+            *cursor ^= 1;
+            PlaySE(SE_SELECT);
+            RunSetup_Draw(*cursor);
+        }
+        else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 1))
+        {
+            sRunSetupConfirm = FALSE;
+            *cursor = 3;
+            RunSetup_Draw(*cursor);
+        }
+        else if (JOY_NEW(A_BUTTON))
+        {
+            gRunSetupRandomizerEnabled = sRunSetupRandomizer;
+            gRunSetupStarterMode = sRunSetupStarter ? RUN_STARTER_RANDOM : RUN_STARTER_NORMAL;
+            gRunSetupWorldSeed = sRunSetupSeed;
+            sRunSetupReturnToBirch = TRUE;
+            FreeAllWindowBuffers();
+            DestroyTask(taskId);
+            SetMainCallback2(CB2_NewGameBirchSpeech_ReturnFromNamingScreen);
+        }
         return;
     }
 
-    if (JOY_HELD(A_BUTTON))
-        gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
-}
-static void Task_NewGameBirchSpeech_ProcessStarterModeYesNo(u8 taskId)
-{
-    switch (Menu_ProcessInputNoWrapClearOnChoose())
+    if (JOY_NEW(UP_BUTTON))
+        *cursor = (*cursor + 3) % 4;
+    else if (JOY_NEW(DOWN_BUTTON))
+        *cursor = (*cursor + 1) % 4;
+    else if (JOY_NEW(LEFT_BUTTON | RIGHT_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor < 3))
     {
-    case 0:
-        PlaySE(SE_SELECT);
-        gRunSetupStarterMode = RUN_STARTER_RANDOM;
-        gTasks[taskId].func = Task_NewGameBirchSpeech_AskCustomSeed;
-        break;
-
-    case MENU_B_PRESSED:
-    case 1:
-        PlaySE(SE_SELECT);
-        gRunSetupStarterMode = RUN_STARTER_NORMAL;
-        if (gRunSetupRandomizerEnabled)
-    gTasks[taskId].func = Task_NewGameBirchSpeech_AskCustomSeed;
-else
-    gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
-        break;
+        if (*cursor == 0)
+            sRunSetupRandomizer ^= 1;
+        else if (*cursor == 1)
+            sRunSetupStarter ^= 1;
+        else if (*cursor == 2)
+            sRunSetupCustom ^= 1;
     }
+    else if (JOY_NEW(A_BUTTON) && *cursor == 3)
+    {
+        PlaySE(SE_SELECT);
+        if (sRunSetupCustom)
+        {
+            gStringVar2[0] = EOS;
+            FreeAllWindowBuffers();
+            DestroyTask(taskId);
+            DoNamingScreen(NAMING_SCREEN_SEED, gStringVar2, 0, 0, 0, CB2_RunSetup_ReturnFromSeed);
+        }
+        else
+        {
+            sRunSetupConfirm = TRUE;
+            *cursor = 1;
+            RunSetup_Draw(*cursor);
+        }
+        return;
+    }
+    else if (JOY_NEW(B_BUTTON))
+    {
+        *cursor = 0;
+    }
+    else
+        return;
+
+    PlaySE(SE_SELECT);
+    sRunSetupEmptySeed = FALSE;
+    RunSetup_Draw(*cursor);
 }
 static void Task_NewGameBirchSpeech_AreYouReady(u8 taskId)
 {
@@ -2067,12 +2127,6 @@ static void CB2_NewGameBirchSpeech_ReturnFromNamingScreen(void)
     LoadMessageBoxGfx(0, BIRCH_DLG_BASE_TILE_NUM, BG_PLTT_ID(15));
     PutWindowTilemap(0);
     CopyWindowToVram(0, COPYWIN_FULL);
-}
-
-static void CB2_NewGameBirchSpeech_ReturnFromCustomSeed(void)
-{
-    gRunSetupEnteringCustomSeed = TRUE;
-    CB2_NewGameBirchSpeech_ReturnFromNamingScreen();
 }
 
 static void SpriteCB_Null(struct Sprite *sprite)
@@ -2486,17 +2540,17 @@ static void Task_NewGameBirchSpeech_ReturnFromNamingScreenShowTextbox(u8 taskId)
     if (gTasks[taskId].tTimer-- <= 0)
     {
         DrawDialogFrameWithCustomTile(0, TRUE, BIRCH_DLG_BASE_TILE_NUM);
-        if (gRunSetupEnteringCustomSeed)
-{
-    gRunSetupWorldSeed = ParseCustomSeed(gStringVar2);
-    gRunSetupEnteringCustomSeed = FALSE;
-    gTasks[taskId].data[5] = TRUE;
-    gTasks[taskId].func = Task_NewGameBirchSpeech_ShowSeed;
-}
-else
-{
-    gTasks[taskId].func = Task_NewGameBirchSpeech_SoItsPlayerName;
-}
+        if (sRunSetupReturnToBirch)
+        {
+            sRunSetupReturnToBirch = FALSE;
+            gTasks[taskId].tIsDoneFadingSprites = TRUE;
+            gTasks[taskId].tTimer = 0;
+            gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
+        }
+        else
+        {
+            gTasks[taskId].func = Task_NewGameBirchSpeech_SoItsPlayerName;
+        }
     }
 }
 
