@@ -255,14 +255,14 @@ static const struct SpriteSheet sStatStageMarkerSheet = { sStatStageMarkerGfx, s
 static const struct SpritePalette sStatStageMarkerPal = { sStatStageMarkerPalette, TAG_STAGE_MARKER_PAL };
 
 // The small weather label is drawn as sprite text, independent of the scrolling battle menu BG.
-static const u32 sWeatherTurnBlankGfx[128] = {0};
+static const u32 sWeatherTurnBlankGfx[256] = {0};
 static const u16 sWeatherTurnPalette[16] = { RGB_BLACK, RGB_WHITE, RGB(3, 3, 3), RGB(8, 8, 8) };
 static const struct SpriteSheet sWeatherTurnSheet = { sWeatherTurnBlankGfx, sizeof(sWeatherTurnBlankGfx), TAG_WEATHER_TURNS_GFX };
 static const struct SpritePalette sWeatherTurnPal = { sWeatherTurnPalette, TAG_WEATHER_TURNS_PAL };
 static const union TextColor sWeatherTurnTextColor = { .background = 0, .foreground = 1, .shadow = 3, .accent = 0 };
 
 static const struct OamData sOamData_StageMarker = { .shape = SPRITE_SHAPE(8x8), .size = SPRITE_SIZE(8x8), .priority = 0 };
-static const struct OamData sOamData_WeatherTurns = { .shape = SPRITE_SHAPE(64x16), .size = SPRITE_SIZE(64x16), .priority = 0 };
+static const struct OamData sOamData_WeatherTurns = { .shape = SPRITE_SHAPE(64x32), .size = SPRITE_SIZE(64x32), .priority = 0 };
 static const struct SpriteTemplate sStatStageMarkerTemplate =
 {
     .tileTag = TAG_STAGE_MARKER_GFX,
@@ -783,7 +783,7 @@ u8 CreateBattlerHealthboxSprites(enum BattlerId battler)
             LoadSpriteSheet(&sWeatherTurnSheet);
             LoadSpritePalette(&sWeatherTurnPal);
         }
-        u8 weatherSpriteId = CreateSprite(&sWeatherTurnTemplate, 207, 10, 0);
+        u8 weatherSpriteId = CreateSprite(&sWeatherTurnTemplate, 207, 18, 0);
         if (weatherSpriteId != MAX_SPRITES)
         {
             const u32 *spriteSrc = sWeatherTurnBlankGfx;
@@ -926,7 +926,7 @@ static void SpriteCB_WeatherTurnLabel(struct Sprite *sprite)
     else
         ConvertIntToDecimalStringN(end, gBattleStruct->weatherDuration, STR_CONV_MODE_LEFT_ALIGN, 2);
 
-    FillSpriteRectColor(sprite - gSprites, 0, 0, 64, 16, 0);
+    FillSpriteRectColor(sprite - gSprites, 0, 0, 64, 32, 0);
     AddSpriteTextPrinterParameterized6(sprite - gSprites, FONT_SMALL, 0, 2, 0, 0, sWeatherTurnTextColor, 0, label);
     sprite->data[0] = gBattleWeather;
     sprite->data[1] = gBattleStruct->weatherDuration;

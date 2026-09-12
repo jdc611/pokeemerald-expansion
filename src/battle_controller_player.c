@@ -281,7 +281,7 @@ static void DrawBattleStageColumn(u8 windowId, enum BattlerId battler)
     FillWindowPixelBuffer(windowId, PIXEL_FILL(windowId == B_WIN_ACTION_PROMPT ? 0xF : 0xE));
     if (!IsBattlerAlive(battler))
     {
-        AddTextPrinterParameterized3(windowId, FONT_SMALL, 2, 8, colors, 0, sNoMon);
+        AddTextPrinterParameterized3(windowId, FONT_SMALL_NARROW, 2, 8, colors, 0, sNoMon);
     }
     else
     {
@@ -296,7 +296,7 @@ static void DrawBattleStageColumn(u8 windowId, enum BattlerId battler)
                 StringAppend(line, sSpace);
                 AppendBattleStatStage(line, battler, index + 1);
             }
-            AddTextPrinterParameterized3(windowId, FONT_SMALL, 2, row * 8, colors, 0, line);
+            AddTextPrinterParameterized3(windowId, FONT_SMALL_NARROW, 2, row * 8, colors, 0, line);
         }
     }
     CopyWindowToVram(windowId, COPYWIN_GFX);
