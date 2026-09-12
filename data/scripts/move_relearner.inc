@@ -8,10 +8,7 @@ Common_EventScript_MoveRelearner::
 
 Common_EventScript_MoveRelearnerDynMultiChoice::
 	dynmultipush MoveRelearner_Text_LevelUpMoves, 0
-	getdifficulty VAR_RESULT
-	goto_if_ne VAR_RESULT, DIFFICULTY_EASY, MoveRelearner_EventScript_PushExit
 	dynmultipush MoveRelearner_Text_TMMoves, 2
-MoveRelearner_EventScript_PushExit:
 	dynmultipush MoveRelearner_Text_SeeYa, 4
 	dynmultistack 0, 0, FALSE, 5, 0, 0, DYN_MULTICHOICE_CB_NONE
 	closemessage
@@ -51,8 +48,6 @@ MoveRelearner_EventScript_TeachEggMoves:
 	end
 
 MoveRelearner_EventScript_TeachTMMoves:
-	getdifficulty VAR_RESULT
-	goto_if_ne VAR_RESULT, DIFFICULTY_EASY, MoveRelearner_EventScript_PleaseComeAgain
 	setmoverelearnerstate MOVE_RELEARNER_TM_MOVES
 	bufferstring STR_VAR_3, MoveRelearner_Text_TMMoveLWR
 	goto MoveRelearner_EventScript_TeachMove
