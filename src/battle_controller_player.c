@@ -236,6 +236,24 @@ static enum Item GetNextBall(enum Item ballId)
 
 static bool8 sStagePanelOpen = FALSE;
 static u8 sStagePanelSlot = 0;
+// The full-width stat panel covers frame tiles outside the two action windows.
+// Save those tiles as well so exiting restores the entire original menu.
+static u16 sStagePanelUnderlay[30 * 7];
+
+static void SaveBattleStagePanelUnderlay(void)
+{
+    const u16 *tilemap = GetBgTilemapBuffer(0);
+    u8 row;
+
+    for (row = 0; row < 7; row++)
+        CpuCopy16(tilemap + (33 + row) * 32, &sStagePanelUnderlay[row * 30], 30 * sizeof(u16));
+}
+
+static void RestoreBattleStagePanelUnderlay(void)
+{
+    CopyToBgTilemapBufferRect(0, sStagePanelUnderlay, 0, 33, 30, 7);
+    CopyBgTilemapBufferToVram(0);
+}
 
 // Temporary battle stages, not the Pokémon's permanent Summary stats.
 static const enum Stat sStagePanelStats[] =
@@ -341,11 +359,7 @@ static void HandleInputChooseAction(enum BattlerId battler)
         {
             PlaySE(SE_SELECT);
             sStagePanelOpen = FALSE;
-            ClearWindowTilemap(B_WIN_STAGE_TAB);
-            ClearWindowTilemap(B_WIN_STAGE_PANEL);
-            PutWindowTilemap(B_WIN_ACTION_PROMPT);
-            PutWindowTilemap(B_WIN_ACTION_MENU);
-            CopyBgTilemapBufferToVram(0);
+            RestoreBattleStagePanelUnderlay();
             BattlePutTextOnWindow(gText_BattleMenu, B_WIN_ACTION_MENU);
             if (B_SHOW_PARTNER_TARGET && gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER
                 && IsBattlerAlive(GetBattlerAtPosition(B_POSITION_PLAYER_RIGHT)))
@@ -363,6 +377,7 @@ static void HandleInputChooseAction(enum BattlerId battler)
         sStagePanelOpen = TRUE;
         sStagePanelSlot = 0;
         ActionSelectionDestroyCursorAt(gActionSelectionCursor[battler]);
+        SaveBattleStagePanelUnderlay();
         DrawBattleStagePanel();
         return;
     }

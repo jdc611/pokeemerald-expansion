@@ -869,7 +869,10 @@ static void SpriteCB_StatStageMarker(struct Sprite *sprite)
     enum BattlerId battler = sprite->data[1];
     u8 state = 0;
 
-    if (gSprites[healthboxId].invisible || !IsBattlerAlive(battler))
+    // Move information overlays the health boxes; don't draw markers through it.
+    if (gBattle_BG0_Y == DISPLAY_HEIGHT * 2
+        || gSprites[healthboxId].invisible
+        || !IsBattlerAlive(battler))
     {
         sprite->invisible = TRUE;
         return;
