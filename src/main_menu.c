@@ -1901,7 +1901,7 @@ static void Task_RunSetup_Input(u8 taskId)
 
     if (sRunSetupConfirm)
     {
-        if (JOY_NEW(LEFT_BUTTON | RIGHT_BUTTON | UP_BUTTON | DOWN_BUTTON))
+        if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | DPAD_UP | DPAD_DOWN))
         {
             *cursor ^= 1;
             PlaySE(SE_SELECT);
@@ -1926,11 +1926,11 @@ static void Task_RunSetup_Input(u8 taskId)
         return;
     }
 
-    if (JOY_NEW(UP_BUTTON))
+    if (JOY_NEW(DPAD_UP))
         *cursor = (*cursor + 3) % 4;
-    else if (JOY_NEW(DOWN_BUTTON))
+    else if (JOY_NEW(DPAD_DOWN))
         *cursor = (*cursor + 1) % 4;
-    else if (JOY_NEW(LEFT_BUTTON | RIGHT_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor < 3))
+    else if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT) || (JOY_NEW(A_BUTTON) && *cursor < 3))
     {
         if (*cursor == 0)
             sRunSetupRandomizer ^= 1;
@@ -2543,7 +2543,7 @@ static void Task_NewGameBirchSpeech_ReturnFromNamingScreenShowTextbox(u8 taskId)
         if (sRunSetupReturnToBirch)
         {
             sRunSetupReturnToBirch = FALSE;
-            gTasks[taskId].tIsDoneFadingSprites = TRUE;
+            gTasks[taskId].data[5] = TRUE;
             gTasks[taskId].tTimer = 0;
             gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
         }
