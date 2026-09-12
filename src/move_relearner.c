@@ -906,8 +906,6 @@ static bool32 IsTmAvailable(enum Item item)
 {
     if (P_ENABLE_ALL_TM_MOVES)
         return TRUE;
-    if (gRelearnMode == RELEARN_MODE_SCRIPT)
-        return TRUE;
     return CheckBagHasItem(item, 1);
 }
 
