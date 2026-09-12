@@ -1091,7 +1091,8 @@ static void DexNavUpdateSearchWindow(u8 proximity, u8 searchLevel)
 {
     bool8 hideName = FALSE;
 
-    if (sDexNavSearchDataPtr->hiddenSearch && !GetSetPokedexFlag(SpeciesToNationalPokedexNum(sDexNavSearchDataPtr->species), FLAG_GET_SEEN))
+    if (sDexNavSearchDataPtr->hiddenSearch && !VarGet(VAR_DEXNAV_INFO_REVEALED)
+        && !GetSetPokedexFlag(SpeciesToNationalPokedexNum(sDexNavSearchDataPtr->species), FLAG_GET_SEEN))
         hideName = TRUE;    //if a detector mode hidden search and player hasn't seen the mon, hide info
 
     FillWindowPixelBuffer(sDexNavSearchDataPtr->windowId, PIXEL_FILL(1));   //clear window
@@ -2068,7 +2069,7 @@ static void PrintCurrentSpeciesInfo(void)
     enum NationalDexOrder dexNum = SpeciesToNationalPokedexNum(species);
     enum Type type1, type2;
 
-    if (!GetSetPokedexFlag(dexNum, FLAG_GET_SEEN))
+    if (!VarGet(VAR_DEXNAV_INFO_REVEALED) && !GetSetPokedexFlag(dexNum, FLAG_GET_SEEN))
         species = SPECIES_NONE;
 
     // clear windows

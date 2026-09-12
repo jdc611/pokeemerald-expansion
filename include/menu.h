@@ -105,6 +105,7 @@ u8 Menu_MoveCursorNoWrapAround(s8 cursorDelta);
 void DrawStdWindowFrame(u8 windowId, bool8 copyToVram);
 u8 AddStartMenuWindow(u8 numActions);
 u8 AddQuickToolsWindow(u8 numActions);
+u8 AddGameOptionsWindow(u8 numActions);
 u8 InitMenuNormal(u8 windowId, u8 fontId, u8 left, u8 top, u8 cursorHeight, u8 numChoices, u8 initialCursorPos);
 void LoadMessageBoxAndFrameGfx(u8 windowId, bool8 copyToVram);
 void RemoveStartMenuWindow(void);

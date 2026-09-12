@@ -81,6 +81,9 @@ enum
     MENU_ACTION_TIME_CHANGER,
     MENU_ACTION_AUTO_REPEL,
     MENU_ACTION_MOVE_RELEARNER,
+    MENU_ACTION_GAME_OPTIONS,
+    MENU_ACTION_DEXNAV_INFO,
+    MENU_ACTION_BACK_GAME_OPTIONS,
 };
 
 // Save status
@@ -102,6 +105,7 @@ EWRAM_DATA static u8 sNumStartMenuActions = 0;
 EWRAM_DATA static u8 sCurrentStartMenuActions[9] = {0};
 EWRAM_DATA static u8 sStartMenuPage = 0;
 EWRAM_DATA static bool8 sQuickToolsMode = FALSE;
+EWRAM_DATA static bool8 sGameOptionsMode = FALSE;
 EWRAM_DATA static s8 sInitStartMenuData[2] = {0};
 
 EWRAM_DATA static u8 (*sSaveDialogCallback)(void) = NULL;
@@ -132,6 +136,9 @@ static bool8 StartMenuTypeHints(void);
 static bool8 StartMenuTimeChanger(void);
 static bool8 StartMenuAutoRepel(void);
 static bool8 StartMenuMoveRelearner(void);
+static bool8 StartMenuGameOptions(void);
+static bool8 StartMenuDexNavInfo(void);
+static bool8 StartMenuBackGameOptions(void);
 
 // Menu callbacks
 static bool8 SaveStartCallback(void);
@@ -173,6 +180,8 @@ static const u8 sText_TypeHintsSeen[] = _("TYPE HINTS: SEEN");
 static const u8 sText_TypeHintsAlways[] = _("TYPE HINTS: ALWAYS");
 static const u8 sText_TypeHintsCaught[] = _("TYPE HINTS: CAUGHT");
 static const u8 sText_TypeHintsOff[] = _("TYPE HINTS: OFF");
+static const u8 sText_DexNavInfoSeen[] = _("DEXNAV INFO: SEEN");
+static const u8 sText_DexNavInfoRevealed[] = _("DEXNAV INFO: REVEALED");
 
 static const u8 *const sPyramidFloorNames[FRONTIER_STAGES_PER_CHALLENGE + 1] =
 {
@@ -241,6 +250,9 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_TIME_CHANGER] = {COMPOUND_STRING("TIME"), {.u8_void = StartMenuTimeChanger}},
     [MENU_ACTION_AUTO_REPEL] = {COMPOUND_STRING("AUTO REPEL"), {.u8_void = StartMenuAutoRepel}},
     [MENU_ACTION_MOVE_RELEARNER] = {COMPOUND_STRING("MOVE RELEARNER"), {.u8_void = StartMenuMoveRelearner}},
+    [MENU_ACTION_GAME_OPTIONS] = {COMPOUND_STRING("GAME OPTIONS"), {.u8_void = StartMenuGameOptions}},
+    [MENU_ACTION_DEXNAV_INFO] = {COMPOUND_STRING("DEXNAV INFO"), {.u8_void = StartMenuDexNavInfo}},
+    [MENU_ACTION_BACK_GAME_OPTIONS] = {COMPOUND_STRING("BACK"), {.u8_void = StartMenuBackGameOptions}},
 };
 
 static const struct BgTemplate sBgTemplates_LinkBattleSave[] =
@@ -353,6 +365,15 @@ static void AddStartMenuAction(u8 action)
 
 static void BuildNormalStartMenu(void)
 {
+    if (sGameOptionsMode)
+    {
+        AddStartMenuAction(MENU_ACTION_TYPE_HINTS);
+        if (DEXNAV_ENABLED)
+            AddStartMenuAction(MENU_ACTION_DEXNAV_INFO);
+        AddStartMenuAction(MENU_ACTION_BACK_GAME_OPTIONS);
+        return;
+    }
+
     if (sQuickToolsMode)
     {
         AddStartMenuAction(MENU_ACTION_POKEVIAL);
@@ -389,6 +410,7 @@ static void BuildNormalStartMenu(void)
     else
     {
         AddStartMenuAction(MENU_ACTION_MOVE_RELEARNER);
+        AddStartMenuAction(MENU_ACTION_GAME_OPTIONS);
         // Reserved for Run Info, level caps, and future rules tools.
         AddStartMenuAction(MENU_ACTION_EXIT);
     }
@@ -546,6 +568,10 @@ static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
             {
                 StringCopy(gStringVar4, VarGet(VAR_AUTO_REPEL_ENABLED) ? sText_AutoRepelOn : sText_AutoRepelOff);
             }
+            else if (sCurrentStartMenuActions[index] == MENU_ACTION_DEXNAV_INFO)
+            {
+                StringCopy(gStringVar4, VarGet(VAR_DEXNAV_INFO_REVEALED) ? sText_DexNavInfoRevealed : sText_DexNavInfoSeen);
+            }
             else
             {
                 StringExpandPlaceholders(gStringVar4, sStartMenuItems[sCurrentStartMenuActions[index]].text);
@@ -583,9 +609,9 @@ static bool32 InitStartMenuStep(void)
         break;
     case 2:
         LoadMessageBoxAndBorderGfx();
-        DrawStdWindowFrame((sQuickToolsMode || sStartMenuPage == 1)
-                         ? AddQuickToolsWindow(sNumStartMenuActions)
-                         : AddStartMenuWindow(sNumStartMenuActions), FALSE);
+        DrawStdWindowFrame(sGameOptionsMode ? AddGameOptionsWindow(sNumStartMenuActions)
+                           : (sQuickToolsMode || sStartMenuPage == 1) ? AddQuickToolsWindow(sNumStartMenuActions)
+                           : AddStartMenuWindow(sNumStartMenuActions), FALSE);
         sInitStartMenuData[1] = 0;
         sInitStartMenuData[0]++;
         break;
@@ -672,6 +698,7 @@ void Task_ShowStartMenu(u8 taskId)
 void ShowStartMenu(void)
 {
     sQuickToolsMode = FALSE;
+    sGameOptionsMode = FALSE;
     sStartMenuPage = 0;
     if (!IsOverworldLinkActive())
     {
@@ -686,6 +713,7 @@ void ShowStartMenu(void)
 void ShowQuickToolsMenu(void)
 {
     sQuickToolsMode = TRUE;
+    sGameOptionsMode = FALSE;
     sStartMenuPage = 1;
     sStartMenuCursorPos = 0;
     if (!IsOverworldLinkActive())
@@ -711,7 +739,7 @@ static bool8 HandleStartMenuInput(void)
         PlaySE(SE_SELECT);
         sStartMenuCursorPos = Menu_MoveCursor(1);
     }
-    if (!sQuickToolsMode && JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
+    if (!sQuickToolsMode && !sGameOptionsMode && JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
     {
         PlaySE(SE_SELECT);
 
@@ -751,11 +779,21 @@ static bool8 HandleStartMenuInput(void)
             && gMenuCallback != StartMenuTypeHints
             && gMenuCallback != StartMenuTimeChanger
             && gMenuCallback != StartMenuAutoRepel
-            && gMenuCallback != StartMenuMoveRelearner)
+            && gMenuCallback != StartMenuMoveRelearner
+            && gMenuCallback != StartMenuGameOptions
+            && gMenuCallback != StartMenuDexNavInfo
+            && gMenuCallback != StartMenuBackGameOptions)
         {
             FadeScreen(FADE_TO_BLACK, 0);
         }
 
+        return FALSE;
+    }
+
+    if (sGameOptionsMode && JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        gMenuCallback = StartMenuBackGameOptions;
         return FALSE;
     }
 
@@ -1672,6 +1710,38 @@ static bool8 StartMenuTypeHints(void)
     }
 
     VarSet(VAR_TYPE_HINTS_MODE, mode);
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+    RemoveStartMenuWindow();
+    InitStartMenu();
+    gMenuCallback = HandleStartMenuInput;
+    return FALSE;
+}
+
+static bool8 StartMenuGameOptions(void)
+{
+    sGameOptionsMode = TRUE;
+    sStartMenuCursorPos = 0;
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+    RemoveStartMenuWindow();
+    InitStartMenu();
+    gMenuCallback = HandleStartMenuInput;
+    return FALSE;
+}
+
+static bool8 StartMenuBackGameOptions(void)
+{
+    sGameOptionsMode = FALSE;
+    sStartMenuCursorPos = 1; // GAME OPTIONS on the second page
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+    RemoveStartMenuWindow();
+    InitStartMenu();
+    gMenuCallback = HandleStartMenuInput;
+    return FALSE;
+}
+
+static bool8 StartMenuDexNavInfo(void)
+{
+    VarSet(VAR_DEXNAV_INFO_REVEALED, !VarGet(VAR_DEXNAV_INFO_REVEALED));
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();
     InitStartMenu();

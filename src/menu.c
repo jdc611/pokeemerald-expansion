@@ -404,6 +404,13 @@ u8 AddQuickToolsWindow(u8 numActions)
     return sStartMenuWindowId;
 }
 
+u8 AddGameOptionsWindow(u8 numActions)
+{
+    if (sStartMenuWindowId == WINDOW_NONE)
+        sStartMenuWindowId = AddWindowParameterized(0, 1, 1, 22, (numActions * 2) + 2, 15, 0x139);
+    return sStartMenuWindowId;
+}
+
 u8 GetStartMenuWindowId(void)
 {
     return sStartMenuWindowId;
