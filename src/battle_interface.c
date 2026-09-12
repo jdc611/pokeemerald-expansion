@@ -187,6 +187,8 @@ static void Task_HidePartyStatusSummary_DuringBattle(u8);
 
 static void SpriteCB_HealthBoxOther(struct Sprite *);
 static void SpriteCB_HealthBar(struct Sprite *);
+static void SpriteCB_StatStageMarker(struct Sprite *);
+static void SpriteCB_WeatherTurnLabel(struct Sprite *);
 static void SpriteCB_StatusSummaryBar_Enter(struct Sprite *);
 static void SpriteCB_StatusSummaryBar_Exit(struct Sprite *);
 static void SpriteCB_StatusSummaryBalls_Enter(struct Sprite *);
@@ -223,6 +225,64 @@ static const struct OamData sOamData_64x32 =
     .paletteNum = 0,
     .affineParam = 0,
 };
+
+// The two arrows share a tile, so a Pokémon can show a boost and a drop at once.
+// Each 32-bit word is one row of eight 4bpp pixels (green = 1, red = 2).
+#define STAGE_UP_TOP     0x00000010
+#define STAGE_UP_WIDE    0x00000111
+#define STAGE_DOWN_STEM  0x02000000
+#define STAGE_DOWN_WIDE  0x22200000
+#define STAGE_BOTH(up, down) ((up) | (down))
+#define TAG_STAGE_MARKER_GFX 0xD7F0
+#define TAG_STAGE_MARKER_PAL 0xD7F1
+#define TAG_WEATHER_TURNS_GFX 0xD7F2
+#define TAG_WEATHER_TURNS_PAL 0xD7F3
+
+static const u32 sStatStageMarkerGfx[] =
+{
+    // Neutral, up, down, both. One 8x8 tile per state.
+    0, 0, 0, 0, 0, 0, 0, 0,
+    STAGE_UP_TOP, STAGE_UP_WIDE, STAGE_UP_TOP, STAGE_UP_TOP,
+    STAGE_UP_TOP, STAGE_UP_TOP, 0, 0,
+    0, STAGE_DOWN_STEM, STAGE_DOWN_STEM, STAGE_DOWN_STEM,
+    STAGE_DOWN_STEM, STAGE_DOWN_WIDE, STAGE_DOWN_STEM, 0,
+    STAGE_UP_TOP, STAGE_BOTH(STAGE_UP_WIDE, STAGE_DOWN_STEM), STAGE_BOTH(STAGE_UP_TOP, STAGE_DOWN_STEM), STAGE_BOTH(STAGE_UP_TOP, STAGE_DOWN_STEM),
+    STAGE_BOTH(STAGE_UP_TOP, STAGE_DOWN_STEM), STAGE_BOTH(STAGE_UP_TOP, STAGE_DOWN_WIDE), STAGE_DOWN_STEM, 0,
+};
+
+static const u16 sStatStageMarkerPalette[16] = { RGB_BLACK, RGB(7, 27, 9), RGB(30, 8, 7), RGB_WHITE };
+static const struct SpriteSheet sStatStageMarkerSheet = { sStatStageMarkerGfx, sizeof(sStatStageMarkerGfx), TAG_STAGE_MARKER_GFX };
+static const struct SpritePalette sStatStageMarkerPal = { sStatStageMarkerPalette, TAG_STAGE_MARKER_PAL };
+
+// The small weather label is drawn as sprite text, independent of the scrolling battle menu BG.
+static const u32 sWeatherTurnBlankGfx[128] = {0};
+static const u16 sWeatherTurnPalette[16] = { RGB_BLACK, RGB_WHITE, RGB(3, 3, 3), RGB(8, 8, 8) };
+static const struct SpriteSheet sWeatherTurnSheet = { sWeatherTurnBlankGfx, sizeof(sWeatherTurnBlankGfx), TAG_WEATHER_TURNS_GFX };
+static const struct SpritePalette sWeatherTurnPal = { sWeatherTurnPalette, TAG_WEATHER_TURNS_PAL };
+static const union TextColor sWeatherTurnTextColor = { .background = 0, .foreground = 1, .shadow = 3, .accent = 0 };
+
+static const struct OamData sOamData_StageMarker = { .shape = SPRITE_SHAPE(8x8), .size = SPRITE_SIZE(8x8), .priority = 0 };
+static const struct OamData sOamData_WeatherTurns = { .shape = SPRITE_SHAPE(64x16), .size = SPRITE_SIZE(64x16), .priority = 0 };
+static const struct SpriteTemplate sStatStageMarkerTemplate =
+{
+    .tileTag = TAG_STAGE_MARKER_GFX,
+    .paletteTag = TAG_STAGE_MARKER_PAL,
+    .oam = &sOamData_StageMarker,
+    .callback = SpriteCB_StatStageMarker,
+};
+static const struct SpriteTemplate sWeatherTurnTemplate =
+{
+    .tileTag = TAG_WEATHER_TURNS_GFX,
+    .paletteTag = TAG_WEATHER_TURNS_PAL,
+    .oam = &sOamData_WeatherTurns,
+    .callback = SpriteCB_WeatherTurnLabel,
+};
+
+#undef STAGE_UP_TOP
+#undef STAGE_UP_WIDE
+#undef STAGE_DOWN_STEM
+#undef STAGE_DOWN_WIDE
+#undef STAGE_BOTH
 
 static const struct SpriteTemplate sHealthboxPlayerSpriteTemplates[2] =
 {
@@ -702,6 +762,38 @@ u8 CreateBattlerHealthboxSprites(enum BattlerId battler)
     gBattleStruct->ballSpriteIds[1] = MAX_SPRITES;
     gBattleStruct->moveInfoSpriteId = MAX_SPRITES;
 
+    if (GetSpriteTileStartByTag(TAG_STAGE_MARKER_GFX) == 0xFFFF)
+    {
+        LoadSpriteSheet(&sStatStageMarkerSheet);
+        LoadSpritePalette(&sStatStageMarkerPal);
+    }
+    u8 stageMarkerId = CreateSprite(&sStatStageMarkerTemplate, DISPLAY_WIDTH, DISPLAY_HEIGHT, 0);
+    if (stageMarkerId != MAX_SPRITES)
+    {
+        gSprites[stageMarkerId].data[0] = healthboxLeftSpriteId;
+        gSprites[stageMarkerId].data[1] = battler;
+        gSprites[stageMarkerId].invisible = TRUE;
+    }
+
+    // This is recreated when the battle screen is restored after opening the Bag/party.
+    if (GetBattlerPosition(battler) == B_POSITION_PLAYER_LEFT)
+    {
+        if (GetSpriteTileStartByTag(TAG_WEATHER_TURNS_GFX) == 0xFFFF)
+        {
+            LoadSpriteSheet(&sWeatherTurnSheet);
+            LoadSpritePalette(&sWeatherTurnPal);
+        }
+        u8 weatherSpriteId = CreateSprite(&sWeatherTurnTemplate, 207, 10, 0);
+        if (weatherSpriteId != MAX_SPRITES)
+        {
+            const u32 *spriteSrc = sWeatherTurnBlankGfx;
+            SetupSpritesForTextPrinting(&weatherSpriteId, &spriteSrc, 1, 1);
+            gSprites[weatherSpriteId].data[0] = -1;
+            gSprites[weatherSpriteId].data[1] = -1;
+            gSprites[weatherSpriteId].invisible = TRUE;
+        }
+    }
+
     return healthboxLeftSpriteId;
 }
 
@@ -754,6 +846,91 @@ static void SpriteCB_HealthBar(struct Sprite *sprite)
 
     sprite->x2 = gSprites[healthboxSpriteId].x2;
     sprite->y2 = gSprites[healthboxSpriteId].y2;
+}
+
+static void SpriteCB_StatStageMarker(struct Sprite *sprite)
+{
+    u8 healthboxId = sprite->data[0];
+    enum BattlerId battler = sprite->data[1];
+    u8 state = 0;
+
+    if (gSprites[healthboxId].invisible || !IsBattlerAlive(battler))
+    {
+        sprite->invisible = TRUE;
+        return;
+    }
+
+    for (enum Stat stat = STAT_ATK; stat < NUM_BATTLE_STATS; stat++)
+    {
+        if (gBattleMons[battler].statStages[stat] > DEFAULT_STAT_STAGE)
+            state |= 1;
+        else if (gBattleMons[battler].statStages[stat] < DEFAULT_STAT_STAGE)
+            state |= 2;
+    }
+
+    sprite->x = gSprites[healthboxId].x + (GetBattlerCoordsIndex(battler) == BATTLE_COORDS_DOUBLES ? 56 : 68);
+    sprite->y = gSprites[healthboxId].y - 17;
+    sprite->x2 = gSprites[healthboxId].x2;
+    sprite->y2 = gSprites[healthboxId].y2;
+    sprite->oam.tileNum = GetSpriteTileStartByTag(TAG_STAGE_MARKER_GFX) + state;
+    sprite->invisible = state == 0;
+}
+
+static void SpriteCB_WeatherTurnLabel(struct Sprite *sprite)
+{
+    static const u8 sSun[] = _("SUN ");
+    static const u8 sRain[] = _("RAIN ");
+    static const u8 sSand[] = _("SAND ");
+    static const u8 sHail[] = _("HAIL ");
+    static const u8 sSnow[] = _("SNOW ");
+    static const u8 sFog[] = _("FOG ");
+    static const u8 sWind[] = _("WIND ");
+    static const u8 sPermanent[] = _("--");
+    const u8 *name;
+    u8 label[16];
+
+    if (gBattleWeather == B_WEATHER_NONE)
+    {
+        sprite->data[0] = -1;
+        sprite->data[1] = -1;
+        sprite->invisible = TRUE;
+        return;
+    }
+
+    if (sprite->data[0] == gBattleWeather && sprite->data[1] == gBattleStruct->weatherDuration)
+        return;
+
+    if (gBattleWeather & B_WEATHER_SUN)
+        name = sSun;
+    else if (gBattleWeather & B_WEATHER_RAIN)
+        name = sRain;
+    else if (gBattleWeather & B_WEATHER_SANDSTORM)
+        name = sSand;
+    else if (gBattleWeather & B_WEATHER_SNOW)
+        name = sSnow;
+    else if (gBattleWeather & B_WEATHER_HAIL)
+        name = sHail;
+    else if (gBattleWeather & B_WEATHER_FOG)
+        name = sFog;
+    else if (gBattleWeather & B_WEATHER_STRONG_WINDS)
+        name = sWind;
+    else
+    {
+        sprite->invisible = TRUE;
+        return;
+    }
+
+    u8 *end = StringCopy(label, name);
+    if (gBattleStruct->weatherDuration == 0)
+        StringAppend(label, sPermanent);
+    else
+        ConvertIntToDecimalStringN(end, gBattleStruct->weatherDuration, STR_CONV_MODE_LEFT_ALIGN, 2);
+
+    FillSpriteRectColor(sprite - gSprites, 0, 0, 64, 16, 0);
+    AddSpriteTextPrinterParameterized6(sprite - gSprites, FONT_SMALL, 0, 2, 0, 0, sWeatherTurnTextColor, 0, label);
+    sprite->data[0] = gBattleWeather;
+    sprite->data[1] = gBattleStruct->weatherDuration;
+    sprite->invisible = FALSE;
 }
 
 static void SpriteCB_HealthBoxOther(struct Sprite *sprite)

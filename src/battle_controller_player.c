@@ -234,9 +234,119 @@ static enum Item GetNextBall(enum Item ballId)
     return ballId;
 }
 
+static bool8 sStagePanelOpen = FALSE;
+static u8 sStagePanelPair = 0;
+
+// Temporary battle stages, not the Pokémon's permanent Summary stats.
+static const enum Stat sStagePanelStats[] =
+{
+    STAT_ATK, STAT_DEF, STAT_SPATK, STAT_SPDEF, STAT_SPEED, STAT_ACC, STAT_EVASION
+};
+static const u8 sStageNameAtk[] = _("AT");
+static const u8 sStageNameDef[] = _("DF");
+static const u8 sStageNameSpAtk[] = _("SA");
+static const u8 sStageNameSpDef[] = _("SD");
+static const u8 sStageNameSpeed[] = _("SP");
+static const u8 sStageNameAcc[] = _("AC");
+static const u8 sStageNameEva[] = _("EV");
+static const u8 *const sStagePanelNames[] =
+{
+    sStageNameAtk, sStageNameDef, sStageNameSpAtk, sStageNameSpDef, sStageNameSpeed, sStageNameAcc, sStageNameEva
+};
+
+static void AppendBattleStatStage(u8 *line, enum BattlerId battler, u8 index)
+{
+    static const u8 sPlus[] = _("+");
+    static const u8 sMinus[] = _("-");
+    static const u8 sEmpty[] = _("");
+    s8 stage = gBattleMons[battler].statStages[sStagePanelStats[index]] - DEFAULT_STAT_STAGE;
+
+    StringAppend(line, sStagePanelNames[index]);
+    StringAppend(line, stage < 0 ? sMinus : sPlus);
+    ConvertIntToDecimalStringN(StringAppend(line, sEmpty), stage < 0 ? -stage : stage, STR_CONV_MODE_LEFT_ALIGN, 1);
+}
+
+static void DrawBattleStageColumn(u8 windowId, enum BattlerId battler)
+{
+    static const u8 sYou[] = _("YOU ");
+    static const u8 sFoe[] = _("FOE ");
+    static const u8 sYou2[] = _("YOU2 ");
+    static const u8 sFoe2[] = _("FOE2 ");
+    static const u8 sSpace[] = _(" ");
+    static const u8 sNoMon[] = _("NO POKéMON");
+    static const u8 sPromptColors[] = { 15, 1, 6 };
+    static const u8 sMenuColors[] = { 14, 13, 15 };
+    const u8 *colors = windowId == B_WIN_ACTION_PROMPT ? sPromptColors : sMenuColors;
+
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(windowId == B_WIN_ACTION_PROMPT ? 0xF : 0xE));
+    if (!IsBattlerAlive(battler))
+    {
+        AddTextPrinterParameterized3(windowId, FONT_SMALL, 2, 8, colors, 0, sNoMon);
+    }
+    else
+    {
+        for (u8 row = 0; row < 4; row++)
+        {
+            u8 line[32];
+            u8 index = row * 2;
+            StringCopy(line, row == 0 ? (IsOnPlayerSide(battler) ? (sStagePanelPair ? sYou2 : sYou) : (sStagePanelPair ? sFoe2 : sFoe)) : sSpace);
+            AppendBattleStatStage(line, battler, index);
+            if (index + 1 < ARRAY_COUNT(sStagePanelStats))
+            {
+                StringAppend(line, sSpace);
+                AppendBattleStatStage(line, battler, index + 1);
+            }
+            AddTextPrinterParameterized3(windowId, FONT_SMALL, 2, row * 8, colors, 0, line);
+        }
+    }
+    CopyWindowToVram(windowId, COPYWIN_GFX);
+}
+
+static void DrawBattleStagePanel(void)
+{
+    enum BattlerId player = GetBattlerAtPosition(sStagePanelPair ? B_POSITION_PLAYER_RIGHT : B_POSITION_PLAYER_LEFT);
+    enum BattlerId foe = GetBattlerAtPosition(sStagePanelPair ? B_POSITION_OPPONENT_RIGHT : B_POSITION_OPPONENT_LEFT);
+
+    DrawBattleStageColumn(B_WIN_ACTION_PROMPT, player);
+    DrawBattleStageColumn(B_WIN_ACTION_MENU, foe);
+}
+
 static void HandleInputChooseAction(enum BattlerId battler)
 {
     enum Item itemId = gBattleResources->bufferA[battler][2] | (gBattleResources->bufferA[battler][3] << 8);
+
+    if (sStagePanelOpen)
+    {
+        if (IsDoubleBattle() && JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+        {
+            PlaySE(SE_SELECT);
+            sStagePanelPair ^= 1;
+            DrawBattleStagePanel();
+        }
+        else if (JOY_NEW(L_BUTTON | A_BUTTON | B_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            sStagePanelOpen = FALSE;
+            BattlePutTextOnWindow(gText_BattleMenu, B_WIN_ACTION_MENU);
+            if (B_SHOW_PARTNER_TARGET && gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER
+                && IsBattlerAlive(GetBattlerAtPosition(B_POSITION_PLAYER_RIGHT)))
+                BattlePutTextOnWindow(gStringVar1, B_WIN_ACTION_PROMPT);
+            else
+                BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
+            ActionSelectionCreateCursorAt(gActionSelectionCursor[battler], 0);
+        }
+        return;
+    }
+
+    if (JOY_NEW(L_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        sStagePanelOpen = TRUE;
+        sStagePanelPair = 0;
+        ActionSelectionDestroyCursorAt(gActionSelectionCursor[battler]);
+        DrawBattleStagePanel();
+        return;
+    }
 
     DoBounceEffect(battler, BOUNCE_HEALTHBOX, 7, 1);
     DoBounceEffect(battler, BOUNCE_MON, 7, 1);
@@ -2008,6 +2118,7 @@ static void PlayerHandleChooseAction(enum BattlerId battler)
 {
     s32 i;
 
+    sStagePanelOpen = FALSE;
     gBattlerControllerFuncs[battler] = HandleChooseActionAfterDma3;
     BattleTv_ClearExplosionFaintCause();
     BattlePutTextOnWindow(gText_BattleMenu, B_WIN_ACTION_MENU);
