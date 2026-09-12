@@ -80,6 +80,7 @@ enum
     MENU_ACTION_TYPE_HINTS,
     MENU_ACTION_TIME_CHANGER,
     MENU_ACTION_AUTO_REPEL,
+    MENU_ACTION_MOVE_RELEARNER,
 };
 
 // Save status
@@ -131,6 +132,7 @@ static bool8 StartMenuChangeGender(void);
 static bool8 StartMenuTypeHints(void);
 static bool8 StartMenuTimeChanger(void);
 static bool8 StartMenuAutoRepel(void);
+static bool8 StartMenuMoveRelearner(void);
 
 // Menu callbacks
 static bool8 SaveStartCallback(void);
@@ -248,6 +250,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_TYPE_HINTS] = {COMPOUND_STRING("TYPE HINTS"), {.u8_void = StartMenuTypeHints}},
     [MENU_ACTION_TIME_CHANGER] = {COMPOUND_STRING("TIME"), {.u8_void = StartMenuTimeChanger}},
     [MENU_ACTION_AUTO_REPEL] = {COMPOUND_STRING("AUTO REPEL"), {.u8_void = StartMenuAutoRepel}},
+    [MENU_ACTION_MOVE_RELEARNER] = {COMPOUND_STRING("MOVE RELEARNER"), {.u8_void = StartMenuMoveRelearner}},
 };
 
 static const struct BgTemplate sBgTemplates_LinkBattleSave[] =
@@ -401,7 +404,8 @@ static void BuildNormalStartMenu(void)
     }
     else
     {
-        // Reserved for Run Info, level caps, Move Relearner, and future rules tools.
+        AddStartMenuAction(MENU_ACTION_MOVE_RELEARNER);
+        // Reserved for Run Info, level caps, and future rules tools.
         AddStartMenuAction(MENU_ACTION_EXIT);
     }
 }
@@ -634,7 +638,9 @@ static bool32 InitStartMenuStep(void)
         break;
     case 2:
         LoadMessageBoxAndBorderGfx();
-        DrawStdWindowFrame(sQuickToolsMode ? AddQuickToolsWindow(sNumStartMenuActions) : AddStartMenuWindow(sNumStartMenuActions), FALSE);
+        DrawStdWindowFrame((sQuickToolsMode || sStartMenuPage == 1)
+                         ? AddQuickToolsWindow(sNumStartMenuActions)
+                         : AddStartMenuWindow(sNumStartMenuActions), FALSE);
         sInitStartMenuData[1] = 0;
         sInitStartMenuData[0]++;
         break;
@@ -801,7 +807,8 @@ static bool8 HandleStartMenuInput(void)
             && gMenuCallback != StartMenuChangeGender
             && gMenuCallback != StartMenuTypeHints
             && gMenuCallback != StartMenuTimeChanger
-            && gMenuCallback != StartMenuAutoRepel)
+            && gMenuCallback != StartMenuAutoRepel
+            && gMenuCallback != StartMenuMoveRelearner)
         {
             FadeScreen(FADE_TO_BLACK, 0);
         }
@@ -1764,6 +1771,19 @@ static bool8 StartMenuAutoRepel(void)
     RemoveStartMenuWindow();
     InitStartMenu();
     gMenuCallback = HandleStartMenuInput;
+    return FALSE;
+}
+
+static bool8 StartMenuMoveRelearner(void)
+{
+    if (!gPaletteFade.active)
+    {
+        RemoveExtraStartMenuWindows();
+        HideStartMenu();
+        ScriptContext_SetupScript(Common_EventScript_MoveRelearner);
+        return TRUE;
+    }
+
     return FALSE;
 }
 
