@@ -301,6 +301,7 @@ static const u8 sText_RunSetupSubmit[] = _("SUBMIT");
 static const u8 sText_RunSetupYes[] = _("YES");
 static const u8 sText_RunSetupNo[] = _("NO");
 static const u8 sText_RunSetupRandom[] = _("RANDOM");
+static const u8 sText_RunSetupNormal[] = _("NORMAL");
 static const u8 sText_RunSetupCustom[] = _("CUSTOM");
 static const u8 sText_RunSetupAreYouSure[] = _("ARE YOU SURE?");
 static const u8 sText_RunSetupControls[] = _("A: SELECT  B: BACK");
@@ -1854,8 +1855,8 @@ static void RunSetup_Draw(u8 cursor)
 {
     u8 i;
     const u8 *const labels[] = {sText_RunSetupWild, sText_RunSetupStarters, sText_RunSetupSeed, sText_RunSetupSubmit};
-    const u8 *const values[] = {sRunSetupRandomizer ? sText_RunSetupYes : sText_RunSetupNo,
-                               sRunSetupStarter ? sText_RunSetupYes : sText_RunSetupNo,
+    const u8 *const values[] = {sRunSetupRandomizer ? sText_RunSetupRandom : sText_RunSetupNormal,
+                               sRunSetupStarter ? sText_RunSetupRandom : sText_RunSetupNormal,
                                sRunSetupCustom ? sText_RunSetupCustom : sText_RunSetupRandom};
 
     FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
@@ -2117,7 +2118,14 @@ static void CB2_NewGameBirchSpeech_ReturnFromNamingScreen(void)
     gSprites[spriteId].y = 60;
     gSprites[spriteId].invisible = FALSE;
     gTasks[taskId].tPlayerSpriteId = spriteId;
-    SetGpuReg(REG_OFFSET_BG1HOFS, -60);
+    if (sRunSetupReturnToBirch)
+    {
+        // The name-confirmation path slides the platform from -60 to 0.
+        // Run setup resumes after that slide, so restore its final position.
+        gTasks[taskId].tBG1HOFS = 0;
+        gSprites[spriteId].x = 120;
+    }
+    SetGpuReg(REG_OFFSET_BG1HOFS, gTasks[taskId].tBG1HOFS);
     BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
     SetGpuReg(REG_OFFSET_WIN0H, 0);
     SetGpuReg(REG_OFFSET_WIN0V, 0);
