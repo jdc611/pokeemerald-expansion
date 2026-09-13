@@ -186,8 +186,8 @@ static EWRAM_DATA bool8 sRunSetupConfirm;
 static EWRAM_DATA bool8 sRunSetupReturnToBirch;
 static EWRAM_DATA bool8 sRunSetupEmptySeed;
 static EWRAM_DATA u32 sRunSetupSeed;
-static EWRAM_DATA u8 sRunSetupNidokingSpriteId = MAX_SPRITES;
-static EWRAM_DATA u8 sRunSetupArcanineSpriteId = MAX_SPRITES;
+static EWRAM_DATA u8 sRunSetupNidokingSpriteId;
+static EWRAM_DATA u8 sRunSetupArcanineSpriteId;
 
 static u8 sBirchSpeechMainTaskId;
 
