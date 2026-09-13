@@ -1,0 +1,42 @@
+name: Apply filtered-run scaling default
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-filter-scaling-default.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Patch filtered-run default scaling
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('src/main_menu.c')
+          text = p.read_text()
+          old = '''            if (sRunSetupFilter == RUN_FILTER_TYPE && sRunSetupRandomizer == RUN_WILD_NORMAL)\n                sRunSetupRandomizer = RUN_WILD_RANDOM;\n'''
+          new = '''            if (sRunSetupFilter == RUN_FILTER_TYPE && sRunSetupRandomizer == RUN_WILD_NORMAL)\n                // Filtered runs default to progression-aware encounters. The player\n                // can still explicitly choose RANDOM on page 1 for an unscaled run.\n                sRunSetupRandomizer = RUN_WILD_SCALED;\n'''
+          if text.count(old) != 1:
+              raise SystemExit(f'Expected one filter-mode default block, found {text.count(old)}')
+          p.write_text(text.replace(old, new, 1))
+
+          # One-shot workflow: remove itself from the source commit.
+          Path('.github/workflows/apply-filter-scaling-default.yml').unlink()
+
+      - name: Commit patched source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/main_menu.c .github/workflows/apply-filter-scaling-default.yml
+          git commit -m "Default type-filtered runs to scaled encounters"
+          git push origin HEAD:master
