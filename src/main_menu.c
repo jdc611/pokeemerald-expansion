@@ -32,6 +32,7 @@
 #include "random.h"
 #include "random_mon_generation.h"
 #include "constants/random_mon_generation.h"
+#include "constants/pokedex.h"
 #include "rtc.h"
 #include "save.h"
 #include "scanline_effect.h"
@@ -197,6 +198,7 @@ static EWRAM_DATA u8 sRunSetupFilter;
 static EWRAM_DATA u8 sRunSetupType;
 static EWRAM_DATA u16 sRunSetupAbility;
 static EWRAM_DATA u16 sRunSetupAbilityChoices[ABILITIES_COUNT];
+static EWRAM_DATA u8 sRunSetupAbilityEligibleCounts[ABILITIES_COUNT];
 static EWRAM_DATA u16 sRunSetupAbilityChoiceCount;
 static EWRAM_DATA u8 sRunSetupNidokingSpriteId;
 static EWRAM_DATA u8 sRunSetupArcanineSpriteId;
@@ -2020,9 +2022,83 @@ static u32 RunSetup_CountEligibleSelection(u8 type, u16 ability, u32 stopAt)
     return CountEligibleRandomSpecies(generator, &args, stopAt);
 }
 
+static void RunSetup_BuildAbilityChoices(void)
+{
+    struct FilterFuncArgs args =
+    {
+        .arg1 = FILTER_FUNC_ARG_NONE,
+        .arg2 = FILTER_FUNC_ARG_NONE,
+    };
+    bool32 scaled = sRunSetupRandomizer != RUN_WILD_RANDOM;
+    u32 generator;
+    u32 i;
+
+    if (sRunSetupAbilityChoiceCount != 0)
+        return;
+
+    if (sRunSetupType != TYPE_NONE)
+    {
+        args.arg1 = sRunSetupType;
+        if (scaled)
+            args.arg2 = 0;
+        generator = scaled ? SPECIES_GENERATOR_SCALED_TYPE_FILTERED : SPECIES_GENERATOR_TYPE_FILTERED;
+    }
+    else if (scaled)
+    {
+        args.arg1 = 0;
+        generator = SPECIES_GENERATOR_SCALED_WILD;
+    }
+    else
+    {
+        generator = SPECIES_GENERATOR_NO_SUPERMONS;
+    }
+
+    for (i = 0; i < ABILITIES_COUNT; i++)
+        sRunSetupAbilityEligibleCounts[i] = 0;
+    for (i = 1; i <= NATIONAL_DEX_COUNT; i++)
+    {
+        enum Species species = NationalPokedexNumToSpecies(i);
+        enum Ability abilities[3];
+        u32 slot;
+
+        if (!IsSpeciesEligibleRandomSpecies(generator, species, &args))
+            continue;
+
+        abilities[0] = GetSpeciesAbility(species, 0);
+        abilities[1] = GetSpeciesAbility(species, 1);
+        abilities[2] = GetSpeciesAbility(species, 2);
+        for (slot = 0; slot < ARRAY_COUNT(abilities); slot++)
+        {
+            enum Ability ability = abilities[slot];
+
+            if (ability == ABILITY_NONE
+             || (slot > 0 && ability == abilities[0])
+             || (slot > 1 && ability == abilities[1]))
+                continue;
+            if (sRunSetupAbilityEligibleCounts[ability] < 3)
+                sRunSetupAbilityEligibleCounts[ability]++;
+        }
+    }
+
+    sRunSetupAbilityChoices[sRunSetupAbilityChoiceCount++] = ABILITY_NONE;
+    for (i = 1; i < ABILITIES_COUNT; i++)
+    {
+        if (sRunSetupAbilityEligibleCounts[i] >= 3)
+            sRunSetupAbilityChoices[sRunSetupAbilityChoiceCount++] = i;
+    }
+}
+
 static bool32 RunSetup_IsAbilityUsed(u16 ability)
 {
-    return ability == ABILITY_NONE || RunSetup_CountEligibleSelection(sRunSetupType, ability, 3) >= 3;
+    u32 i;
+
+    RunSetup_BuildAbilityChoices();
+    for (i = 0; i < sRunSetupAbilityChoiceCount; i++)
+    {
+        if (sRunSetupAbilityChoices[i] == ability)
+            return TRUE;
+    }
+    return FALSE;
 }
 
 static u16 RunSetup_NextUsedAbility(u16 ability, s8 direction)
@@ -2030,15 +2106,7 @@ static u16 RunSetup_NextUsedAbility(u16 ability, s8 direction)
     u32 i;
     u32 current = 0;
 
-    if (sRunSetupAbilityChoiceCount == 0)
-    {
-        sRunSetupAbilityChoices[sRunSetupAbilityChoiceCount++] = ABILITY_NONE;
-        for (i = 1; i < ABILITIES_COUNT; i++)
-        {
-            if (RunSetup_IsAbilityUsed(i))
-                sRunSetupAbilityChoices[sRunSetupAbilityChoiceCount++] = i;
-        }
-    }
+    RunSetup_BuildAbilityChoices();
 
     for (i = 0; i < sRunSetupAbilityChoiceCount; i++)
     {

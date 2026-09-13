@@ -17,6 +17,7 @@ struct FilterFuncArgs
 
 enum Species GetRandomSpecies(u32 optionId, const struct FilterFuncArgs *filterFuncArgs);
 u32 CountEligibleRandomSpecies(u32 optionId, const struct FilterFuncArgs *filterFuncArgs, u32 stopAt);
+bool32 IsSpeciesEligibleRandomSpecies(u32 optionId, enum Species species, const struct FilterFuncArgs *filterFuncArgs);
 enum Item GetRandomItem(u32 optionId, const struct FilterFuncArgs *filterFuncArgs);
 enum PokeBall GetRandomBall(void);
 void ResolveMoves(enum Species species, u32 level, const u16 *movesTemplate, enum Move *moves);

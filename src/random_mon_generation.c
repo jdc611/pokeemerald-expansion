@@ -395,6 +395,13 @@ u32 CountEligibleRandomSpecies(u32 optionId, const struct FilterFuncArgs *filter
     return count;
 }
 
+bool32 IsSpeciesEligibleRandomSpecies(u32 optionId, enum Species species, const struct FilterFuncArgs *filterFuncArgs)
+{
+    if (optionId >= RANDOM_SPECIES_OPTIONS_COUNT)
+        return FALSE;
+    return GetSpeciesCandidateForm(species, &sRandomSpeciesGeneratorOptions[optionId], filterFuncArgs) != SPECIES_NONE;
+}
+
 static enum Species SlowPickRandomSpecies(const struct RandomSpeciesGeneratorOptions *options, u32 poolSize, const struct FilterFuncArgs *filterFuncArgs)
 {
     u32 eligibleSpeciesCount = 0;
