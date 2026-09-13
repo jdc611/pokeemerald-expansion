@@ -1613,16 +1613,17 @@ static bool8 DexNav_InitBgs(void)
 static void PrepareFishingDexNavLayout(void)
 {
     u32 x;
+    u16 *tilemap = (u16 *)sBg1TilemapBuffer;
 
     // Replace the unused three-slot Hidden box with a full-width Fishing box.
     // Reusing the existing frame tiles keeps it visually identical to Land.
     for (x = 0; x < 20; x++)
     {
-        sBg1TilemapBuffer[15 * 32 + x] = 0xF;
-        sBg1TilemapBuffer[16 * 32 + x] = sBg1TilemapBuffer[8 * 32 + x];
-        sBg1TilemapBuffer[17 * 32 + x] = sBg1TilemapBuffer[9 * 32 + x];
-        sBg1TilemapBuffer[18 * 32 + x] = sBg1TilemapBuffer[9 * 32 + x];
-        sBg1TilemapBuffer[19 * 32 + x] = sBg1TilemapBuffer[14 * 32 + x];
+        tilemap[15 * 32 + x] = 0xF;
+        tilemap[16 * 32 + x] = tilemap[8 * 32 + x];
+        tilemap[17 * 32 + x] = tilemap[9 * 32 + x];
+        tilemap[18 * 32 + x] = tilemap[9 * 32 + x];
+        tilemap[19 * 32 + x] = tilemap[14 * 32 + x];
     }
 }
 
