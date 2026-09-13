@@ -983,6 +983,27 @@
           }
         },
         {
+          "map": "MAP_ROUTE110",
+          "base_label": "gRoute110_Night",
+          "land_mons": {
+            "encounter_rate": 20,
+            "mons": [
+              { "min_level": 12, "max_level": 12, "species": "SPECIES_POOCHYENA" },
+              { "min_level": 12, "max_level": 12, "species": "SPECIES_ELECTRIKE" },
+              { "min_level": 12, "max_level": 12, "species": "SPECIES_GULPIN" },
+              { "min_level": 13, "max_level": 13, "species": "SPECIES_ELECTRIKE" },
+              { "min_level": 13, "max_level": 13, "species": "SPECIES_MINUN" },
+              { "min_level": 13, "max_level": 13, "species": "SPECIES_ODDISH" },
+              { "min_level": 13, "max_level": 13, "species": "SPECIES_MINUN" },
+              { "min_level": 13, "max_level": 13, "species": "SPECIES_GULPIN" },
+              { "min_level": 12, "max_level": 12, "species": "SPECIES_VOLBEAT" },
+              { "min_level": 12, "max_level": 12, "species": "SPECIES_VOLBEAT" },
+              { "min_level": 12, "max_level": 12, "species": "SPECIES_ILLUMISE" },
+              { "min_level": 13, "max_level": 13, "species": "SPECIES_ILLUMISE" }
+            ]
+          }
+        },
+        {
           "map": "MAP_ROUTE111",
           "base_label": "gRoute111",
           "land_mons": {
@@ -1167,6 +1188,27 @@
           }
         },
         {
+          "map": "MAP_ROUTE111",
+          "base_label": "gRoute111_Night",
+          "land_mons": {
+            "encounter_rate": 20,
+            "mons": [
+              { "min_level": 20, "max_level": 20, "species": "SPECIES_SANDSHREW" },
+              { "min_level": 20, "max_level": 20, "species": "SPECIES_TRAPINCH" },
+              { "min_level": 21, "max_level": 21, "species": "SPECIES_SANDSHREW" },
+              { "min_level": 21, "max_level": 21, "species": "SPECIES_TRAPINCH" },
+              { "min_level": 19, "max_level": 19, "species": "SPECIES_BALTOY" },
+              { "min_level": 21, "max_level": 21, "species": "SPECIES_BALTOY" },
+              { "min_level": 19, "max_level": 19, "species": "SPECIES_SANDSHREW" },
+              { "min_level": 19, "max_level": 19, "species": "SPECIES_TRAPINCH" },
+              { "min_level": 20, "max_level": 20, "species": "SPECIES_SANDILE" },
+              { "min_level": 20, "max_level": 20, "species": "SPECIES_SANDILE" },
+              { "min_level": 22, "max_level": 22, "species": "SPECIES_DUSKULL" },
+              { "min_level": 22, "max_level": 22, "species": "SPECIES_DUSKULL" }
+            ]
+          }
+        },
+        {
           "map": "MAP_ROUTE112",
           "base_label": "gRoute112",
           "land_mons": {
@@ -1236,6 +1278,27 @@
           }
         },
         {
+          "map": "MAP_ROUTE112",
+          "base_label": "gRoute112_Night",
+          "land_mons": {
+            "encounter_rate": 20,
+            "mons": [
+              { "min_level": 15, "max_level": 15, "species": "SPECIES_NUMEL" },
+              { "min_level": 15, "max_level": 15, "species": "SPECIES_NUMEL" },
+              { "min_level": 15, "max_level": 15, "species": "SPECIES_MARILL" },
+              { "min_level": 14, "max_level": 14, "species": "SPECIES_NUMEL" },
+              { "min_level": 14, "max_level": 14, "species": "SPECIES_NUMEL" },
+              { "min_level": 14, "max_level": 14, "species": "SPECIES_MARILL" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_NUMEL" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_MARILL" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_SLUGMA" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_SLUGMA" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_SALANDIT" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_SALANDIT" }
+            ]
+          }
+        },
+        {
           "map": "MAP_ROUTE113",
           "base_label": "gRoute113",
           "land_mons": {
@@ -1301,6 +1364,27 @@
                 "max_level": 16,
                 "species": "SPECIES_SKARMORY"
               }
+            ]
+          }
+        },
+        {
+          "map": "MAP_ROUTE113",
+          "base_label": "gRoute113_Night",
+          "land_mons": {
+            "encounter_rate": 20,
+            "mons": [
+              { "min_level": 15, "max_level": 15, "species": "SPECIES_SPINDA" },
+              { "min_level": 15, "max_level": 15, "species": "SPECIES_SPINDA" },
+              { "min_level": 15, "max_level": 15, "species": "SPECIES_SLUGMA" },
+              { "min_level": 14, "max_level": 14, "species": "SPECIES_SPINDA" },
+              { "min_level": 14, "max_level": 14, "species": "SPECIES_SPINDA" },
+              { "min_level": 14, "max_level": 14, "species": "SPECIES_SLUGMA" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_SPINDA" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_SLUGMA" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_SNEASEL" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_SNEASEL" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_ABSOL" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_ABSOL" }
             ]
           }
         },
@@ -1489,6 +1573,27 @@
           }
         },
         {
+          "map": "MAP_ROUTE114",
+          "base_label": "gRoute114_Night",
+          "land_mons": {
+            "encounter_rate": 20,
+            "mons": [
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_SWABLU" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_LOTAD" },
+              { "min_level": 17, "max_level": 17, "species": "SPECIES_SWABLU" },
+              { "min_level": 15, "max_level": 15, "species": "SPECIES_SWABLU" },
+              { "min_level": 15, "max_level": 15, "species": "SPECIES_LOTAD" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_LOMBRE" },
+              { "min_level": 16, "max_level": 16, "species": "SPECIES_LOMBRE" },
+              { "min_level": 18, "max_level": 18, "species": "SPECIES_LOMBRE" },
+              { "min_level": 17, "max_level": 17, "species": "SPECIES_SABLEYE" },
+              { "min_level": 15, "max_level": 15, "species": "SPECIES_SABLEYE" },
+              { "min_level": 17, "max_level": 17, "species": "SPECIES_NOCTOWL" },
+              { "min_level": 15, "max_level": 15, "species": "SPECIES_NOCTOWL" }
+            ]
+          }
+        },
+        {
           "map": "MAP_ROUTE116",
           "base_label": "gRoute116",
           "land_mons": {
@@ -1554,6 +1659,27 @@
                 "max_level": 8,
                 "species": "SPECIES_SKITTY"
               }
+            ]
+          }
+        },
+        {
+          "map": "MAP_ROUTE116",
+          "base_label": "gRoute116_Night",
+          "land_mons": {
+            "encounter_rate": 20,
+            "mons": [
+              { "min_level": 6, "max_level": 6, "species": "SPECIES_POOCHYENA" },
+              { "min_level": 6, "max_level": 6, "species": "SPECIES_WHISMUR" },
+              { "min_level": 6, "max_level": 6, "species": "SPECIES_NINCADA" },
+              { "min_level": 7, "max_level": 7, "species": "SPECIES_ABRA" },
+              { "min_level": 7, "max_level": 7, "species": "SPECIES_NINCADA" },
+              { "min_level": 6, "max_level": 6, "species": "SPECIES_TAILLOW" },
+              { "min_level": 7, "max_level": 7, "species": "SPECIES_TAILLOW" },
+              { "min_level": 8, "max_level": 8, "species": "SPECIES_TAILLOW" },
+              { "min_level": 7, "max_level": 7, "species": "SPECIES_VENONAT" },
+              { "min_level": 8, "max_level": 8, "species": "SPECIES_VENONAT" },
+              { "min_level": 7, "max_level": 7, "species": "SPECIES_SABLEYE" },
+              { "min_level": 8, "max_level": 8, "species": "SPECIES_SABLEYE" }
             ]
           }
         },

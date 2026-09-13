@@ -312,7 +312,6 @@ static const u8 sText_RunSetupCustom[] = _("CUSTOM");
 static const u8 sText_RunSetupAreYouSure[] = _("ARE YOU SURE?");
 static const u8 sText_RunSetupNeedSeed[] = _("ENTER AT LEAST ONE DIGIT");
 static const u8 sText_RunSetupSeedNumber[] = _("VALUE: {STR_VAR_1}");
-static const u8 sText_RunSetupSummary[] = _("W:{STR_VAR_1}  S:{STR_VAR_2}  SEED:{STR_VAR_3}");
 static const u8 sText_RunSetupConfirmButton[] = _("CONFIRM");
 
 #define MENU_LEFT 2
@@ -1936,14 +1935,8 @@ static void RunSetup_Draw(u8 cursor)
         RunSetup_DrawChoice(sText_RunSetupRandom, 98, 78, !sRunSetupCustom);
         RunSetup_DrawChoice(sText_RunSetupCustom, 151, 78, sRunSetupCustom);
 
-        StringCopy(gStringVar1, wild);
-        StringCopy(gStringVar2, starters);
-        StringCopy(gStringVar3, seed);
-        StringExpandPlaceholders(gStringVar4, sText_RunSetupSummary);
         if (sRunSetupEmptySeed)
             AddTextPrinterParameterized3(0, FONT_SMALL, 8, 99, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupNeedSeed);
-        else
-            AddTextPrinterParameterized3(0, FONT_SMALL, 8, 99, sTextColor_Headers, TEXT_SKIP_DRAW, gStringVar4);
 
         RunSetup_DrawChoice(sText_RunSetupConfirmButton, 79, 110, cursor == 3);
         if (cursor < 3)
