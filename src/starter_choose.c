@@ -119,7 +119,10 @@ static u16 sStarterMon[STARTER_MON_COUNT];
 
 static void GenerateRandomStarters(void)
 {
-    if (gSaveBlock3Ptr->starterMode == RUN_STARTER_NORMAL)
+    bool8 typeFiltered = gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE;
+    u32 generator = SPECIES_GENERATOR_NO_SUPERMONS;
+
+    if (gSaveBlock3Ptr->starterMode == RUN_STARTER_NORMAL && !typeFiltered)
     {
         sStarterMon[0] = SPECIES_TREECKO;
         sStarterMon[1] = SPECIES_TORCHIC;
@@ -127,17 +130,29 @@ static void GenerateRandomStarters(void)
         return;
     }
 
-    if (gSaveBlock3Ptr->starterMode != RUN_STARTER_RANDOM)
+    if (gSaveBlock3Ptr->starterMode != RUN_STARTER_RANDOM && !typeFiltered)
         return;
 
     rng_value_t oldRngState = gRngValue;
-
     struct FilterFuncArgs filterArgs =
-{
-    
+    {
         .arg1 = FILTER_FUNC_ARG_NONE,
         .arg2 = FILTER_FUNC_ARG_NONE,
     };
+
+    if (typeFiltered)
+    {
+        filterArgs.arg1 = gSaveBlock3Ptr->filterValue;
+        if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
+        {
+            filterArgs.arg2 = 0;
+            generator = SPECIES_GENERATOR_SCALED_TYPE_FILTERED;
+        }
+        else
+        {
+            generator = SPECIES_GENERATOR_TYPE_FILTERED;
+        }
+    }
 
     SeedRng(gSaveBlock3Ptr->worldSeed);
 
@@ -145,14 +160,13 @@ static void GenerateRandomStarters(void)
     {
         do
         {
-            sStarterMon[i] = GetRandomSpecies(SPECIES_GENERATOR_NO_SUPERMONS, &filterArgs);
+            sStarterMon[i] = GetRandomSpecies(generator, &filterArgs);
         }
         while ((i > 0 && sStarterMon[i] == sStarterMon[0])
             || (i > 1 && sStarterMon[i] == sStarterMon[1]));
     }
 
     gRngValue = oldRngState;
-
 }
 
 static const struct BgTemplate sBgTemplates[] =

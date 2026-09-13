@@ -607,7 +607,8 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
 
     // Only the four rare land slots rotate with an area's Night table.
     // This keeps most of a randomized route stable between Day and Night.
-    if (area == WILD_AREA_LAND && wildMonIndex >= 8)
+    if (gSaveBlock3Ptr->filterMode != RUN_FILTER_TYPE
+     && area == WILD_AREA_LAND && wildMonIndex >= 8)
     {
         u32 headerId = GetCurrentMapWildMonHeaderId();
 

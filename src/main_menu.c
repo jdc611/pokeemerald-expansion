@@ -2051,6 +2051,10 @@ static void Task_RunSetup_Input(u8 taskId)
             *cursor = (*cursor + 3) % 4;
         else if (JOY_NEW(DPAD_DOWN))
             *cursor = (*cursor + 1) % 4;
+        else if (JOY_NEW(DPAD_LEFT) && (*cursor == 2 || *cursor == 3))
+            *cursor = 2;
+        else if (JOY_NEW(DPAD_RIGHT) && (*cursor == 2 || *cursor == 3))
+            *cursor = 3;
         else if ((JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON)) && *cursor == 0)
         {
             sRunSetupFilter = sRunSetupFilter == RUN_FILTER_NONE ? RUN_FILTER_TYPE : RUN_FILTER_NONE;
