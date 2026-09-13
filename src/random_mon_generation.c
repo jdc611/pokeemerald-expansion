@@ -49,6 +49,7 @@ struct RandomItemGeneratorOptions
 
 static enum Species GetSpeciesCandidateForm(enum Species species, const struct RandomSpeciesGeneratorOptions *options, const struct FilterFuncArgs *filterFuncArgs);
 static bool32 UNUSED IsInBstRangeFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs);
+static bool32 IsScaledWildSpeciesFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs);
 static enum Species GetRandomSpeciesAtIndex(const struct RandomSpeciesGeneratorOptions *options, u32 index);
 static enum Species SlowPickRandomSpecies(const struct RandomSpeciesGeneratorOptions *options, u32 poolSize, const struct FilterFuncArgs *filterFuncArgs);
 static enum Species FastPickRandomSpecies(const struct RandomSpeciesGeneratorOptions *options, u32 poolSize, const struct FilterFuncArgs *filterFuncArgs);
@@ -116,6 +117,32 @@ static bool32 UNUSED IsInBstRangeFilterFunc(enum Species species, const struct F
     maxBst = bstStandard + bstLeniency;
 
     return bst >= minBst && bst <= maxBst;
+}
+
+static bool32 IsScaledWildSpeciesFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs)
+{
+    static const u16 sMinBst[] = {180, 250, 320, 380, 430};
+    static const u16 sMaxBst[] = {380, 430, 480, 530, 600};
+    static const u8 sMaxEvolutionStage[] = {0, 1, 1, 2, 2};
+    enum Species preEvolution = species;
+    u32 evolutionStage = 0;
+    u32 tier = filterFuncArgs->arg1;
+    u32 bst;
+
+    if (tier >= ARRAY_COUNT(sMinBst))
+        tier = ARRAY_COUNT(sMinBst) - 1;
+
+    bst = GetSpeciesBaseStatTotal(GET_BASE_SPECIES_ID(species));
+    if (bst < sMinBst[tier] || bst > sMaxBst[tier])
+        return FALSE;
+
+    while ((preEvolution = GetSpeciesPreEvolution(preEvolution)) != SPECIES_NONE)
+    {
+        if (++evolutionStage > sMaxEvolutionStage[tier])
+            return FALSE;
+    }
+
+    return TRUE;
 }
 
 static enum Species GetRandomSpeciesAtIndex(const struct RandomSpeciesGeneratorOptions *options, u32 index)

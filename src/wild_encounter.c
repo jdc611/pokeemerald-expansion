@@ -529,7 +529,20 @@ void CreateWildMon(enum Species species, u8 level)
 #define TRY_GET_ABILITY_INFLUENCED_WILD_MON_INDEX(wildPokemon, type, ability, ptr, count) TryGetAbilityInfluencedWildMonIndex(wildPokemon, type, ability, ptr)
 #endif
 
-static enum Species GetSeededWildSpecies(enum WildPokemonArea area, u8 wildMonIndex)
+static u32 GetScaledWildTier(u8 level)
+{
+    if (level <= 10)
+        return 0;
+    if (level <= 20)
+        return 1;
+    if (level <= 30)
+        return 2;
+    if (level <= 40)
+        return 3;
+    return 4;
+}
+
+enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo, enum WildPokemonArea area, u8 wildMonIndex)
 {
     rng_value_t oldRngState = gRngValue;
     enum Species species;
@@ -539,6 +552,7 @@ static enum Species GetSeededWildSpecies(enum WildPokemonArea area, u8 wildMonIn
         .arg1 = FILTER_FUNC_ARG_NONE,
         .arg2 = FILTER_FUNC_ARG_NONE,
     };
+    u32 generator = SPECIES_GENERATOR_NO_SUPERMONS;
 
     u32 seed = gSaveBlock3Ptr->worldSeed;
 
@@ -558,7 +572,12 @@ static enum Species GetSeededWildSpecies(enum WildPokemonArea area, u8 wildMonIn
     }
 
     SeedRng(seed);
-    species = GetRandomSpecies(SPECIES_GENERATOR_NO_SUPERMONS, &filterArgs);
+    if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
+    {
+        filterArgs.arg1 = GetScaledWildTier(wildMonInfo->wildPokemon[wildMonIndex].maxLevel);
+        generator = SPECIES_GENERATOR_SCALED_WILD;
+    }
+    species = GetRandomSpecies(generator, &filterArgs);
 
     gRngValue = oldRngState;
 
@@ -619,9 +638,9 @@ bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, enum WildPok
         return FALSE;
 
     if (gSaveBlock3Ptr->randomizerEnabled)
-    CreateWildMon(GetSeededWildSpecies(area, wildMonIndex), level);
+        CreateWildMon(GetRandomizedWildSpecies(wildMonInfo, area, wildMonIndex), level);
     else
-    CreateWildMon(wildMonInfo->wildPokemon[wildMonIndex].species, level);
+        CreateWildMon(wildMonInfo->wildPokemon[wildMonIndex].species, level);
     return TRUE;
 }
 

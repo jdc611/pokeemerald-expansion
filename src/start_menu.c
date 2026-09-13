@@ -237,6 +237,7 @@ static const u8 sText_GameInfoValue[] = _("VALUE: {STR_VAR_1}");
 static const u8 sText_GameInfoBack[] = _("A/B: BACK");
 static const u8 sText_GameInfoNormal[] = _("NORMAL");
 static const u8 sText_GameInfoRandom[] = _("RANDOM");
+static const u8 sText_GameInfoScaled[] = _("SCALED");
 static const u8 sText_GameInfoCustom[] = _("CUSTOM");
 static const u8 sText_GameInfoUnknown[] = _("UNKNOWN");
 
@@ -1765,7 +1766,12 @@ static bool8 StartMenuGameInfo(void)
     PrintGameInfoLine(sText_GameInfoVersion, 25);
 
     StringCopy(gStringVar4, sText_GameInfoWild);
-    StringAppend(gStringVar4, gSaveBlock3Ptr->randomizerEnabled ? sText_GameInfoRandom : sText_GameInfoNormal);
+    if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
+        StringAppend(gStringVar4, sText_GameInfoScaled);
+    else if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_RANDOM)
+        StringAppend(gStringVar4, sText_GameInfoRandom);
+    else
+        StringAppend(gStringVar4, sText_GameInfoNormal);
     PrintGameInfoLine(gStringVar4, 41);
 
     StringCopy(gStringVar4, sText_GameInfoStarters);

@@ -175,11 +175,11 @@
 
 static EWRAM_DATA bool8 sStartedPokeBallTask = 0;
 static EWRAM_DATA u16 sCurrItemAndOptionMenuCheck = 0;
-EWRAM_DATA bool8 gRunSetupRandomizerEnabled;
+EWRAM_DATA u8 gRunSetupRandomizerEnabled;
 EWRAM_DATA bool8 gRunSetupSeedIsCustom;
 EWRAM_DATA u8 gRunSetupStarterMode;
 EWRAM_DATA u32 gRunSetupWorldSeed;
-static EWRAM_DATA bool8 sRunSetupRandomizer;
+static EWRAM_DATA u8 sRunSetupRandomizer;
 static EWRAM_DATA bool8 sRunSetupStarter;
 static EWRAM_DATA bool8 sRunSetupCustom;
 static EWRAM_DATA bool8 sRunSetupConfirm;
@@ -308,6 +308,7 @@ static const u8 sText_RunSetupYes[] = _("YES");
 static const u8 sText_RunSetupNo[] = _("NO");
 static const u8 sText_RunSetupRandom[] = _("RANDOM");
 static const u8 sText_RunSetupNormal[] = _("NORMAL");
+static const u8 sText_RunSetupScaled[] = _("SCALED");
 static const u8 sText_RunSetupCustom[] = _("CUSTOM");
 static const u8 sText_RunSetupAreYouSure[] = _("ARE YOU SURE?");
 static const u8 sText_RunSetupNeedSeed[] = _("ENTER AT LEAST ONE DIGIT");
@@ -1896,9 +1897,21 @@ static void RunSetup_DrawChoice(const u8 *text, u8 x, u8 y, bool32 selected)
     AddTextPrinterParameterized3(0, FONT_SMALL, textX, y + 2, colors, TEXT_SKIP_DRAW, text);
 }
 
+static void RunSetup_DrawNarrowChoice(const u8 *text, u8 x, u8 y, bool32 selected)
+{
+    const u8 *colors = selected ? sTextColor_RunSetupSelected : sTextColor_Headers;
+    u8 textX = x + GetStringCenterAlignXOffset(FONT_SMALL, text, 36);
+
+    FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_2), x, y, 38, 16);
+    FillWindowPixelRect(0, PIXEL_FILL(selected ? TEXT_DYNAMIC_COLOR_2 : TEXT_DYNAMIC_COLOR_1), x + 1, y + 1, 36, 14);
+    AddTextPrinterParameterized3(0, FONT_SMALL, textX, y + 2, colors, TEXT_SKIP_DRAW, text);
+}
+
 static void RunSetup_Draw(u8 cursor)
 {
-    const u8 *wild = sRunSetupRandomizer ? sText_RunSetupRandom : sText_RunSetupNormal;
+    const u8 *wild = sRunSetupRandomizer == RUN_WILD_SCALED ? sText_RunSetupScaled
+                     : sRunSetupRandomizer == RUN_WILD_RANDOM ? sText_RunSetupRandom
+                     : sText_RunSetupNormal;
     const u8 *starters = sRunSetupStarter ? sText_RunSetupRandom : sText_RunSetupNormal;
     const u8 *seed = sRunSetupCustom ? sText_RunSetupCustom : sText_RunSetupRandom;
     const u8 *title = sRunSetupConfirm ? sText_RunSetupConfirm : sText_RunSetupTitle;
@@ -1925,11 +1938,12 @@ static void RunSetup_Draw(u8 cursor)
     }
     else
     {
-        AddTextPrinterParameterized3(0, FONT_NORMAL, 16, 35, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupWild);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 35, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupWild);
         AddTextPrinterParameterized3(0, FONT_NORMAL, 16, 57, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupStarters);
         AddTextPrinterParameterized3(0, FONT_NORMAL, 16, 79, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupSeed);
-        RunSetup_DrawChoice(sText_RunSetupNormal, 98, 34, !sRunSetupRandomizer);
-        RunSetup_DrawChoice(sText_RunSetupRandom, 151, 34, sRunSetupRandomizer);
+        RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 88, 34, sRunSetupRandomizer == RUN_WILD_NORMAL);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 127, 34, sRunSetupRandomizer == RUN_WILD_RANDOM);
+        RunSetup_DrawNarrowChoice(sText_RunSetupScaled, 166, 34, sRunSetupRandomizer == RUN_WILD_SCALED);
         RunSetup_DrawChoice(sText_RunSetupNormal, 98, 56, !sRunSetupStarter);
         RunSetup_DrawChoice(sText_RunSetupRandom, 151, 56, sRunSetupStarter);
         RunSetup_DrawChoice(sText_RunSetupRandom, 98, 78, !sRunSetupCustom);
@@ -2002,7 +2016,7 @@ static void Task_RunSetup_Input(u8 taskId)
     else if (JOY_NEW(DPAD_LEFT) && *cursor < 3)
     {
         if (*cursor == 0)
-            sRunSetupRandomizer = FALSE;
+            sRunSetupRandomizer = (sRunSetupRandomizer == RUN_WILD_NORMAL) ? RUN_WILD_NORMAL : sRunSetupRandomizer - 1;
         else if (*cursor == 1)
             sRunSetupStarter = FALSE;
         else
@@ -2011,7 +2025,7 @@ static void Task_RunSetup_Input(u8 taskId)
     else if (JOY_NEW(DPAD_RIGHT) && *cursor < 3)
     {
         if (*cursor == 0)
-            sRunSetupRandomizer = TRUE;
+            sRunSetupRandomizer = (sRunSetupRandomizer == RUN_WILD_SCALED) ? RUN_WILD_SCALED : sRunSetupRandomizer + 1;
         else if (*cursor == 1)
             sRunSetupStarter = TRUE;
         else
@@ -2020,7 +2034,7 @@ static void Task_RunSetup_Input(u8 taskId)
     else if (JOY_NEW(A_BUTTON) && *cursor < 3)
     {
         if (*cursor == 0)
-            sRunSetupRandomizer ^= 1;
+            sRunSetupRandomizer = (sRunSetupRandomizer + 1) % 3;
         else if (*cursor == 1)
             sRunSetupStarter ^= 1;
         else if (*cursor == 2)

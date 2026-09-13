@@ -151,7 +151,6 @@ static enum Item DexNavGenerateHeldItem(enum Species species, u8 searchLevel);
 static u8 DexNavGetAbilityNum(enum Species species, u8 searchLevel);
 static u8 DexNavGeneratePotential(u8 searchLevel);
 static u8 DexNavTryGenerateMonLevel(enum Species species, enum EncounterType environment);
-static enum Species GetDexNavSeededSpecies(enum WildPokemonArea area, u8 wildMonIndex);
 static u8 GetEncounterLevelFromMapData(enum Species species, enum EncounterType environment);
 static void CreateDexNavWildMon(enum Species species, u8 potential, u8 level, u8 abilityNum, enum Item item, enum Move *moves);
 static u8 GetPlayerDistance(s16 x, s16 y);
@@ -1451,7 +1450,7 @@ static u8 GetEncounterLevelFromMapData(enum Species species, enum EncounterType 
 
         for (i = 0; i < NUM_LAND_MONS_ENCOUNTER_SLOTS; i++)
         {
-            if ((gSaveBlock3Ptr->randomizerEnabled ? GetDexNavSeededSpecies(WILD_AREA_LAND, i) : landMonsInfo->wildPokemon[i].species) == species)
+            if ((gSaveBlock3Ptr->randomizerEnabled ? GetRandomizedWildSpecies(landMonsInfo, WILD_AREA_LAND, i) : landMonsInfo->wildPokemon[i].species) == species)
             {
                 min = (min < landMonsInfo->wildPokemon[i].minLevel) ? min : landMonsInfo->wildPokemon[i].minLevel;
                 max = (max > landMonsInfo->wildPokemon[i].maxLevel) ? max : landMonsInfo->wildPokemon[i].maxLevel;
@@ -1467,7 +1466,7 @@ static u8 GetEncounterLevelFromMapData(enum Species species, enum EncounterType 
 
         for (i = 0; i < NUM_WATER_MONS_ENCOUNTER_SLOTS; i++)
         {
-            if ((gSaveBlock3Ptr->randomizerEnabled ? GetDexNavSeededSpecies(WILD_AREA_WATER, i) : waterMonsInfo->wildPokemon[i].species) == species)
+            if ((gSaveBlock3Ptr->randomizerEnabled ? GetRandomizedWildSpecies(waterMonsInfo, WILD_AREA_WATER, i) : waterMonsInfo->wildPokemon[i].species) == species)
             {
                 min = (min < waterMonsInfo->wildPokemon[i].minLevel) ? min : waterMonsInfo->wildPokemon[i].minLevel;
                 max = (max > waterMonsInfo->wildPokemon[i].maxLevel) ? max : waterMonsInfo->wildPokemon[i].maxLevel;
@@ -1853,40 +1852,6 @@ static bool8 SpeciesInArray(enum Species species, u8 section)
 
     return FALSE;
 }
-static enum Species GetDexNavSeededSpecies(enum WildPokemonArea area, u8 wildMonIndex)
-{
-    rng_value_t oldRngState = gRngValue;
-    enum Species species;
-
-    struct FilterFuncArgs filterArgs =
-    {
-        .arg1 = FILTER_FUNC_ARG_NONE,
-        .arg2 = FILTER_FUNC_ARG_NONE,
-    };
-
-    u32 seed = gSaveBlock3Ptr->worldSeed;
-
-    seed ^= ((u32)gSaveBlock1Ptr->location.mapGroup << 24);
-    seed ^= ((u32)gSaveBlock1Ptr->location.mapNum << 16);
-    seed ^= ((u32)area << 8);
-    seed ^= wildMonIndex;
-
-    // Match the wild generator: only rare land slots change at night.
-    if (area == WILD_AREA_LAND && wildMonIndex >= 8)
-    {
-        u32 headerId = GetCurrentMapWildMonHeaderId();
-
-        if (headerId != HEADER_NONE && GetTimeOfDayForEncounters(headerId, area) == TIME_NIGHT)
-            seed ^= 0x4E494748; // "NIGH"
-    }
-
-    SeedRng(seed);
-    species = GetRandomSpecies(SPECIES_GENERATOR_NO_SUPERMONS, &filterArgs);
-
-    gRngValue = oldRngState;
-
-    return species;
-}
 // get unique wild encounters on current map
 static void DexNavLoadEncounterData(void)
 {
@@ -1919,9 +1884,9 @@ static void DexNavLoadEncounterData(void)
         for (i = 0; i < NUM_LAND_MONS_ENCOUNTER_SLOTS; i++)
         {
             if (gSaveBlock3Ptr->randomizerEnabled)
-    species = GetDexNavSeededSpecies(WILD_AREA_LAND, i);
-else
-    species = landMonsInfo->wildPokemon[i].species;
+                species = GetRandomizedWildSpecies(landMonsInfo, WILD_AREA_LAND, i);
+            else
+                species = landMonsInfo->wildPokemon[i].species;
             if (species != SPECIES_NONE && !SpeciesInArray(species, 0))
                 sDexNavUiDataPtr->landSpecies[grassIndex++] = species;
         }
@@ -1933,9 +1898,9 @@ else
         for (i = 0; i < NUM_WATER_MONS_ENCOUNTER_SLOTS; i++)
         {
             if (gSaveBlock3Ptr->randomizerEnabled)
-    species = GetDexNavSeededSpecies(WILD_AREA_WATER, i);
-else
-    species = waterMonsInfo->wildPokemon[i].species;
+                species = GetRandomizedWildSpecies(waterMonsInfo, WILD_AREA_WATER, i);
+            else
+                species = waterMonsInfo->wildPokemon[i].species;
             if (species != SPECIES_NONE && !SpeciesInArray(species, 1))
                 sDexNavUiDataPtr->waterSpecies[waterIndex++] = species;
         }

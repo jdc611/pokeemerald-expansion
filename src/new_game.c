@@ -54,7 +54,7 @@
 #include "follower_npc.h"
 #include "run_settings.h"
 
-extern EWRAM_DATA bool8 gRunSetupRandomizerEnabled;
+extern EWRAM_DATA u8 gRunSetupRandomizerEnabled;
 extern EWRAM_DATA bool8 gRunSetupSeedIsCustom;
 extern EWRAM_DATA u8 gRunSetupStarterMode;
 extern EWRAM_DATA u32 gRunSetupWorldSeed;

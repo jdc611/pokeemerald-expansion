@@ -1,6 +1,13 @@
 #ifndef GUARD_RUN_SETTINGS_H
 #define GUARD_RUN_SETTINGS_H
 
+enum RunWildMode
+{
+    RUN_WILD_NORMAL,
+    RUN_WILD_RANDOM,
+    RUN_WILD_SCALED,
+};
+
 enum RunStarterMode
 {
     RUN_STARTER_NORMAL,
