@@ -17,6 +17,7 @@
 #include "main_menu.h"
 #include "menu.h"
 #include "list_menu.h"
+#include "line_break.h"
 #include "mystery_event_menu.h"
 #include "naming_screen.h"
 #include "oak_speech.h"
@@ -314,6 +315,8 @@ static const u8 sText_RunSetupFilterTitle[] = _("RUN FILTER");
 static const u8 sText_RunSetupFilterSettings[] = _("FILTER SETTINGS");
 static const u8 sText_RunSetupSelectType[] = _("SELECT TYPE");
 static const u8 sText_RunSetupSelectAbility[] = _("SELECT ABILITY");
+static const u8 sText_RunSetupAbilityDetails[] = _("ABILITY DETAILS");
+static const u8 sText_RunSetupChooseAbility[] = _("SELECT");
 static const u8 sText_RunSetupWild[] = _("WILD POKéMON");
 static const u8 sText_RunSetupWildMode[] = _("WILD MODE");
 static const u8 sText_RunSetupStarters[] = _("STARTERS");
@@ -336,6 +339,8 @@ static const u8 sText_RunSetupBoth[] = _("BOTH");
 static const u8 sText_RunSetupLimitedPool[] = _("WARNING: VERY LIMITED POOL");
 static const u8 sText_RunSetupNoMatches[] = _("NO MATCHING POKéMON - CHANGE FILTER");
 static const u8 sText_RunSetupAll[] = _("ALL");
+static const u8 sText_RunSetupScrollUp[] = {CHAR_UP_ARROW, EOS};
+static const u8 sText_RunSetupScrollDown[] = {CHAR_DOWN_ARROW, EOS};
 static const u8 sText_RunSetupOff[] = _("OFF");
 static const u8 sText_RunSetupTypeFilter[] = _("TYPE");
 static const u8 sText_RunSetupRestricted[] = _("1-3 SPECIES PER AREA");
@@ -2038,13 +2043,19 @@ static void RunSetup_DrawPicker(u8 picker, u16 value)
     {
         u32 i;
         u8 selected = RunSetup_TypeToPickerIndex(value);
+        u8 first = selected / 3 >= 6 ? 3 : 0;
 
-        for (i = 0; i < 19; i++)
+        for (i = first; i < 19 && i < first + 18; i++)
         {
             u8 type = RunSetup_PickerIndexToType(i);
             const u8 *name = type == TYPE_NONE ? sText_RunSetupAll : gTypesInfo[type].name;
-            RunSetup_DrawWideChoice(name, 7 + (i % 3) * 67, 31 + (i / 3) * 15, 62, i == selected);
+            RunSetup_DrawWideChoice(name, 7 + (i % 3) * 67, 31 + ((i - first) / 3) * 15, 62, i == selected);
         }
+
+        if (first == 0)
+            AddTextPrinterParameterized3(0, FONT_SMALL, 198, 111, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupScrollDown);
+        else
+            AddTextPrinterParameterized3(0, FONT_SMALL, 198, 31, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupScrollUp);
     }
     else
     {
@@ -2064,6 +2075,26 @@ static void RunSetup_DrawPicker(u8 picker, u16 value)
         }
     }
 
+    PutWindowTilemap(0);
+    CopyWindowToVram(0, COPYWIN_FULL);
+}
+
+static void RunSetup_DrawAbilityDetails(u16 ability, u8 choice)
+{
+    u8 titleX = GetStringCenterAlignXOffset(FONT_NORMAL, sText_RunSetupAbilityDetails, 208);
+    u8 nameX = GetStringCenterAlignXOffset(FONT_NORMAL, gAbilitiesInfo[ability].name, 192);
+
+    FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
+    AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupAbilityDetails);
+    FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_3), 48, 25, 112, 1);
+    AddTextPrinterParameterized3(0, FONT_NORMAL, nameX + 8, 31, sTextColor_Headers, TEXT_SKIP_DRAW, gAbilitiesInfo[ability].name);
+
+    StringCopy(gStringVar4, gAbilitiesInfo[ability].description);
+    BreakStringAutomatic(gStringVar4, 192, 4, FONT_SMALL, HIDE_SCROLL_PROMPT);
+    AddTextPrinterParameterized3(0, FONT_SMALL, 8, 51, sTextColor_Headers, TEXT_SKIP_DRAW, gStringVar4);
+
+    RunSetup_DrawWideChoice(sText_RunSetupChooseAbility, 39, 110, 66, choice == 0);
+    RunSetup_DrawWideChoice(sText_RunSetupBack, 112, 110, 58, choice == 1);
     PutWindowTilemap(0);
     CopyWindowToVram(0, COPYWIN_FULL);
 }
@@ -2195,9 +2226,35 @@ static void Task_RunSetup_Input(u8 taskId)
     s16 *cursor = &gTasks[taskId].data[0];
     s16 *picker = &gTasks[taskId].data[1];
     s16 *pickerValue = &gTasks[taskId].data[2];
+    s16 *detailChoice = &gTasks[taskId].data[3];
 
     if (*picker != 0)
     {
+        if (*picker == 3)
+        {
+            if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | DPAD_UP | DPAD_DOWN))
+            {
+                *detailChoice ^= 1;
+                PlaySE(SE_SELECT);
+                RunSetup_DrawAbilityDetails(*pickerValue, *detailChoice);
+            }
+            else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *detailChoice == 1))
+            {
+                *picker = 2;
+                PlaySE(SE_SELECT);
+                RunSetup_DrawPicker(*picker, *pickerValue);
+            }
+            else if (JOY_NEW(A_BUTTON))
+            {
+                sRunSetupAbility = *pickerValue;
+                RunSetup_UpdateFilterMode();
+                *picker = 0;
+                PlaySE(SE_SELECT);
+                RunSetup_Draw(*cursor);
+            }
+            return;
+        }
+
         if (*picker == 1)
         {
             u8 index = RunSetup_TypeToPickerIndex(*pickerValue);
@@ -2239,10 +2296,19 @@ static void Task_RunSetup_Input(u8 taskId)
                 *pickerValue = RunSetup_NextUsedAbility(*pickerValue, 1);
             else if (JOY_NEW(A_BUTTON))
             {
-                sRunSetupAbility = *pickerValue;
-                RunSetup_UpdateFilterMode();
-                *picker = 0;
-                RunSetup_Draw(*cursor);
+                if (*pickerValue == ABILITY_NONE)
+                {
+                    sRunSetupAbility = ABILITY_NONE;
+                    RunSetup_UpdateFilterMode();
+                    *picker = 0;
+                    RunSetup_Draw(*cursor);
+                }
+                else
+                {
+                    *picker = 3;
+                    *detailChoice = 0;
+                    RunSetup_DrawAbilityDetails(*pickerValue, *detailChoice);
+                }
                 PlaySE(SE_SELECT);
                 return;
             }
