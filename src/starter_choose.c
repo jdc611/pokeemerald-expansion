@@ -119,10 +119,10 @@ static u16 sStarterMon[STARTER_MON_COUNT];
 
 static void GenerateRandomStarters(void)
 {
-    bool8 typeFiltered = gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE;
+    bool8 filtered = gSaveBlock3Ptr->filterMode != RUN_FILTER_NONE;
     u32 generator = SPECIES_GENERATOR_NO_SUPERMONS;
 
-    if (gSaveBlock3Ptr->starterMode == RUN_STARTER_NORMAL && !typeFiltered)
+    if (gSaveBlock3Ptr->starterMode == RUN_STARTER_NORMAL && !filtered)
     {
         sStarterMon[0] = SPECIES_TREECKO;
         sStarterMon[1] = SPECIES_TORCHIC;
@@ -130,7 +130,7 @@ static void GenerateRandomStarters(void)
         return;
     }
 
-    if (gSaveBlock3Ptr->starterMode != RUN_STARTER_RANDOM && !typeFiltered)
+    if (gSaveBlock3Ptr->starterMode != RUN_STARTER_RANDOM && !filtered)
         return;
 
     rng_value_t oldRngState = gRngValue;
@@ -140,18 +140,18 @@ static void GenerateRandomStarters(void)
         .arg2 = FILTER_FUNC_ARG_NONE,
     };
 
-    if (typeFiltered)
+    if (filtered)
     {
         filterArgs.arg1 = gSaveBlock3Ptr->filterValue;
         if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
-        {
             filterArgs.arg2 = 0;
-            generator = SPECIES_GENERATOR_SCALED_TYPE_FILTERED;
-        }
+
+        if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE)
+            generator = gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED ? SPECIES_GENERATOR_SCALED_TYPE_FILTERED : SPECIES_GENERATOR_TYPE_FILTERED;
+        else if (gSaveBlock3Ptr->filterMode == RUN_FILTER_ABILITY)
+            generator = gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED ? SPECIES_GENERATOR_SCALED_ABILITY_FILTERED : SPECIES_GENERATOR_ABILITY_FILTERED;
         else
-        {
-            generator = SPECIES_GENERATOR_TYPE_FILTERED;
-        }
+            generator = gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED ? SPECIES_GENERATOR_SCALED_TYPE_ABILITY_FILTERED : SPECIES_GENERATOR_TYPE_ABILITY_FILTERED;
     }
 
     SeedRng(gSaveBlock3Ptr->worldSeed);

@@ -193,6 +193,8 @@ static EWRAM_DATA u8 sRunSetupPage;
 static EWRAM_DATA u8 sRunSetupFilter;
 static EWRAM_DATA u8 sRunSetupType;
 static EWRAM_DATA u16 sRunSetupAbility;
+static EWRAM_DATA u16 sRunSetupAbilityChoices[ABILITIES_COUNT];
+static EWRAM_DATA u16 sRunSetupAbilityChoiceCount;
 static EWRAM_DATA u8 sRunSetupNidokingSpriteId;
 static EWRAM_DATA u8 sRunSetupArcanineSpriteId;
 
@@ -309,6 +311,9 @@ static const u8 gText_ContinueMenuBadges[] = _("BADGES");
 static const u8 sText_RunSetupTitle[] = _("RUN SETUP");
 static const u8 sText_RunSetupConfirm[] = _("CONFIRM RUN");
 static const u8 sText_RunSetupFilterTitle[] = _("RUN FILTER");
+static const u8 sText_RunSetupFilterSettings[] = _("FILTER SETTINGS");
+static const u8 sText_RunSetupSelectType[] = _("SELECT TYPE");
+static const u8 sText_RunSetupSelectAbility[] = _("SELECT ABILITY");
 static const u8 sText_RunSetupWild[] = _("WILD POKéMON");
 static const u8 sText_RunSetupWildMode[] = _("WILD MODE");
 static const u8 sText_RunSetupStarters[] = _("STARTERS");
@@ -329,6 +334,8 @@ static const u8 sText_RunSetupType[] = _("TYPE");
 static const u8 sText_RunSetupAbility[] = _("ABILITY");
 static const u8 sText_RunSetupBoth[] = _("BOTH");
 static const u8 sText_RunSetupLimitedPool[] = _("WARNING: VERY LIMITED POOL");
+static const u8 sText_RunSetupNoMatches[] = _("NO MATCHING POKéMON - CHANGE FILTER");
+static const u8 sText_RunSetupAll[] = _("ALL");
 static const u8 sText_RunSetupOff[] = _("OFF");
 static const u8 sText_RunSetupTypeFilter[] = _("TYPE");
 static const u8 sText_RunSetupRestricted[] = _("1-3 SPECIES PER AREA");
@@ -1807,8 +1814,8 @@ static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
         sRunSetupEmptySeed = FALSE;
         sRunSetupPage = 0;
         sRunSetupFilter = RUN_FILTER_NONE;
-        sRunSetupType = TYPE_NORMAL;
-        sRunSetupAbility = ABILITY_INTIMIDATE;
+        sRunSetupType = TYPE_NONE;
+        sRunSetupAbility = ABILITY_NONE;
         sRunSetupSeed = (((u32)Random() << 16) | Random()) % 100000000;
         FreeAllWindowBuffers();
         DestroyTask(taskId);
@@ -1929,6 +1936,138 @@ static void RunSetup_DrawNarrowChoice(const u8 *text, u8 x, u8 y, bool32 selecte
     AddTextPrinterParameterized3(0, FONT_SMALL, textX, y + 2, colors, TEXT_SKIP_DRAW, text);
 }
 
+static void RunSetup_DrawWideChoice(const u8 *text, u8 x, u8 y, u8 width, bool32 selected)
+{
+    const u8 *colors = selected ? sTextColor_RunSetupSelected : sTextColor_Headers;
+    u8 textX = x + GetStringCenterAlignXOffset(FONT_SMALL, text, width - 2);
+
+    FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_2), x, y, width, 16);
+    FillWindowPixelRect(0, PIXEL_FILL(selected ? TEXT_DYNAMIC_COLOR_2 : TEXT_DYNAMIC_COLOR_1), x + 1, y + 1, width - 2, 14);
+    AddTextPrinterParameterized3(0, FONT_SMALL, textX, y + 2, colors, TEXT_SKIP_DRAW, text);
+}
+
+static void RunSetup_UpdateFilterMode(void)
+{
+    if (sRunSetupType != TYPE_NONE && sRunSetupAbility != ABILITY_NONE)
+        sRunSetupFilter = RUN_FILTER_TYPE_ABILITY;
+    else if (sRunSetupType != TYPE_NONE)
+        sRunSetupFilter = RUN_FILTER_TYPE;
+    else if (sRunSetupAbility != ABILITY_NONE)
+        sRunSetupFilter = RUN_FILTER_ABILITY;
+    else
+        sRunSetupFilter = RUN_FILTER_NONE;
+
+    if (sRunSetupFilter != RUN_FILTER_NONE && sRunSetupRandomizer == RUN_WILD_NORMAL)
+        sRunSetupRandomizer = RUN_WILD_SCALED;
+}
+
+static u8 RunSetup_TypeToPickerIndex(u8 type)
+{
+    if (type == TYPE_NONE)
+        return 0;
+    return type < TYPE_MYSTERY ? type : type - 1;
+}
+
+static u8 RunSetup_PickerIndexToType(u8 index)
+{
+    if (index == 0)
+        return TYPE_NONE;
+    return index < TYPE_MYSTERY ? index : index + 1;
+}
+
+static bool32 RunSetup_IsAbilityUsed(u16 ability)
+{
+    enum Species species;
+
+    if (ability == ABILITY_NONE)
+        return TRUE;
+
+    for (species = SPECIES_BULBASAUR; species < NUM_SPECIES; species++)
+    {
+        if (!IsSpeciesEnabled(species))
+            continue;
+        if (GetSpeciesAbility(species, 0) == ability
+         || GetSpeciesAbility(species, 1) == ability
+         || GetSpeciesAbility(species, 2) == ability)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+static u16 RunSetup_NextUsedAbility(u16 ability, s8 direction)
+{
+    u32 i;
+    u32 current = 0;
+
+    if (sRunSetupAbilityChoiceCount == 0)
+    {
+        sRunSetupAbilityChoices[sRunSetupAbilityChoiceCount++] = ABILITY_NONE;
+        for (i = 1; i < ABILITIES_COUNT; i++)
+        {
+            if (RunSetup_IsAbilityUsed(i))
+                sRunSetupAbilityChoices[sRunSetupAbilityChoiceCount++] = i;
+        }
+    }
+
+    for (i = 0; i < sRunSetupAbilityChoiceCount; i++)
+    {
+        if (sRunSetupAbilityChoices[i] == ability)
+        {
+            current = i;
+            break;
+        }
+    }
+
+    if (direction > 0)
+        current = (current + 1) % sRunSetupAbilityChoiceCount;
+    else
+        current = (current + sRunSetupAbilityChoiceCount - 1) % sRunSetupAbilityChoiceCount;
+    return sRunSetupAbilityChoices[current];
+}
+
+static void RunSetup_DrawPicker(u8 picker, u16 value)
+{
+    const u8 *title = picker == 1 ? sText_RunSetupSelectType : sText_RunSetupSelectAbility;
+    u8 titleX = GetStringCenterAlignXOffset(FONT_NORMAL, title, 208);
+
+    FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
+    AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, title);
+    FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_3), 48, 25, 112, 1);
+
+    if (picker == 1)
+    {
+        u32 i;
+        u8 selected = RunSetup_TypeToPickerIndex(value);
+
+        for (i = 0; i < 19; i++)
+        {
+            u8 type = RunSetup_PickerIndexToType(i);
+            const u8 *name = type == TYPE_NONE ? sText_RunSetupAll : gTypesInfo[type].name;
+            RunSetup_DrawWideChoice(name, 7 + (i % 3) * 67, 31 + (i / 3) * 15, 62, i == selected);
+        }
+    }
+    else
+    {
+        u16 shown[7];
+        u32 i;
+
+        shown[3] = value;
+        for (i = 3; i > 0; i--)
+            shown[i - 1] = RunSetup_NextUsedAbility(shown[i], -1);
+        for (i = 4; i < ARRAY_COUNT(shown); i++)
+            shown[i] = RunSetup_NextUsedAbility(shown[i - 1], 1);
+
+        for (i = 0; i < ARRAY_COUNT(shown); i++)
+        {
+            const u8 *name = shown[i] == ABILITY_NONE ? sText_RunSetupAll : gAbilitiesInfo[shown[i]].name;
+            RunSetup_DrawWideChoice(name, 20, 30 + i * 15, 168, i == 3);
+        }
+    }
+
+    PutWindowTilemap(0);
+    CopyWindowToVram(0, COPYWIN_FULL);
+}
+
 static u32 RunSetup_CountEligibleFilterMons(void)
 {
     u32 count = 0;
@@ -1968,7 +2107,7 @@ static void RunSetup_Draw(u8 cursor)
                      : sRunSetupFilter == RUN_FILTER_TYPE_ABILITY ? sText_RunSetupBoth
                      : sText_RunSetupOff;
     const u8 *title = sRunSetupConfirm ? sText_RunSetupConfirm
-                      : sRunSetupPage == 1 ? sText_RunSetupFilterTitle
+                      : sRunSetupPage == 1 ? sText_RunSetupFilterSettings
                       : sText_RunSetupTitle;
     u8 titleX = GetStringCenterAlignXOffset(FONT_NORMAL, title, 208);
 
@@ -1994,22 +2133,21 @@ static void RunSetup_Draw(u8 cursor)
     else if (sRunSetupPage == 1)
     {
         u32 eligible = RunSetup_CountEligibleFilterMons();
-        AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 31, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupFilter);
-        AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 51, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupType);
-        AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 71, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupAbility);
-        RunSetup_DrawChoice(sText_RunSetupOff, 65, 30, sRunSetupFilter == RUN_FILTER_NONE);
-        RunSetup_DrawChoice(sText_RunSetupTypeFilter, 118, 30, sRunSetupFilter == RUN_FILTER_TYPE);
-        RunSetup_DrawChoice(sText_RunSetupAbility, 171, 30, sRunSetupFilter == RUN_FILTER_ABILITY);
-        RunSetup_DrawChoice(gTypesInfo[sRunSetupType].name, 105, 50, cursor == 1);
-        RunSetup_DrawChoice(gAbilitiesInfo[sRunSetupAbility].name, 105, 70, cursor == 2);
-        if (sRunSetupFilter == RUN_FILTER_TYPE_ABILITY)
-            AddTextPrinterParameterized3(0, FONT_SMALL, 25, 91, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupLimitedPool);
+        const u8 *type = sRunSetupType == TYPE_NONE ? sText_RunSetupAll : gTypesInfo[sRunSetupType].name;
+        const u8 *ability = sRunSetupAbility == ABILITY_NONE ? sText_RunSetupAll : gAbilitiesInfo[sRunSetupAbility].name;
+
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 12, 42, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupType);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 12, 67, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupAbility);
+        RunSetup_DrawWideChoice(type, 82, 39, 116, cursor == 0);
+        RunSetup_DrawWideChoice(ability, 82, 64, 116, cursor == 1);
+        if (eligible == 0 && sRunSetupFilter != RUN_FILTER_NONE)
+            AddTextPrinterParameterized3(0, FONT_SMALL, 8, 89, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupNoMatches);
         else if (eligible <= 5 && sRunSetupFilter != RUN_FILTER_NONE)
             AddTextPrinterParameterized3(0, FONT_SMALL, 25, 91, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupLimitedPool);
-        RunSetup_DrawChoice(sText_RunSetupBack, 52, 110, cursor == 3);
-        RunSetup_DrawChoice(sText_RunSetupConfirmButton, 108, 110, cursor == 4);
-        if (cursor < 3)
-            AddTextPrinterParameterized3(0, FONT_NORMAL, 2, 31 + 20 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
+        RunSetup_DrawChoice(sText_RunSetupBack, 52, 110, cursor == 2);
+        RunSetup_DrawWideChoice(sText_RunSetupConfirmButton, 108, 110, 76, cursor == 3);
+        if (cursor < 2)
+            AddTextPrinterParameterized3(0, FONT_NORMAL, 2, 42 + 25 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
     }
     else
     {
@@ -2055,6 +2193,74 @@ static void CB2_RunSetup_ReturnFromSeed(void)
 static void Task_RunSetup_Input(u8 taskId)
 {
     s16 *cursor = &gTasks[taskId].data[0];
+    s16 *picker = &gTasks[taskId].data[1];
+    s16 *pickerValue = &gTasks[taskId].data[2];
+
+    if (*picker != 0)
+    {
+        if (*picker == 1)
+        {
+            u8 index = RunSetup_TypeToPickerIndex(*pickerValue);
+
+            if (JOY_NEW(DPAD_LEFT))
+                index = (index + 18) % 19;
+            else if (JOY_NEW(DPAD_RIGHT))
+                index = (index + 1) % 19;
+            else if (JOY_NEW(DPAD_UP))
+                index = (index + 16) % 19;
+            else if (JOY_NEW(DPAD_DOWN))
+                index = (index + 3) % 19;
+            else if (JOY_NEW(A_BUTTON))
+            {
+                sRunSetupType = RunSetup_PickerIndexToType(index);
+                RunSetup_UpdateFilterMode();
+                *picker = 0;
+                RunSetup_Draw(*cursor);
+                PlaySE(SE_SELECT);
+                return;
+            }
+            else if (JOY_NEW(B_BUTTON))
+            {
+                *picker = 0;
+                RunSetup_Draw(*cursor);
+                PlaySE(SE_SELECT);
+                return;
+            }
+            else
+                return;
+
+            *pickerValue = RunSetup_PickerIndexToType(index);
+        }
+        else
+        {
+            if (JOY_NEW(DPAD_UP | DPAD_LEFT))
+                *pickerValue = RunSetup_NextUsedAbility(*pickerValue, -1);
+            else if (JOY_NEW(DPAD_DOWN | DPAD_RIGHT))
+                *pickerValue = RunSetup_NextUsedAbility(*pickerValue, 1);
+            else if (JOY_NEW(A_BUTTON))
+            {
+                sRunSetupAbility = *pickerValue;
+                RunSetup_UpdateFilterMode();
+                *picker = 0;
+                RunSetup_Draw(*cursor);
+                PlaySE(SE_SELECT);
+                return;
+            }
+            else if (JOY_NEW(B_BUTTON))
+            {
+                *picker = 0;
+                RunSetup_Draw(*cursor);
+                PlaySE(SE_SELECT);
+                return;
+            }
+            else
+                return;
+        }
+
+        PlaySE(SE_SELECT);
+        RunSetup_DrawPicker(*picker, *pickerValue);
+        return;
+    }
 
     if (sRunSetupConfirm)
     {
@@ -2094,41 +2300,35 @@ static void Task_RunSetup_Input(u8 taskId)
     {
         u32 eligible;
         if (JOY_NEW(DPAD_UP))
-            *cursor = (*cursor + 4) % 5;
+            *cursor = (*cursor + 3) % 4;
         else if (JOY_NEW(DPAD_DOWN))
-            *cursor = (*cursor + 1) % 5;
-        else if (JOY_NEW(DPAD_LEFT) && (*cursor == 3 || *cursor == 4))
+            *cursor = (*cursor + 1) % 4;
+        else if (JOY_NEW(DPAD_LEFT) && (*cursor == 2 || *cursor == 3))
+            *cursor = 2;
+        else if (JOY_NEW(DPAD_RIGHT) && (*cursor == 2 || *cursor == 3))
             *cursor = 3;
-        else if (JOY_NEW(DPAD_RIGHT) && (*cursor == 3 || *cursor == 4))
-            *cursor = 4;
-        else if ((JOY_NEW(DPAD_LEFT)) && *cursor == 0)
-            sRunSetupFilter = sRunSetupFilter == RUN_FILTER_NONE ? RUN_FILTER_TYPE_ABILITY : sRunSetupFilter - 1;
-        else if ((JOY_NEW(DPAD_RIGHT | A_BUTTON)) && *cursor == 0)
+        else if (JOY_NEW(A_BUTTON) && *cursor == 0)
         {
-            sRunSetupFilter = sRunSetupFilter == RUN_FILTER_TYPE_ABILITY ? RUN_FILTER_NONE : sRunSetupFilter + 1;
-            if (sRunSetupFilter != RUN_FILTER_NONE && sRunSetupRandomizer == RUN_WILD_NORMAL)
-                sRunSetupRandomizer = RUN_WILD_SCALED;
+            *picker = 1;
+            *pickerValue = sRunSetupType;
+            PlaySE(SE_SELECT);
+            RunSetup_DrawPicker(*picker, *pickerValue);
+            return;
         }
-        else if (JOY_NEW(DPAD_LEFT) && *cursor == 1)
+        else if (JOY_NEW(A_BUTTON) && *cursor == 1)
         {
-            sRunSetupType = sRunSetupType <= TYPE_NORMAL ? TYPE_FAIRY : sRunSetupType - 1;
-            if (sRunSetupType == TYPE_MYSTERY) sRunSetupType--;
+            *picker = 2;
+            *pickerValue = sRunSetupAbility;
+            PlaySE(SE_SELECT);
+            RunSetup_DrawPicker(*picker, *pickerValue);
+            return;
         }
-        else if (JOY_NEW(DPAD_RIGHT | A_BUTTON) && *cursor == 1)
-        {
-            sRunSetupType = sRunSetupType >= TYPE_FAIRY ? TYPE_NORMAL : sRunSetupType + 1;
-            if (sRunSetupType == TYPE_MYSTERY) sRunSetupType++;
-        }
-        else if (JOY_NEW(DPAD_LEFT) && *cursor == 2)
-            sRunSetupAbility = sRunSetupAbility <= 1 ? ABILITIES_COUNT - 1 : sRunSetupAbility - 1;
-        else if (JOY_NEW(DPAD_RIGHT | A_BUTTON) && *cursor == 2)
-            sRunSetupAbility = sRunSetupAbility >= ABILITIES_COUNT - 1 ? 1 : sRunSetupAbility + 1;
-        else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 3))
+        else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 2))
         {
             sRunSetupPage = 0;
             *cursor = 3;
         }
-        else if (JOY_NEW(A_BUTTON) && *cursor == 4)
+        else if (JOY_NEW(A_BUTTON) && *cursor == 3)
         {
             eligible = RunSetup_CountEligibleFilterMons();
             if (sRunSetupFilter != RUN_FILTER_NONE && eligible == 0)
