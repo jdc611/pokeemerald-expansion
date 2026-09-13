@@ -30,6 +30,8 @@
 #include "pokemon.h"
 #include "pokemon_icon.h"
 #include "random.h"
+#include "random_mon_generation.h"
+#include "constants/random_mon_generation.h"
 #include "rtc.h"
 #include "save.h"
 #include "scanline_effect.h"
@@ -338,7 +340,10 @@ static const u8 sText_RunSetupAbility[] = _("ABILITY");
 static const u8 sText_RunSetupBoth[] = _("BOTH");
 static const u8 sText_RunSetupLimitedPool[] = _("WARNING: VERY LIMITED POOL");
 static const u8 sText_RunSetupNoMatches[] = _("NO MATCHING POKéMON - CHANGE FILTER");
+static const u8 sText_RunSetupNeedThree[] = _("AT LEAST 3 POKéMON ARE REQUIRED");
 static const u8 sText_RunSetupAll[] = _("ALL");
+static const u8 sText_RunSetupAbilityRule[] = _("ONLY ABILITIES WITH AT LEAST 3 VALID STARTER POKéMON ARE SHOWN.");
+static const u8 sText_RunSetupContinue[] = _("CONTINUE");
 static const u8 sText_RunSetupScrollUp[] = {CHAR_UP_ARROW, EOS};
 static const u8 sText_RunSetupScrollDown[] = {CHAR_DOWN_ARROW, EOS};
 static const u8 sText_RunSetupOff[] = _("OFF");
@@ -1980,23 +1985,44 @@ static u8 RunSetup_PickerIndexToType(u8 index)
     return index < TYPE_MYSTERY ? index : index + 1;
 }
 
+static u32 RunSetup_CountEligibleSelection(u8 type, u16 ability, u32 stopAt)
+{
+    struct FilterFuncArgs args =
+    {
+        .arg1 = FILTER_FUNC_ARG_NONE,
+        .arg2 = FILTER_FUNC_ARG_NONE,
+    };
+    bool32 scaled = sRunSetupRandomizer != RUN_WILD_RANDOM;
+    u32 generator;
+
+    if (type != TYPE_NONE && ability != ABILITY_NONE)
+    {
+        args.arg1 = (ability << 5) | type;
+        generator = scaled ? SPECIES_GENERATOR_SCALED_TYPE_ABILITY_FILTERED : SPECIES_GENERATOR_TYPE_ABILITY_FILTERED;
+    }
+    else if (type != TYPE_NONE)
+    {
+        args.arg1 = type;
+        generator = scaled ? SPECIES_GENERATOR_SCALED_TYPE_FILTERED : SPECIES_GENERATOR_TYPE_FILTERED;
+    }
+    else if (ability != ABILITY_NONE)
+    {
+        args.arg1 = ability;
+        generator = scaled ? SPECIES_GENERATOR_SCALED_ABILITY_FILTERED : SPECIES_GENERATOR_ABILITY_FILTERED;
+    }
+    else
+    {
+        generator = SPECIES_GENERATOR_NO_SUPERMONS;
+    }
+
+    if (scaled && (type != TYPE_NONE || ability != ABILITY_NONE))
+        args.arg2 = 0;
+    return CountEligibleRandomSpecies(generator, &args, stopAt);
+}
+
 static bool32 RunSetup_IsAbilityUsed(u16 ability)
 {
-    enum Species species;
-
-    if (ability == ABILITY_NONE)
-        return TRUE;
-
-    for (species = SPECIES_BULBASAUR; species < NUM_SPECIES; species++)
-    {
-        if (!IsSpeciesEnabled(species))
-            continue;
-        if (GetSpeciesAbility(species, 0) == ability
-         || GetSpeciesAbility(species, 1) == ability
-         || GetSpeciesAbility(species, 2) == ability)
-            return TRUE;
-    }
-    return FALSE;
+    return ability == ABILITY_NONE || RunSetup_CountEligibleSelection(sRunSetupType, ability, 3) >= 3;
 }
 
 static u16 RunSetup_NextUsedAbility(u16 ability, s8 direction)
@@ -2099,31 +2125,24 @@ static void RunSetup_DrawAbilityDetails(u16 ability, u8 choice)
     CopyWindowToVram(0, COPYWIN_FULL);
 }
 
+static void RunSetup_DrawAbilityNotice(void)
+{
+    u8 titleX = GetStringCenterAlignXOffset(FONT_NORMAL, sText_RunSetupSelectAbility, 208);
+
+    FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
+    AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupSelectAbility);
+    FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_3), 48, 25, 112, 1);
+    StringCopy(gStringVar4, sText_RunSetupAbilityRule);
+    BreakStringAutomatic(gStringVar4, 184, 4, FONT_NORMAL, HIDE_SCROLL_PROMPT);
+    AddTextPrinterParameterized3(0, FONT_NORMAL, 12, 40, sTextColor_Headers, TEXT_SKIP_DRAW, gStringVar4);
+    RunSetup_DrawWideChoice(sText_RunSetupContinue, 69, 106, 72, TRUE);
+    PutWindowTilemap(0);
+    CopyWindowToVram(0, COPYWIN_FULL);
+}
+
 static u32 RunSetup_CountEligibleFilterMons(void)
 {
-    u32 count = 0;
-    enum Species species;
-
-    for (species = SPECIES_BULBASAUR; species < NUM_SPECIES; species++)
-    {
-        // The expansion's species range contains reserved/disabled entries.
-        // Species accessors sanitize their input and deliberately assert when
-        // one of those entries is queried, so exclude them before checking
-        // the selected type or ability.
-        if (!IsSpeciesEnabled(species))
-            continue;
-
-        bool32 typeOk = (GetSpeciesType(species, 0) == sRunSetupType || GetSpeciesType(species, 1) == sRunSetupType);
-        bool32 abilityOk = (GetSpeciesAbility(species, 0) == sRunSetupAbility
-                         || GetSpeciesAbility(species, 1) == sRunSetupAbility
-                         || GetSpeciesAbility(species, 2) == sRunSetupAbility);
-
-        if ((sRunSetupFilter == RUN_FILTER_TYPE && typeOk)
-         || (sRunSetupFilter == RUN_FILTER_ABILITY && abilityOk)
-         || (sRunSetupFilter == RUN_FILTER_TYPE_ABILITY && typeOk && abilityOk))
-            count++;
-    }
-    return count;
+    return RunSetup_CountEligibleSelection(sRunSetupType, sRunSetupAbility, 6);
 }
 
 static void RunSetup_Draw(u8 cursor)
@@ -2171,8 +2190,8 @@ static void RunSetup_Draw(u8 cursor)
         AddTextPrinterParameterized3(0, FONT_NORMAL, 12, 67, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupAbility);
         RunSetup_DrawWideChoice(type, 82, 39, 116, cursor == 0);
         RunSetup_DrawWideChoice(ability, 82, 64, 116, cursor == 1);
-        if (eligible == 0 && sRunSetupFilter != RUN_FILTER_NONE)
-            AddTextPrinterParameterized3(0, FONT_SMALL, 8, 89, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupNoMatches);
+        if (eligible < 3 && sRunSetupFilter != RUN_FILTER_NONE)
+            AddTextPrinterParameterized3(0, FONT_SMALL, 8, 89, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupNeedThree);
         else if (eligible <= 5 && sRunSetupFilter != RUN_FILTER_NONE)
             AddTextPrinterParameterized3(0, FONT_SMALL, 25, 91, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupLimitedPool);
         RunSetup_DrawChoice(sText_RunSetupBack, 52, 110, cursor == 2);
@@ -2230,6 +2249,25 @@ static void Task_RunSetup_Input(u8 taskId)
 
     if (*picker != 0)
     {
+        if (*picker == 4)
+        {
+            if (JOY_NEW(B_BUTTON))
+            {
+                *picker = 0;
+                PlaySE(SE_SELECT);
+                RunSetup_Draw(*cursor);
+            }
+            else if (JOY_NEW(A_BUTTON))
+            {
+                sRunSetupAbilityChoiceCount = 0;
+                *pickerValue = RunSetup_IsAbilityUsed(sRunSetupAbility) ? sRunSetupAbility : ABILITY_NONE;
+                *picker = 2;
+                PlaySE(SE_SELECT);
+                RunSetup_DrawPicker(*picker, *pickerValue);
+            }
+            return;
+        }
+
         if (*picker == 3)
         {
             if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | DPAD_UP | DPAD_DOWN))
@@ -2270,6 +2308,7 @@ static void Task_RunSetup_Input(u8 taskId)
             else if (JOY_NEW(A_BUTTON))
             {
                 sRunSetupType = RunSetup_PickerIndexToType(index);
+                sRunSetupAbilityChoiceCount = 0;
                 RunSetup_UpdateFilterMode();
                 *picker = 0;
                 RunSetup_Draw(*cursor);
@@ -2383,10 +2422,9 @@ static void Task_RunSetup_Input(u8 taskId)
         }
         else if (JOY_NEW(A_BUTTON) && *cursor == 1)
         {
-            *picker = 2;
-            *pickerValue = sRunSetupAbility;
+            *picker = 4;
             PlaySE(SE_SELECT);
-            RunSetup_DrawPicker(*picker, *pickerValue);
+            RunSetup_DrawAbilityNotice();
             return;
         }
         else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 2))
@@ -2397,7 +2435,7 @@ static void Task_RunSetup_Input(u8 taskId)
         else if (JOY_NEW(A_BUTTON) && *cursor == 3)
         {
             eligible = RunSetup_CountEligibleFilterMons();
-            if (sRunSetupFilter != RUN_FILTER_NONE && eligible == 0)
+            if (sRunSetupFilter != RUN_FILTER_NONE && eligible < 3)
             {
                 PlaySE(SE_BOO);
                 RunSetup_Draw(*cursor);

@@ -364,6 +364,37 @@ enum Species GetRandomSpecies(u32 optionId, const struct FilterFuncArgs *filterF
     return FastPickRandomSpecies(options, poolSize, filterFuncArgs);
 }
 
+u32 CountEligibleRandomSpecies(u32 optionId, const struct FilterFuncArgs *filterFuncArgs, u32 stopAt)
+{
+    const struct RandomSpeciesGeneratorOptions *options;
+    u32 poolSize;
+    u32 count = 0;
+
+    if (optionId >= RANDOM_SPECIES_OPTIONS_COUNT)
+        return 0;
+
+    options = &sRandomSpeciesGeneratorOptions[optionId];
+    if (options->speciesPoolCount != 0)
+        poolSize = options->speciesPoolCount;
+    else if (options->dexMode == RANDOM_MON_DEX_HOENN)
+        poolSize = HOENN_DEX_COUNT - 1;
+    else
+        poolSize = NATIONAL_DEX_COUNT;
+
+    for (u32 i = 0; i < poolSize; i++)
+    {
+        enum Species species = GetRandomSpeciesAtIndex(options, i);
+
+        // Setup-screen generators do not randomize forms, so this check is
+        // deterministic and mirrors the exact pool used for starters.
+        species = GetSpeciesCandidateForm(species, options, filterFuncArgs);
+        if (species != SPECIES_NONE && ++count >= stopAt)
+            break;
+    }
+
+    return count;
+}
+
 static enum Species SlowPickRandomSpecies(const struct RandomSpeciesGeneratorOptions *options, u32 poolSize, const struct FilterFuncArgs *filterFuncArgs)
 {
     u32 eligibleSpeciesCount = 0;
@@ -394,6 +425,28 @@ static enum Species FastPickRandomSpecies(const struct RandomSpeciesGeneratorOpt
         species = GetSpeciesCandidateForm(species, options, filterFuncArgs);
         if (species != SPECIES_NONE)
             return species;
+    }
+
+    // Very small filtered pools can be missed by every random probe even
+    // though valid species exist. Fall back to an exhaustive reservoir pick
+    // so a valid filter never produces SPECIES_NONE merely from bad luck.
+    {
+        enum Species selected = SPECIES_NONE;
+        u32 eligibleCount = 0;
+
+        for (u32 i = 0; i < poolSize; i++)
+        {
+            enum Species species = GetRandomSpeciesAtIndex(options, i);
+            species = GetSpeciesCandidateForm(species, options, filterFuncArgs);
+            if (species != SPECIES_NONE)
+            {
+                eligibleCount++;
+                if (RandomUniform(RNG_NONE, 0, eligibleCount - 1) == 0)
+                    selected = species;
+            }
+        }
+        if (selected != SPECIES_NONE)
+            return selected;
     }
 
     errorf("Could not get random species after %d tries", poolSize);

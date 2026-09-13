@@ -154,6 +154,16 @@ static void GenerateRandomStarters(void)
             generator = gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED ? SPECIES_GENERATOR_SCALED_TYPE_ABILITY_FILTERED : SPECIES_GENERATOR_TYPE_ABILITY_FILTERED;
     }
 
+    // Setup prevents pools smaller than three, but retain a safe fallback for
+    // old/corrupt saves so the third Poké Ball can never become SPECIES_NONE.
+    if (filtered && CountEligibleRandomSpecies(generator, &filterArgs, STARTER_MON_COUNT) < STARTER_MON_COUNT)
+    {
+        sStarterMon[0] = SPECIES_TREECKO;
+        sStarterMon[1] = SPECIES_TORCHIC;
+        sStarterMon[2] = SPECIES_MUDKIP;
+        return;
+    }
+
     SeedRng(gSaveBlock3Ptr->worldSeed);
 
     for (u32 i = 0; i < STARTER_MON_COUNT; i++)
