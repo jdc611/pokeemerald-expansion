@@ -1936,6 +1936,13 @@ static u32 RunSetup_CountEligibleFilterMons(void)
 
     for (species = SPECIES_BULBASAUR; species < NUM_SPECIES; species++)
     {
+        // The expansion's species range contains reserved/disabled entries.
+        // Species accessors sanitize their input and deliberately assert when
+        // one of those entries is queried, so exclude them before checking
+        // the selected type or ability.
+        if (!IsSpeciesEnabled(species))
+            continue;
+
         bool32 typeOk = (GetSpeciesType(species, 0) == sRunSetupType || GetSpeciesType(species, 1) == sRunSetupType);
         bool32 abilityOk = (GetSpeciesAbility(species, 0) == sRunSetupAbility
                          || GetSpeciesAbility(species, 1) == sRunSetupAbility
