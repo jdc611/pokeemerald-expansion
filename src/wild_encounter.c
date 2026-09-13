@@ -69,6 +69,20 @@ EWRAM_DATA bool8 gIsFishingEncounter = 0;
 EWRAM_DATA bool8 gIsSurfingEncounter = 0;
 EWRAM_DATA u8 gChainFishingDexNavStreak = 0;
 
+#define RANDOMIZED_WILD_CACHE_SIZE 32
+
+struct RandomizedWildCacheEntry
+{
+    u32 seed;
+    u32 generator;
+    u32 arg1;
+    u32 arg2;
+    enum Species species;
+    bool8 valid;
+};
+
+EWRAM_DATA static struct RandomizedWildCacheEntry sRandomizedWildCache[RANDOMIZED_WILD_CACHE_SIZE] = {0};
+
 #include "data/wild_encounters.h"
 
 const struct WildPokemon gWildFeebas = {20, 25, SPECIES_FEEBAS};
@@ -612,7 +626,6 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
             seed ^= 0x4E494748; // "NIGH"
     }
 
-    SeedRng(seed);
     if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE)
     {
         filterArgs.arg1 = gSaveBlock3Ptr->filterValue;
@@ -631,7 +644,31 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
         filterArgs.arg1 = GetScaledWildTier(wildMonInfo, area, wildMonIndex, seedMonIndex);
         generator = SPECIES_GENERATOR_SCALED_WILD;
     }
-    species = GetRandomSpecies(generator, &filterArgs);
+
+    // DexNav and encounter-level lookups repeatedly ask for the same seeded
+    // species slots. Cache the deterministic result so those UI scans do not
+    // rerun the full filtered species search dozens of times.
+    {
+        u32 cacheIndex = (seed ^ (generator * 33u) ^ filterArgs.arg1 ^ (filterArgs.arg2 << 8)) & (RANDOMIZED_WILD_CACHE_SIZE - 1);
+        struct RandomizedWildCacheEntry *cache = &sRandomizedWildCache[cacheIndex];
+
+        if (cache->valid
+         && cache->seed == seed
+         && cache->generator == generator
+         && cache->arg1 == filterArgs.arg1
+         && cache->arg2 == filterArgs.arg2)
+            return cache->species;
+
+        SeedRng(seed);
+        species = GetRandomSpecies(generator, &filterArgs);
+
+        cache->seed = seed;
+        cache->generator = generator;
+        cache->arg1 = filterArgs.arg1;
+        cache->arg2 = filterArgs.arg2;
+        cache->species = species;
+        cache->valid = TRUE;
+    }
 
     gRngValue = oldRngState;
 
