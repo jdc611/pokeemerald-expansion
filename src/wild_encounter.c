@@ -581,6 +581,14 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
     seed ^= ((u32)gSaveBlock1Ptr->location.mapGroup << 24);
     seed ^= ((u32)gSaveBlock1Ptr->location.mapNum << 16);
     seed ^= ((u32)area << 8);
+    if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE)
+    {
+        // Restricted runs intentionally expose only one to three distinct
+        // species in each encounter method on a map.
+        u8 uniqueSlots = 1 + ((seed >> 8) % 3);
+
+        seedMonIndex %= uniqueSlots;
+    }
     // Weighted water slots repeat a smaller set so randomized routes do not
     // become overcrowded: three Surf species and five across the three rods.
     if (area == WILD_AREA_WATER && seedMonIndex >= RANDOMIZED_WATER_UNIQUE_SLOTS)
@@ -608,7 +616,20 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
     }
 
     SeedRng(seed);
-    if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
+    if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE)
+    {
+        filterArgs.arg1 = gSaveBlock3Ptr->filterValue;
+        if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
+        {
+            filterArgs.arg2 = GetScaledWildTier(area, wildMonIndex);
+            generator = SPECIES_GENERATOR_SCALED_TYPE_FILTERED;
+        }
+        else
+        {
+            generator = SPECIES_GENERATOR_TYPE_FILTERED;
+        }
+    }
+    else if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
     {
         filterArgs.arg1 = GetScaledWildTier(area, wildMonIndex);
         generator = SPECIES_GENERATOR_SCALED_WILD;

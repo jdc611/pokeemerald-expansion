@@ -50,6 +50,7 @@ struct RandomItemGeneratorOptions
 static enum Species GetSpeciesCandidateForm(enum Species species, const struct RandomSpeciesGeneratorOptions *options, const struct FilterFuncArgs *filterFuncArgs);
 static bool32 UNUSED IsInBstRangeFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs);
 static bool32 IsScaledWildSpeciesFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs);
+static bool32 IsTypeFilteredWildSpeciesFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs);
 static enum Species GetRandomSpeciesAtIndex(const struct RandomSpeciesGeneratorOptions *options, u32 index);
 static enum Species SlowPickRandomSpecies(const struct RandomSpeciesGeneratorOptions *options, u32 poolSize, const struct FilterFuncArgs *filterFuncArgs);
 static enum Species FastPickRandomSpecies(const struct RandomSpeciesGeneratorOptions *options, u32 poolSize, const struct FilterFuncArgs *filterFuncArgs);
@@ -143,6 +144,22 @@ static bool32 IsScaledWildSpeciesFilterFunc(enum Species species, const struct F
     }
 
     return TRUE;
+}
+
+static bool32 IsTypeFilteredWildSpeciesFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs)
+{
+    struct FilterFuncArgs scaledArgs;
+
+    if (GetSpeciesType(species, 0) != filterFuncArgs->arg1
+     && GetSpeciesType(species, 1) != filterFuncArgs->arg1)
+        return FALSE;
+
+    if (filterFuncArgs->arg2 == FILTER_FUNC_ARG_NONE)
+        return TRUE;
+
+    scaledArgs.arg1 = filterFuncArgs->arg2;
+    scaledArgs.arg2 = FILTER_FUNC_ARG_NONE;
+    return IsScaledWildSpeciesFilterFunc(species, &scaledArgs);
 }
 
 static enum Species GetRandomSpeciesAtIndex(const struct RandomSpeciesGeneratorOptions *options, u32 index)

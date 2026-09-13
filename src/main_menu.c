@@ -1,4 +1,5 @@
 #include "global.h"
+#include "battle_main.h"
 #include "trainer_pokemon_sprites.h"
 #include "bg.h"
 #include "constants/rgb.h"
@@ -179,6 +180,8 @@ EWRAM_DATA u8 gRunSetupRandomizerEnabled;
 EWRAM_DATA bool8 gRunSetupSeedIsCustom;
 EWRAM_DATA u8 gRunSetupStarterMode;
 EWRAM_DATA u32 gRunSetupWorldSeed;
+EWRAM_DATA u8 gRunSetupFilterMode;
+EWRAM_DATA u8 gRunSetupFilterValue;
 static EWRAM_DATA u8 sRunSetupRandomizer;
 static EWRAM_DATA bool8 sRunSetupStarter;
 static EWRAM_DATA bool8 sRunSetupCustom;
@@ -186,6 +189,9 @@ static EWRAM_DATA bool8 sRunSetupConfirm;
 static EWRAM_DATA bool8 sRunSetupReturnToBirch;
 static EWRAM_DATA bool8 sRunSetupEmptySeed;
 static EWRAM_DATA u32 sRunSetupSeed;
+static EWRAM_DATA u8 sRunSetupPage;
+static EWRAM_DATA u8 sRunSetupFilter;
+static EWRAM_DATA u8 sRunSetupType;
 static EWRAM_DATA u8 sRunSetupNidokingSpriteId;
 static EWRAM_DATA u8 sRunSetupArcanineSpriteId;
 
@@ -301,6 +307,7 @@ static const u8 gText_ContinueMenuPokedex[] = _("POKéDEX");
 static const u8 gText_ContinueMenuBadges[] = _("BADGES");
 static const u8 sText_RunSetupTitle[] = _("RUN SETUP");
 static const u8 sText_RunSetupConfirm[] = _("CONFIRM RUN");
+static const u8 sText_RunSetupFilterTitle[] = _("RUN FILTER");
 static const u8 sText_RunSetupWild[] = _("WILD POKéMON");
 static const u8 sText_RunSetupWildMode[] = _("WILD MODE");
 static const u8 sText_RunSetupStarters[] = _("STARTERS");
@@ -311,10 +318,16 @@ static const u8 sText_RunSetupRandom[] = _("RANDOM");
 static const u8 sText_RunSetupNormal[] = _("NORMAL");
 static const u8 sText_RunSetupScaled[] = _("SCALED");
 static const u8 sText_RunSetupCustom[] = _("CUSTOM");
-static const u8 sText_RunSetupAreYouSure[] = _("ARE YOU SURE?");
 static const u8 sText_RunSetupNeedSeed[] = _("ENTER AT LEAST ONE DIGIT");
 static const u8 sText_RunSetupSeedNumber[] = _("VALUE: {STR_VAR_1}");
 static const u8 sText_RunSetupConfirmButton[] = _("CONFIRM");
+static const u8 sText_RunSetupNext[] = _("NEXT");
+static const u8 sText_RunSetupBack[] = _("BACK");
+static const u8 sText_RunSetupFilter[] = _("FILTER");
+static const u8 sText_RunSetupType[] = _("TYPE");
+static const u8 sText_RunSetupOff[] = _("OFF");
+static const u8 sText_RunSetupTypeFilter[] = _("TYPE");
+static const u8 sText_RunSetupRestricted[] = _("1-3 SPECIES PER AREA");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -1788,6 +1801,9 @@ static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
         sRunSetupCustom = FALSE;
         sRunSetupConfirm = FALSE;
         sRunSetupEmptySeed = FALSE;
+        sRunSetupPage = 0;
+        sRunSetupFilter = RUN_FILTER_NONE;
+        sRunSetupType = TYPE_NORMAL;
         sRunSetupSeed = (((u32)Random() << 16) | Random()) % 100000000;
         FreeAllWindowBuffers();
         DestroyTask(taskId);
@@ -1915,7 +1931,10 @@ static void RunSetup_Draw(u8 cursor)
                      : sText_RunSetupNormal;
     const u8 *starters = sRunSetupStarter ? sText_RunSetupRandom : sText_RunSetupNormal;
     const u8 *seed = sRunSetupCustom ? sText_RunSetupCustom : sText_RunSetupRandom;
-    const u8 *title = sRunSetupConfirm ? sText_RunSetupConfirm : sText_RunSetupTitle;
+    const u8 *filter = sRunSetupFilter == RUN_FILTER_TYPE ? gTypesInfo[sRunSetupType].name : sText_RunSetupOff;
+    const u8 *title = sRunSetupConfirm ? sText_RunSetupConfirm
+                      : sRunSetupPage == 1 ? sText_RunSetupFilterTitle
+                      : sText_RunSetupTitle;
     u8 titleX = GetStringCenterAlignXOffset(FONT_NORMAL, title, 208);
 
     FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
@@ -1933,9 +1952,22 @@ static void RunSetup_Draw(u8 cursor)
         ConvertIntToDecimalStringN(gStringVar1, sRunSetupSeed, STR_CONV_MODE_LEFT_ALIGN, 8);
         StringExpandPlaceholders(gStringVar4, sText_RunSetupSeedNumber);
         AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 88, sTextColor_Headers, TEXT_SKIP_DRAW, gStringVar4);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 8, 109, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupAreYouSure);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 120, 88, sTextColor_Headers, TEXT_SKIP_DRAW, filter);
         RunSetup_DrawChoice(sText_RunSetupYes, 104, 106, cursor == 0);
         RunSetup_DrawChoice(sText_RunSetupNo, 157, 106, cursor == 1);
+    }
+    else if (sRunSetupPage == 1)
+    {
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 16, 35, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupFilter);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 16, 57, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupType);
+        RunSetup_DrawChoice(sText_RunSetupOff, 98, 34, sRunSetupFilter == RUN_FILTER_NONE);
+        RunSetup_DrawChoice(sText_RunSetupTypeFilter, 151, 34, sRunSetupFilter == RUN_FILTER_TYPE);
+        RunSetup_DrawChoice(filter, 124, 56, cursor == 1);
+        AddTextPrinterParameterized3(0, FONT_SMALL, 46, 82, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupRestricted);
+        RunSetup_DrawChoice(sText_RunSetupBack, 52, 110, cursor == 2);
+        RunSetup_DrawChoice(sText_RunSetupConfirmButton, 108, 110, cursor == 3);
+        if (cursor < 2)
+            AddTextPrinterParameterized3(0, FONT_NORMAL, 2, 35 + 22 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
     }
     else
     {
@@ -1953,7 +1985,7 @@ static void RunSetup_Draw(u8 cursor)
         if (sRunSetupEmptySeed)
             AddTextPrinterParameterized3(0, FONT_SMALL, 8, 99, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupNeedSeed);
 
-        RunSetup_DrawChoice(sText_RunSetupConfirmButton, 79, 110, cursor == 3);
+        RunSetup_DrawChoice(sText_RunSetupNext, 79, 110, cursor == 3);
         if (cursor < 3)
             AddTextPrinterParameterized3(0, FONT_NORMAL, 2, 35 + 22 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
     }
@@ -1971,7 +2003,8 @@ static void CB2_RunSetup_ReturnFromSeed(void)
     else
     {
         sRunSetupSeed = ParseCustomSeed(gStringVar2);
-        sRunSetupConfirm = TRUE;
+        sRunSetupPage = 1;
+        sRunSetupConfirm = FALSE;
         sRunSetupEmptySeed = FALSE;
     }
     SetMainCallback2(CB2_RunSetup_Init);
@@ -2001,12 +2034,56 @@ static void Task_RunSetup_Input(u8 taskId)
             gRunSetupSeedIsCustom = sRunSetupCustom;
             gRunSetupStarterMode = sRunSetupStarter ? RUN_STARTER_RANDOM : RUN_STARTER_NORMAL;
             gRunSetupWorldSeed = sRunSetupSeed;
+            gRunSetupFilterMode = sRunSetupFilter;
+            gRunSetupFilterValue = sRunSetupType;
             sRunSetupReturnToBirch = TRUE;
             RunSetup_DestroyIcons();
             FreeAllWindowBuffers();
             DestroyTask(taskId);
             SetMainCallback2(CB2_NewGameBirchSpeech_ReturnFromNamingScreen);
         }
+        return;
+    }
+
+    if (sRunSetupPage == 1)
+    {
+        if (JOY_NEW(DPAD_UP))
+            *cursor = (*cursor + 3) % 4;
+        else if (JOY_NEW(DPAD_DOWN))
+            *cursor = (*cursor + 1) % 4;
+        else if ((JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON)) && *cursor == 0)
+        {
+            sRunSetupFilter = sRunSetupFilter == RUN_FILTER_NONE ? RUN_FILTER_TYPE : RUN_FILTER_NONE;
+            if (sRunSetupFilter == RUN_FILTER_TYPE && sRunSetupRandomizer == RUN_WILD_NORMAL)
+                sRunSetupRandomizer = RUN_WILD_RANDOM;
+        }
+        else if ((JOY_NEW(DPAD_LEFT)) && *cursor == 1)
+        {
+            sRunSetupType = sRunSetupType <= TYPE_NORMAL ? TYPE_FAIRY : sRunSetupType - 1;
+            if (sRunSetupType == TYPE_MYSTERY)
+                sRunSetupType--;
+        }
+        else if ((JOY_NEW(DPAD_RIGHT | A_BUTTON)) && *cursor == 1)
+        {
+            sRunSetupType = sRunSetupType >= TYPE_FAIRY ? TYPE_NORMAL : sRunSetupType + 1;
+            if (sRunSetupType == TYPE_MYSTERY)
+                sRunSetupType++;
+        }
+        else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 2))
+        {
+            sRunSetupPage = 0;
+            *cursor = 3;
+        }
+        else if (JOY_NEW(A_BUTTON) && *cursor == 3)
+        {
+            sRunSetupConfirm = TRUE;
+            *cursor = 1;
+        }
+        else
+            return;
+
+        PlaySE(SE_SELECT);
+        RunSetup_Draw(*cursor);
         return;
     }
 
@@ -2054,8 +2131,8 @@ static void Task_RunSetup_Input(u8 taskId)
         }
         else
         {
-            sRunSetupConfirm = TRUE;
-            *cursor = 1;
+            sRunSetupPage = 1;
+            *cursor = 0;
             RunSetup_Draw(*cursor);
         }
         return;

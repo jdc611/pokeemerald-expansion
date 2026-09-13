@@ -26,6 +26,28 @@ static const struct RandomSpeciesGeneratorOptions sRandomSpeciesGeneratorOptions
         .randomizeForms = FALSE,
         .dexMode = RANDOM_MON_DEX_NATIONAL,
     },
+    [SPECIES_GENERATOR_TYPE_FILTERED] =
+    {
+        .filterFunc = IsTypeFilteredWildSpeciesFilterFunc,
+        .banLegendary = TRUE,
+        .banMythical = TRUE,
+        .banSubLegendary = TRUE,
+        .banUltraBeast = TRUE,
+        .banParadox = TRUE,
+        .randomizeForms = FALSE,
+        .dexMode = RANDOM_MON_DEX_NATIONAL,
+    },
+    [SPECIES_GENERATOR_SCALED_TYPE_FILTERED] =
+    {
+        .filterFunc = IsTypeFilteredWildSpeciesFilterFunc,
+        .banLegendary = TRUE,
+        .banMythical = TRUE,
+        .banSubLegendary = TRUE,
+        .banUltraBeast = TRUE,
+        .banParadox = TRUE,
+        .randomizeForms = FALSE,
+        .dexMode = RANDOM_MON_DEX_NATIONAL,
+    },
 };
 
 static const struct RandomItemGeneratorOptions sRandomItemGeneratorOptions[RANDOM_ITEM_OPTIONS_COUNT] =
