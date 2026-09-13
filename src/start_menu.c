@@ -49,6 +49,7 @@
 #include "window.h"
 #include "union_room.h"
 #include "dexnav.h"
+#include "run_settings.h"
 #include "wild_encounter.h"
 #include "constants/battle_frontier.h"
 #include "constants/rgb.h"
@@ -82,6 +83,7 @@ enum
     MENU_ACTION_AUTO_REPEL,
     MENU_ACTION_MOVE_RELEARNER,
     MENU_ACTION_GAME_OPTIONS,
+    MENU_ACTION_GAME_INFO,
     MENU_ACTION_DEXNAV_INFO,
     MENU_ACTION_BACK_GAME_OPTIONS,
 };
@@ -137,6 +139,7 @@ static bool8 StartMenuTimeChanger(void);
 static bool8 StartMenuAutoRepel(void);
 static bool8 StartMenuMoveRelearner(void);
 static bool8 StartMenuGameOptions(void);
+static bool8 StartMenuGameInfo(void);
 static bool8 StartMenuDexNavInfo(void);
 static bool8 StartMenuBackGameOptions(void);
 
@@ -147,6 +150,7 @@ static bool8 BattlePyramidRetireStartCallback(void);
 static bool8 BattlePyramidRetireReturnCallback(void);
 static bool8 BattlePyramidRetireCallback(void);
 static bool8 HandleStartMenuInput(void);
+static bool8 HandleGameInfoInput(void);
 
 // Save dialog callbacks
 static u8 SaveConfirmSaveCallback(void);
@@ -224,6 +228,17 @@ static const u8 sText_TimeEvening[] = _("TIME: EVENING");
 static const u8 sText_TimeNight[] = _("TIME: NIGHT");
 static const u8 sText_AutoRepelOn[] = _("AUTO REPEL: ON");
 static const u8 sText_AutoRepelOff[] = _("AUTO REPEL: OFF");
+static const u8 sText_GameInfoTitle[] = _("GAME INFO");
+static const u8 sText_GameInfoVersion[] = _("VERSION: DEVELOPMENT");
+static const u8 sText_GameInfoWild[] = _("WILD: ");
+static const u8 sText_GameInfoStarters[] = _("STARTERS: ");
+static const u8 sText_GameInfoSeed[] = _("SEED: ");
+static const u8 sText_GameInfoValue[] = _("VALUE: {STR_VAR_1}");
+static const u8 sText_GameInfoBack[] = _("A/B: BACK");
+static const u8 sText_GameInfoNormal[] = _("NORMAL");
+static const u8 sText_GameInfoRandom[] = _("RANDOM");
+static const u8 sText_GameInfoCustom[] = _("CUSTOM");
+static const u8 sText_GameInfoUnknown[] = _("UNKNOWN");
 
 static const struct MenuAction sStartMenuItems[] =
 {
@@ -251,6 +266,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_AUTO_REPEL] = {COMPOUND_STRING("AUTO REPEL"), {.u8_void = StartMenuAutoRepel}},
     [MENU_ACTION_MOVE_RELEARNER] = {COMPOUND_STRING("MOVE RELEARNER"), {.u8_void = StartMenuMoveRelearner}},
     [MENU_ACTION_GAME_OPTIONS] = {COMPOUND_STRING("GAME OPTIONS"), {.u8_void = StartMenuGameOptions}},
+    [MENU_ACTION_GAME_INFO] = {COMPOUND_STRING("GAME INFO"), {.u8_void = StartMenuGameInfo}},
     [MENU_ACTION_DEXNAV_INFO] = {COMPOUND_STRING("DEXNAV INFO"), {.u8_void = StartMenuDexNavInfo}},
     [MENU_ACTION_BACK_GAME_OPTIONS] = {COMPOUND_STRING("BACK"), {.u8_void = StartMenuBackGameOptions}},
 };
@@ -411,7 +427,8 @@ static void BuildNormalStartMenu(void)
     {
         AddStartMenuAction(MENU_ACTION_MOVE_RELEARNER);
         AddStartMenuAction(MENU_ACTION_GAME_OPTIONS);
-        // Reserved for Run Info, level caps, and future rules tools.
+        AddStartMenuAction(MENU_ACTION_GAME_INFO);
+        // Reserved for level caps and future rules tools.
         AddStartMenuAction(MENU_ACTION_EXIT);
     }
 }
@@ -781,6 +798,7 @@ static bool8 HandleStartMenuInput(void)
             && gMenuCallback != StartMenuAutoRepel
             && gMenuCallback != StartMenuMoveRelearner
             && gMenuCallback != StartMenuGameOptions
+            && gMenuCallback != StartMenuGameInfo
             && gMenuCallback != StartMenuDexNavInfo
             && gMenuCallback != StartMenuBackGameOptions)
         {
@@ -1725,6 +1743,66 @@ static bool8 StartMenuGameOptions(void)
     RemoveStartMenuWindow();
     InitStartMenu();
     gMenuCallback = HandleStartMenuInput;
+    return FALSE;
+}
+
+static void PrintGameInfoLine(const u8 *text, u8 y)
+{
+    AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_NORMAL, text, 8, y, TEXT_SKIP_DRAW, NULL);
+}
+
+static bool8 StartMenuGameInfo(void)
+{
+    u8 windowId;
+
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+    RemoveStartMenuWindow();
+    windowId = AddGameOptionsWindow(7);
+    DrawStdWindowFrame(windowId, FALSE);
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+
+    PrintGameInfoLine(sText_GameInfoTitle, 9);
+    PrintGameInfoLine(sText_GameInfoVersion, 25);
+
+    StringCopy(gStringVar4, sText_GameInfoWild);
+    StringAppend(gStringVar4, gSaveBlock3Ptr->randomizerEnabled ? sText_GameInfoRandom : sText_GameInfoNormal);
+    PrintGameInfoLine(gStringVar4, 41);
+
+    StringCopy(gStringVar4, sText_GameInfoStarters);
+    StringAppend(gStringVar4, gSaveBlock3Ptr->starterMode == RUN_STARTER_RANDOM ? sText_GameInfoRandom : sText_GameInfoNormal);
+    PrintGameInfoLine(gStringVar4, 57);
+
+    StringCopy(gStringVar4, sText_GameInfoSeed);
+    if (VarGet(VAR_RUN_SEED_SOURCE) == 2)
+        StringAppend(gStringVar4, sText_GameInfoCustom);
+    else if (VarGet(VAR_RUN_SEED_SOURCE) == 1)
+        StringAppend(gStringVar4, sText_GameInfoRandom);
+    else
+        StringAppend(gStringVar4, sText_GameInfoUnknown);
+    PrintGameInfoLine(gStringVar4, 73);
+
+    ConvertIntToDecimalStringN(gStringVar1, gSaveBlock3Ptr->worldSeed, STR_CONV_MODE_LEFT_ALIGN, 8);
+    StringExpandPlaceholders(gStringVar4, sText_GameInfoValue);
+    PrintGameInfoLine(gStringVar4, 89);
+    PrintGameInfoLine(sText_GameInfoBack, 105);
+
+    PutWindowTilemap(windowId);
+    CopyWindowToVram(windowId, COPYWIN_FULL);
+    gMenuCallback = HandleGameInfoInput;
+    return FALSE;
+}
+
+static bool8 HandleGameInfoInput(void)
+{
+    if (JOY_NEW(A_BUTTON | B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+        RemoveStartMenuWindow();
+        sStartMenuCursorPos = 2;
+        InitStartMenu();
+        gMenuCallback = HandleStartMenuInput;
+    }
     return FALSE;
 }
 

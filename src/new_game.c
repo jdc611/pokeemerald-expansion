@@ -55,6 +55,7 @@
 #include "run_settings.h"
 
 extern EWRAM_DATA bool8 gRunSetupRandomizerEnabled;
+extern EWRAM_DATA bool8 gRunSetupSeedIsCustom;
 extern EWRAM_DATA u8 gRunSetupStarterMode;
 extern EWRAM_DATA u32 gRunSetupWorldSeed;
 extern const u8 EventScript_ResetAllMapFlags[];
@@ -239,6 +240,7 @@ void NewGameInitData(void)
     ResetDexNav();
     gSaveBlock3Ptr->worldSeed = gRunSetupWorldSeed;
     gSaveBlock3Ptr->randomizerEnabled = gRunSetupRandomizerEnabled;
+    VarSet(VAR_RUN_SEED_SOURCE, gRunSetupSeedIsCustom ? 2 : 1);
    
     gSaveBlock3Ptr->starterMode = gRunSetupStarterMode;
        

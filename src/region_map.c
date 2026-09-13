@@ -846,26 +846,49 @@ u8 DoRegionMapInputCallback(void)
 static u8 ProcessRegionMapInput_Full(void)
 {
     u8 input;
+    bool32 upPressed;
+    bool32 downPressed;
+    bool32 leftPressed;
+    bool32 rightPressed;
 
     input = MAP_INPUT_NONE;
     sRegionMap->cursorDeltaX = 0;
     sRegionMap->cursorDeltaY = 0;
-    if (JOY_HELD(DPAD_UP) && sRegionMap->cursorPosY > MAPCURSOR_Y_MIN)
+
+    // Fast-forward turns a held direction into many game frames. On the Fly
+    // map, require a fresh press so every tap always advances one map square.
+    // Other region-map screens retain their original hold-to-scroll behavior.
+    if (sFlyMap != NULL)
+    {
+        upPressed = JOY_NEW(DPAD_UP);
+        downPressed = JOY_NEW(DPAD_DOWN);
+        leftPressed = JOY_NEW(DPAD_LEFT);
+        rightPressed = JOY_NEW(DPAD_RIGHT);
+    }
+    else
+    {
+        upPressed = JOY_HELD(DPAD_UP);
+        downPressed = JOY_HELD(DPAD_DOWN);
+        leftPressed = JOY_HELD(DPAD_LEFT);
+        rightPressed = JOY_HELD(DPAD_RIGHT);
+    }
+
+    if (upPressed && sRegionMap->cursorPosY > MAPCURSOR_Y_MIN)
     {
         sRegionMap->cursorDeltaY = -1;
         input = MAP_INPUT_MOVE_START;
     }
-    if (JOY_HELD(DPAD_DOWN) && sRegionMap->cursorPosY < MAPCURSOR_Y_MAX)
+    if (downPressed && sRegionMap->cursorPosY < MAPCURSOR_Y_MAX)
     {
         sRegionMap->cursorDeltaY = +1;
         input = MAP_INPUT_MOVE_START;
     }
-    if (JOY_HELD(DPAD_LEFT) && sRegionMap->cursorPosX > MAPCURSOR_X_MIN)
+    if (leftPressed && sRegionMap->cursorPosX > MAPCURSOR_X_MIN)
     {
         sRegionMap->cursorDeltaX = -1;
         input = MAP_INPUT_MOVE_START;
     }
-    if (JOY_HELD(DPAD_RIGHT) && sRegionMap->cursorPosX < MAPCURSOR_X_MAX)
+    if (rightPressed && sRegionMap->cursorPosX < MAPCURSOR_X_MAX)
     {
         sRegionMap->cursorDeltaX = +1;
         input = MAP_INPUT_MOVE_START;

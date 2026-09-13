@@ -175,6 +175,7 @@
 static EWRAM_DATA bool8 sStartedPokeBallTask = 0;
 static EWRAM_DATA u16 sCurrItemAndOptionMenuCheck = 0;
 EWRAM_DATA bool8 gRunSetupRandomizerEnabled;
+EWRAM_DATA bool8 gRunSetupSeedIsCustom;
 EWRAM_DATA u8 gRunSetupStarterMode;
 EWRAM_DATA u32 gRunSetupWorldSeed;
 static EWRAM_DATA bool8 sRunSetupRandomizer;
@@ -1926,6 +1927,7 @@ static void Task_RunSetup_Input(u8 taskId)
         else if (JOY_NEW(A_BUTTON))
         {
             gRunSetupRandomizerEnabled = sRunSetupRandomizer;
+            gRunSetupSeedIsCustom = sRunSetupCustom;
             gRunSetupStarterMode = sRunSetupStarter ? RUN_STARTER_RANDOM : RUN_STARTER_NORMAL;
             gRunSetupWorldSeed = sRunSetupSeed;
             sRunSetupReturnToBirch = TRUE;
