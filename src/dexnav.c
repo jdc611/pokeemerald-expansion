@@ -251,7 +251,7 @@ static const struct WindowTemplate sDexNavGuiWindowTemplates[] =
         .tilemapLeft = 0,
         .tilemapTop = 15,
         .width = 8,
-        .height = 1,
+        .height = 2,
         .paletteNum = 15,
         .baseBlock = 136,
     },
