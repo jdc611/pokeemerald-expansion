@@ -1990,9 +1990,9 @@ static void RunSetup_Draw(u8 cursor)
         AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 31, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupFilter);
         AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 51, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupType);
         AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 71, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupAbility);
-        RunSetup_DrawChoice(sText_RunSetupOff, 83, 30, sRunSetupFilter == RUN_FILTER_NONE);
-        RunSetup_DrawChoice(sText_RunSetupTypeFilter, 136, 30, sRunSetupFilter == RUN_FILTER_TYPE);
-        RunSetup_DrawChoice(sText_RunSetupAbility, 189, 30, sRunSetupFilter == RUN_FILTER_ABILITY);
+        RunSetup_DrawChoice(sText_RunSetupOff, 65, 30, sRunSetupFilter == RUN_FILTER_NONE);
+        RunSetup_DrawChoice(sText_RunSetupTypeFilter, 118, 30, sRunSetupFilter == RUN_FILTER_TYPE);
+        RunSetup_DrawChoice(sText_RunSetupAbility, 171, 30, sRunSetupFilter == RUN_FILTER_ABILITY);
         RunSetup_DrawChoice(gTypesInfo[sRunSetupType].name, 105, 50, cursor == 1);
         RunSetup_DrawChoice(gAbilitiesInfo[sRunSetupAbility].name, 105, 70, cursor == 2);
         if (sRunSetupFilter == RUN_FILTER_TYPE_ABILITY)
@@ -2130,52 +2130,6 @@ static void Task_RunSetup_Input(u8 taskId)
                 RunSetup_Draw(*cursor);
                 return;
             }
-            sRunSetupConfirm = TRUE;
-            *cursor = 1;
-        }
-        else
-            return;
-
-        PlaySE(SE_SELECT);
-        RunSetup_Draw(*cursor);
-        return;
-    }
-
-    if (JOY_NEW(DPAD_UP))
-            *cursor = (*cursor + 3) % 4;
-        else if (JOY_NEW(DPAD_DOWN))
-            *cursor = (*cursor + 1) % 4;
-        else if (JOY_NEW(DPAD_LEFT) && (*cursor == 2 || *cursor == 3))
-            *cursor = 2;
-        else if (JOY_NEW(DPAD_RIGHT) && (*cursor == 2 || *cursor == 3))
-            *cursor = 3;
-        else if ((JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON)) && *cursor == 0)
-        {
-            sRunSetupFilter = sRunSetupFilter == RUN_FILTER_NONE ? RUN_FILTER_TYPE : RUN_FILTER_NONE;
-            if (sRunSetupFilter == RUN_FILTER_TYPE && sRunSetupRandomizer == RUN_WILD_NORMAL)
-                // Filtered runs default to progression-aware encounters. The player
-                // can still explicitly choose RANDOM on page 1 for an unscaled run.
-                sRunSetupRandomizer = RUN_WILD_SCALED;
-        }
-        else if ((JOY_NEW(DPAD_LEFT)) && *cursor == 1)
-        {
-            sRunSetupType = sRunSetupType <= TYPE_NORMAL ? TYPE_FAIRY : sRunSetupType - 1;
-            if (sRunSetupType == TYPE_MYSTERY)
-                sRunSetupType--;
-        }
-        else if ((JOY_NEW(DPAD_RIGHT | A_BUTTON)) && *cursor == 1)
-        {
-            sRunSetupType = sRunSetupType >= TYPE_FAIRY ? TYPE_NORMAL : sRunSetupType + 1;
-            if (sRunSetupType == TYPE_MYSTERY)
-                sRunSetupType++;
-        }
-        else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 2))
-        {
-            sRunSetupPage = 0;
-            *cursor = 3;
-        }
-        else if (JOY_NEW(A_BUTTON) && *cursor == 3)
-        {
             sRunSetupConfirm = TRUE;
             *cursor = 1;
         }
