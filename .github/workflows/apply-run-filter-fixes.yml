@@ -1,0 +1,62 @@
+name: Apply run filter fixes
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-run-filter-fixes.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Patch run filter bugs
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f'Expected block not found in {path}')
+              if text.count(old) != 1:
+                  raise SystemExit(f'Expected exactly one match in {path}, found {text.count(old)}')
+              p.write_text(text.replace(old, new, 1))
+
+          # Filter page: BACK and CONFIRM are a horizontal pair.
+          replace_once(
+              'src/main_menu.c',
+              '''        else if ((JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON)) && *cursor == 0)\n''',
+              '''        else if (JOY_NEW(DPAD_LEFT) && (*cursor == 2 || *cursor == 3))\n            *cursor = 2;\n        else if (JOY_NEW(DPAD_RIGHT) && (*cursor == 2 || *cursor == 3))\n            *cursor = 3;\n        else if ((JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON)) && *cursor == 0)\n''')
+
+          # A type-filtered route must stay at 1-3 species. The normal night-table
+          # rotation can otherwise split the restricted slots into a second set.
+          replace_once(
+              'src/wild_encounter.c',
+              '''    if (area == WILD_AREA_LAND && wildMonIndex >= 8)\n''',
+              '''    if (gSaveBlock3Ptr->filterMode != RUN_FILTER_TYPE\n     && area == WILD_AREA_LAND && wildMonIndex >= 8)\n''')
+
+          # Type-filtered random starters use the selected type. Scaled mode uses
+          # tier 0 so the opening choices stay early-game appropriate.
+          old_starters = '''static void GenerateRandomStarters(void)\n{\n    if (gSaveBlock3Ptr->starterMode == RUN_STARTER_NORMAL)\n    {\n        sStarterMon[0] = SPECIES_TREECKO;\n        sStarterMon[1] = SPECIES_TORCHIC;\n        sStarterMon[2] = SPECIES_MUDKIP;\n        return;\n    }\n\n    if (gSaveBlock3Ptr->starterMode != RUN_STARTER_RANDOM)\n        return;\n\n    rng_value_t oldRngState = gRngValue;\n\n    struct FilterFuncArgs filterArgs =\n{\n    \n        .arg1 = FILTER_FUNC_ARG_NONE,\n        .arg2 = FILTER_FUNC_ARG_NONE,\n    };\n\n    SeedRng(gSaveBlock3Ptr->worldSeed);\n\n    for (u32 i = 0; i < STARTER_MON_COUNT; i++)\n    {\n        do\n        {\n            sStarterMon[i] = GetRandomSpecies(SPECIES_GENERATOR_NO_SUPERMONS, &filterArgs);\n        }\n        while ((i > 0 && sStarterMon[i] == sStarterMon[0])\n            || (i > 1 && sStarterMon[i] == sStarterMon[1]));\n    }\n\n    gRngValue = oldRngState;\n\n}\n'''
+          new_starters = '''static void GenerateRandomStarters(void)\n{\n    bool8 typeFiltered = gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE;\n    u32 generator = SPECIES_GENERATOR_NO_SUPERMONS;\n\n    if (gSaveBlock3Ptr->starterMode == RUN_STARTER_NORMAL && !typeFiltered)\n    {\n        sStarterMon[0] = SPECIES_TREECKO;\n        sStarterMon[1] = SPECIES_TORCHIC;\n        sStarterMon[2] = SPECIES_MUDKIP;\n        return;\n    }\n\n    if (gSaveBlock3Ptr->starterMode != RUN_STARTER_RANDOM && !typeFiltered)\n        return;\n\n    rng_value_t oldRngState = gRngValue;\n    struct FilterFuncArgs filterArgs =\n    {\n        .arg1 = FILTER_FUNC_ARG_NONE,\n        .arg2 = FILTER_FUNC_ARG_NONE,\n    };\n\n    if (typeFiltered)\n    {\n        filterArgs.arg1 = gSaveBlock3Ptr->filterValue;\n        if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)\n        {\n            filterArgs.arg2 = 0;\n            generator = SPECIES_GENERATOR_SCALED_TYPE_FILTERED;\n        }\n        else\n        {\n            generator = SPECIES_GENERATOR_TYPE_FILTERED;\n        }\n    }\n\n    SeedRng(gSaveBlock3Ptr->worldSeed);\n\n    for (u32 i = 0; i < STARTER_MON_COUNT; i++)\n    {\n        do\n        {\n            sStarterMon[i] = GetRandomSpecies(generator, &filterArgs);\n        }\n        while ((i > 0 && sStarterMon[i] == sStarterMon[0])\n            || (i > 1 && sStarterMon[i] == sStarterMon[1]));\n    }\n\n    gRngValue = oldRngState;\n}\n'''
+          replace_once('src/starter_choose.c', old_starters, new_starters)
+
+          # Remove this one-shot helper from the resulting source commit.
+          Path('.github/workflows/apply-run-filter-fixes.yml').unlink()
+
+      - name: Commit patched sources
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/main_menu.c src/wild_encounter.c src/starter_choose.c .github/workflows/apply-run-filter-fixes.yml
+          git commit -m "Fix filtered run encounters and starters"
+          git push origin HEAD:master
