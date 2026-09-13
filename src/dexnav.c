@@ -286,7 +286,7 @@ static const struct OamData sHeldItemOam =
 static const struct OamData sCapturedAllOam =
 {
     .y = 0,
-    .affineMode = 1,
+    .affineMode = ST_OAM_AFFINE_OFF,
     .objMode = 0,
     .mosaic = 0,
     .bpp = 0,
@@ -1641,6 +1641,7 @@ static bool8 DexNav_LoadGraphics(void)
         {
             DecompressDataWithHeaderWram(sDexNavGuiTilemap, sBg1TilemapBuffer);
             PrepareFishingDexNavLayout();
+            ScheduleBgCopyTilemapToVram(1);
             sDexNavUiDataPtr->state++;
         }
         break;

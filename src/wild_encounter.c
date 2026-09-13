@@ -29,6 +29,7 @@
 #include "battle_pike.h"
 #include "battle_pyramid.h"
 #include "constants/abilities.h"
+#include "constants/flags.h"
 #include "constants/game_stat.h"
 #include "constants/item.h"
 #include "constants/items.h"
@@ -42,7 +43,7 @@ extern const u8 EventScript_SprayWoreOff[];
 #define MAX_ENCOUNTER_RATE 2880
 
 #define NUM_FEEBAS_SPOTS 6
-#define RANDOMIZED_FISHING_UNIQUE_SLOTS 7
+#define RANDOMIZED_WATER_UNIQUE_SLOTS 3
 
 // Number of accessible fishing spots in each section of Route 119
 // Each section is an area of the route between the y coordinates in sRoute119WaterTileData
@@ -530,15 +531,23 @@ void CreateWildMon(enum Species species, u8 level)
 #define TRY_GET_ABILITY_INFLUENCED_WILD_MON_INDEX(wildPokemon, type, ability, ptr, count) TryGetAbilityInfluencedWildMonIndex(wildPokemon, type, ability, ptr)
 #endif
 
-static u32 GetScaledWildTier(u8 level)
+static u32 GetScaledWildTier(void)
 {
-    if (level <= 10)
+    u32 badgeCount = 0;
+
+    for (u32 flag = FLAG_BADGE01_GET; flag < FLAG_BADGE01_GET + NUM_BADGES; flag++)
+    {
+        if (FlagGet(flag))
+            badgeCount++;
+    }
+
+    if (badgeCount == 0)
         return 0;
-    if (level <= 20)
+    if (badgeCount <= 2)
         return 1;
-    if (level <= 30)
+    if (badgeCount <= 4)
         return 2;
-    if (level <= 40)
+    if (badgeCount <= 6)
         return 3;
     return 4;
 }
@@ -561,10 +570,19 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
     seed ^= ((u32)gSaveBlock1Ptr->location.mapGroup << 24);
     seed ^= ((u32)gSaveBlock1Ptr->location.mapNum << 16);
     seed ^= ((u32)area << 8);
-    // Fishing has ten weighted slots but the DexNav can cleanly show seven.
-    // Reuse two Super Rod seeds for its final slots so every result remains visible.
-    if (area == WILD_AREA_FISHING && seedMonIndex >= RANDOMIZED_FISHING_UNIQUE_SLOTS)
-        seedMonIndex = 5 + ((seedMonIndex - RANDOMIZED_FISHING_UNIQUE_SLOTS) % 2);
+    // Weighted water slots repeat a smaller set so randomized routes do not
+    // become overcrowded: three Surf species and five across the three rods.
+    if (area == WILD_AREA_WATER && seedMonIndex >= RANDOMIZED_WATER_UNIQUE_SLOTS)
+        seedMonIndex %= RANDOMIZED_WATER_UNIQUE_SLOTS;
+    else if (area == WILD_AREA_FISHING)
+    {
+        if (seedMonIndex == 1)
+            seedMonIndex = 0; // one Old Rod species
+        else if (seedMonIndex == 4)
+            seedMonIndex = 2; // two Good Rod species
+        else if (seedMonIndex >= 7)
+            seedMonIndex = 5 + ((seedMonIndex - 7) % 2); // two Super Rod species
+    }
 
     seed ^= seedMonIndex;
 
@@ -581,7 +599,7 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
     SeedRng(seed);
     if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
     {
-        filterArgs.arg1 = GetScaledWildTier(wildMonInfo->wildPokemon[seedMonIndex].maxLevel);
+        filterArgs.arg1 = GetScaledWildTier();
         generator = SPECIES_GENERATOR_SCALED_WILD;
     }
     species = GetRandomSpecies(generator, &filterArgs);
