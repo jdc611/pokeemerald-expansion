@@ -249,9 +249,9 @@ static const struct WindowTemplate sDexNavGuiWindowTemplates[] =
     {
         .bg = 0,
         .tilemapLeft = 0,
-        .tilemapTop = 14,
+        .tilemapTop = 15,
         .width = 8,
-        .height = 2,
+        .height = 1,
         .paletteNum = 15,
         .baseBlock = 136,
     },
@@ -1616,20 +1616,30 @@ static void PrepareFishingDexNavLayout(void)
     u16 *tilemap = (u16 *)sBg1TilemapBuffer;
 
     // Replace the unused three-slot Hidden box with a full-width Fishing box.
-    // Reusing the existing frame tiles keeps it visually identical to Land.
-    // Fishing uses the same cyan header treatment as Water, extended across
-    // the full left panel without retaining the baked-in WATER lettering.
+    // Extend Water's cyan header and frame treatment across the left panel.
     for (x = 0; x < 19; x++)
         tilemap[15 * 32 + x] = tilemap[1 * 32 + 5];
     tilemap[15 * 32 + 19] = tilemap[1 * 32 + 18];
 
-    for (x = 0; x < 20; x++)
+    tilemap[16 * 32] = tilemap[2 * 32 + 1];
+    for (x = 1; x < 19; x++)
+        tilemap[16 * 32 + x] = tilemap[2 * 32 + 5];
+    tilemap[16 * 32 + 19] = tilemap[2 * 32 + 18];
+
+    tilemap[17 * 32] = tilemap[4 * 32 + 1];
+    tilemap[18 * 32] = tilemap[4 * 32 + 1];
+    for (x = 1; x < 19; x++)
     {
-        tilemap[16 * 32 + x] = tilemap[8 * 32 + x];
-        tilemap[17 * 32 + x] = tilemap[9 * 32 + x];
-        tilemap[18 * 32 + x] = tilemap[9 * 32 + x];
-        tilemap[19 * 32 + x] = tilemap[14 * 32 + x];
+        tilemap[17 * 32 + x] = tilemap[4 * 32 + 5];
+        tilemap[18 * 32 + x] = tilemap[4 * 32 + 5];
     }
+    tilemap[17 * 32 + 19] = tilemap[4 * 32 + 18];
+    tilemap[18 * 32 + 19] = tilemap[4 * 32 + 18];
+
+    tilemap[19 * 32] = tilemap[6 * 32 + 1];
+    for (x = 1; x < 19; x++)
+        tilemap[19 * 32 + x] = tilemap[6 * 32 + 5];
+    tilemap[19 * 32 + 19] = tilemap[6 * 32 + 18];
 }
 
 static bool8 DexNav_LoadGraphics(void)
@@ -1843,7 +1853,7 @@ static void DexNav_InitWindows(void)
     InitWindows(sDexNavGuiWindowTemplates);
     DeactivateAllTextPrinters();
     FillWindowPixelBuffer(WINDOW_FISHING_LABEL, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
-    AddTextPrinterParameterized3(WINDOW_FISHING_LABEL, FONT_SMALL_NARROW, 2, 6, sFontColor_White, 0, sText_Fishing);
+    AddTextPrinterParameterized3(WINDOW_FISHING_LABEL, FONT_SMALL_NARROW, 2, 0, sFontColor_White, 0, sText_Fishing);
     PutWindowTilemap(WINDOW_FISHING_LABEL);
     CopyWindowToVram(WINDOW_FISHING_LABEL, COPYWIN_FULL);
     ScheduleBgCopyTilemapToVram(0);
