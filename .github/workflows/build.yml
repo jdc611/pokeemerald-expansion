@@ -2,10 +2,6 @@ name: CI
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-      - upcoming
   pull_request:
   
 env:
