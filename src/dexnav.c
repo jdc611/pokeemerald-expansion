@@ -197,6 +197,9 @@ static const u8 sText_DexNavChain[] = _("CHAIN {STR_VAR_1}");
 static const u8 sText_DexNavChainLong[] = _("CHAIN {STR_VAR_1}");
 static const u8 sText_Day[] = _("DAY");
 static const u8 sText_Night[] = _("NIGHT");
+static const u8 sText_MethodWalk[] = _("WALK");
+static const u8 sText_MethodSurf[] = _("SURF");
+static const u8 sText_MethodHidden[] = _("HIDDEN");
 
 static const u8 sText_ArrowLeft[] = _("{LEFT_ARROW}");
 static const u8 sText_ArrowRight[] = _("{RIGHT_ARROW}");
@@ -2043,6 +2046,7 @@ static void PrintCurrentSpeciesInfo(void)
 {
     enum Species species = DexNavGetSpecies();
     enum NationalDexOrder dexNum = SpeciesToNationalPokedexNum(species);
+    const u8 *method;
     enum Type type1, type2;
 
     if (!VarGet(VAR_DEXNAV_INFO_REVEALED) && !GetSetPokedexFlag(dexNum, FLAG_GET_SEEN))
@@ -2083,6 +2087,13 @@ static void PrintCurrentSpeciesInfo(void)
     {
         ConvertIntToDecimalStringN(gStringVar4, GetSearchLevel(species), 0, 4);
         AddTextPrinterParameterized3(WINDOW_INFO, FONT_SMALL, 0, SEARCH_LEVEL_Y, sFontColor_Black, 0, gStringVar4);
+        if (sDexNavUiDataPtr->environment == ENCOUNTER_TYPE_WATER)
+            method = sText_MethodSurf;
+        else if (sDexNavUiDataPtr->environment == ENCOUNTER_TYPE_HIDDEN)
+            method = sText_MethodHidden;
+        else
+            method = sText_MethodWalk;
+        AddTextPrinterParameterized3(WINDOW_INFO, FONT_SMALL, 20, SEARCH_LEVEL_Y, sFontColor_Black, 0, method);
     }
 
     //hidden ability

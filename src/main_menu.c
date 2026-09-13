@@ -302,6 +302,7 @@ static const u8 gText_ContinueMenuBadges[] = _("BADGES");
 static const u8 sText_RunSetupTitle[] = _("RUN SETUP");
 static const u8 sText_RunSetupConfirm[] = _("CONFIRM RUN");
 static const u8 sText_RunSetupWild[] = _("WILD POKéMON");
+static const u8 sText_RunSetupWildMode[] = _("WILD MODE");
 static const u8 sText_RunSetupStarters[] = _("STARTERS");
 static const u8 sText_RunSetupSeed[] = _("SEED");
 static const u8 sText_RunSetupYes[] = _("YES");
@@ -1938,7 +1939,7 @@ static void RunSetup_Draw(u8 cursor)
     }
     else
     {
-        AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 35, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupWild);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 16, 35, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupWildMode);
         AddTextPrinterParameterized3(0, FONT_NORMAL, 16, 57, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupStarters);
         AddTextPrinterParameterized3(0, FONT_NORMAL, 16, 79, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupSeed);
         RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 88, 34, sRunSetupRandomizer == RUN_WILD_NORMAL);
