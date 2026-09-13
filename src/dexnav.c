@@ -1617,9 +1617,15 @@ static void PrepareFishingDexNavLayout(void)
 
     // Replace the unused three-slot Hidden box with a full-width Fishing box.
     // Reusing the existing frame tiles keeps it visually identical to Land.
+    // Build a green section header from the Land header's frame and blank
+    // grass tile, then draw the Fishing title over it in the window layer.
+    tilemap[15 * 32] = tilemap[7 * 32 + 19] ^ 0x400;
+    for (x = 1; x < 19; x++)
+        tilemap[15 * 32 + x] = tilemap[7 * 32 + 4];
+    tilemap[15 * 32 + 19] = tilemap[7 * 32 + 19];
+
     for (x = 0; x < 20; x++)
     {
-        tilemap[15 * 32 + x] = 0xF;
         tilemap[16 * 32 + x] = tilemap[8 * 32 + x];
         tilemap[17 * 32 + x] = tilemap[9 * 32 + x];
         tilemap[18 * 32 + x] = tilemap[9 * 32 + x];
