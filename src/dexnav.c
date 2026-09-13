@@ -266,9 +266,9 @@ static const struct WindowTemplate sDexNavGuiWindowTemplates[] =
     {
         .bg = 0,
         .tilemapLeft = 0,
-        .tilemapTop = 15,
+        .tilemapTop = 14,
         .width = 8,
-        .height = 1,
+        .height = 2,
         .paletteNum = 15,
         .baseBlock = 136,
     },
@@ -1868,7 +1868,7 @@ static void DexNav_InitWindows(void)
     InitWindows(sDexNavGuiWindowTemplates);
     DeactivateAllTextPrinters();
     FillWindowPixelBuffer(WINDOW_FISHING_LABEL, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
-    AddTextPrinterParameterized3(WINDOW_FISHING_LABEL, FONT_SMALL_NARROW, 2, 0, sFontColor_White, 0, sText_Fishing);
+    AddTextPrinterParameterized3(WINDOW_FISHING_LABEL, FONT_SMALL_NARROW, 2, 6, sFontColor_White, 0, sText_Fishing);
     PutWindowTilemap(WINDOW_FISHING_LABEL);
     CopyWindowToVram(WINDOW_FISHING_LABEL, COPYWIN_FULL);
     ScheduleBgCopyTilemapToVram(0);
