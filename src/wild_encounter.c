@@ -531,9 +531,10 @@ void CreateWildMon(enum Species species, u8 level)
 #define TRY_GET_ABILITY_INFLUENCED_WILD_MON_INDEX(wildPokemon, type, ability, ptr, count) TryGetAbilityInfluencedWildMonIndex(wildPokemon, type, ability, ptr)
 #endif
 
-static u32 GetScaledWildTier(void)
+static u32 GetScaledWildTier(enum WildPokemonArea area, u8 wildMonIndex)
 {
     u32 badgeCount = 0;
+    u32 tier;
 
     for (u32 flag = FLAG_BADGE01_GET; flag < FLAG_BADGE01_GET + NUM_BADGES; flag++)
     {
@@ -542,14 +543,24 @@ static u32 GetScaledWildTier(void)
     }
 
     if (badgeCount == 0)
-        return 0;
-    if (badgeCount <= 2)
-        return 1;
-    if (badgeCount <= 4)
-        return 2;
-    if (badgeCount <= 6)
-        return 3;
-    return 4;
+        tier = 0;
+    else if (badgeCount <= 2)
+        tier = 1;
+    else if (badgeCount <= 4)
+        tier = 2;
+    else if (badgeCount <= 6)
+        tier = 3;
+    else
+        tier = 4;
+
+    // Rod progression already gates these encounters. Preserve the reward for
+    // acquiring better rods even when their tables are viewed on an early map.
+    if (area == WILD_AREA_FISHING && wildMonIndex >= 5)
+        tier = 4; // Super Rod
+    else if (area == WILD_AREA_FISHING && wildMonIndex >= 2 && tier < 2)
+        tier = 2; // Good Rod
+
+    return tier;
 }
 
 enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo, enum WildPokemonArea area, u8 wildMonIndex)
@@ -599,7 +610,7 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
     SeedRng(seed);
     if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
     {
-        filterArgs.arg1 = GetScaledWildTier();
+        filterArgs.arg1 = GetScaledWildTier(area, wildMonIndex);
         generator = SPECIES_GENERATOR_SCALED_WILD;
     }
     species = GetRandomSpecies(generator, &filterArgs);
