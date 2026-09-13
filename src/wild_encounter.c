@@ -42,6 +42,7 @@ extern const u8 EventScript_SprayWoreOff[];
 #define MAX_ENCOUNTER_RATE 2880
 
 #define NUM_FEEBAS_SPOTS 6
+#define RANDOMIZED_FISHING_UNIQUE_SLOTS 7
 
 // Number of accessible fishing spots in each section of Route 119
 // Each section is an area of the route between the y coordinates in sRoute119WaterTileData
@@ -546,6 +547,7 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
 {
     rng_value_t oldRngState = gRngValue;
     enum Species species;
+    u8 seedMonIndex = wildMonIndex;
 
     struct FilterFuncArgs filterArgs =
     {
@@ -559,7 +561,12 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
     seed ^= ((u32)gSaveBlock1Ptr->location.mapGroup << 24);
     seed ^= ((u32)gSaveBlock1Ptr->location.mapNum << 16);
     seed ^= ((u32)area << 8);
-    seed ^= wildMonIndex;
+    // Fishing has ten weighted slots but the DexNav can cleanly show seven.
+    // Reuse two Super Rod seeds for its final slots so every result remains visible.
+    if (area == WILD_AREA_FISHING && seedMonIndex >= RANDOMIZED_FISHING_UNIQUE_SLOTS)
+        seedMonIndex = 5 + ((seedMonIndex - RANDOMIZED_FISHING_UNIQUE_SLOTS) % 2);
+
+    seed ^= seedMonIndex;
 
     // Only the four rare land slots rotate with an area's Night table.
     // This keeps most of a randomized route stable between Day and Night.
@@ -574,7 +581,7 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
     SeedRng(seed);
     if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
     {
-        filterArgs.arg1 = GetScaledWildTier(wildMonInfo->wildPokemon[wildMonIndex].maxLevel);
+        filterArgs.arg1 = GetScaledWildTier(wildMonInfo->wildPokemon[seedMonIndex].maxLevel);
         generator = SPECIES_GENERATOR_SCALED_WILD;
     }
     species = GetRandomSpecies(generator, &filterArgs);
@@ -647,7 +654,9 @@ bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, enum WildPok
 static u16 GenerateFishingWildMon(const struct WildPokemonInfo *wildMonInfo, u8 rod)
 {
     u8 wildMonIndex = ChooseWildMonIndex_Fishing(rod);
-    enum Species wildMonSpecies = wildMonInfo->wildPokemon[wildMonIndex].species;
+    enum Species wildMonSpecies = gSaveBlock3Ptr->randomizerEnabled
+            ? GetRandomizedWildSpecies(wildMonInfo, WILD_AREA_FISHING, wildMonIndex)
+            : wildMonInfo->wildPokemon[wildMonIndex].species;
     u8 level = ChooseWildMonLevel(wildMonInfo->wildPokemon, wildMonIndex, WILD_AREA_FISHING);
 
     UpdateChainFishingStreak();
