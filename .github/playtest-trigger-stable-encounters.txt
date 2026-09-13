@@ -1,0 +1,1 @@
+Trigger Playtest ROM after stable encounter tier source patch.
