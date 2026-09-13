@@ -48,6 +48,35 @@ static const struct RandomSpeciesGeneratorOptions sRandomSpeciesGeneratorOptions
         .randomizeForms = FALSE,
         .dexMode = RANDOM_MON_DEX_NATIONAL,
     },
+    [SPECIES_GENERATOR_ABILITY_FILTERED] =
+    {
+        .filterFunc = IsAbilityFilteredWildSpeciesFilterFunc,
+        .banLegendary = TRUE, .banMythical = TRUE, .banSubLegendary = TRUE,
+        .banUltraBeast = TRUE, .banParadox = TRUE, .randomizeForms = FALSE,
+        .dexMode = RANDOM_MON_DEX_NATIONAL,
+    },
+    [SPECIES_GENERATOR_SCALED_ABILITY_FILTERED] =
+    {
+        .filterFunc = IsAbilityFilteredWildSpeciesFilterFunc,
+        .banLegendary = TRUE, .banMythical = TRUE, .banSubLegendary = TRUE,
+        .banUltraBeast = TRUE, .banParadox = TRUE, .randomizeForms = FALSE,
+        .dexMode = RANDOM_MON_DEX_NATIONAL,
+    },
+    [SPECIES_GENERATOR_TYPE_ABILITY_FILTERED] =
+    {
+        .filterFunc = IsTypeAbilityFilteredWildSpeciesFilterFunc,
+        .banLegendary = TRUE, .banMythical = TRUE, .banSubLegendary = TRUE,
+        .banUltraBeast = TRUE, .banParadox = TRUE, .randomizeForms = FALSE,
+        .dexMode = RANDOM_MON_DEX_NATIONAL,
+    },
+    [SPECIES_GENERATOR_SCALED_TYPE_ABILITY_FILTERED] =
+    {
+        .filterFunc = IsTypeAbilityFilteredWildSpeciesFilterFunc,
+        .banLegendary = TRUE, .banMythical = TRUE, .banSubLegendary = TRUE,
+        .banUltraBeast = TRUE, .banParadox = TRUE, .randomizeForms = FALSE,
+        .dexMode = RANDOM_MON_DEX_NATIONAL,
+    },
+
 };
 
 static const struct RandomItemGeneratorOptions sRandomItemGeneratorOptions[RANDOM_ITEM_OPTIONS_COUNT] =

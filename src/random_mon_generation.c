@@ -51,6 +51,8 @@ static enum Species GetSpeciesCandidateForm(enum Species species, const struct R
 static bool32 UNUSED IsInBstRangeFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs);
 static bool32 IsScaledWildSpeciesFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs);
 static bool32 IsTypeFilteredWildSpeciesFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs);
+static bool32 IsAbilityFilteredWildSpeciesFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs);
+static bool32 IsTypeAbilityFilteredWildSpeciesFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs);
 static enum Species GetRandomSpeciesAtIndex(const struct RandomSpeciesGeneratorOptions *options, u32 index);
 static enum Species SlowPickRandomSpecies(const struct RandomSpeciesGeneratorOptions *options, u32 poolSize, const struct FilterFuncArgs *filterFuncArgs);
 static enum Species FastPickRandomSpecies(const struct RandomSpeciesGeneratorOptions *options, u32 poolSize, const struct FilterFuncArgs *filterFuncArgs);
@@ -152,6 +154,46 @@ static bool32 IsTypeFilteredWildSpeciesFilterFunc(enum Species species, const st
 
     if (GetSpeciesType(species, 0) != filterFuncArgs->arg1
      && GetSpeciesType(species, 1) != filterFuncArgs->arg1)
+        return FALSE;
+
+    if (filterFuncArgs->arg2 == FILTER_FUNC_ARG_NONE)
+        return TRUE;
+
+    scaledArgs.arg1 = filterFuncArgs->arg2;
+    scaledArgs.arg2 = FILTER_FUNC_ARG_NONE;
+    return IsScaledWildSpeciesFilterFunc(species, &scaledArgs);
+}
+
+static bool32 IsAbilityFilteredWildSpeciesFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs)
+{
+    struct FilterFuncArgs scaledArgs;
+    enum Ability ability = filterFuncArgs->arg1;
+
+    if (GetSpeciesAbility(species, 0) != ability
+     && GetSpeciesAbility(species, 1) != ability
+     && GetSpeciesAbility(species, 2) != ability)
+        return FALSE;
+
+    if (filterFuncArgs->arg2 == FILTER_FUNC_ARG_NONE)
+        return TRUE;
+
+    scaledArgs.arg1 = filterFuncArgs->arg2;
+    scaledArgs.arg2 = FILTER_FUNC_ARG_NONE;
+    return IsScaledWildSpeciesFilterFunc(species, &scaledArgs);
+}
+
+static bool32 IsTypeAbilityFilteredWildSpeciesFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs)
+{
+    struct FilterFuncArgs scaledArgs;
+    u32 packed = filterFuncArgs->arg1;
+    enum Type type = packed & 31;
+    enum Ability ability = packed >> 5;
+
+    if (GetSpeciesType(species, 0) != type && GetSpeciesType(species, 1) != type)
+        return FALSE;
+    if (GetSpeciesAbility(species, 0) != ability
+     && GetSpeciesAbility(species, 1) != ability
+     && GetSpeciesAbility(species, 2) != ability)
         return FALSE;
 
     if (filterFuncArgs->arg2 == FILTER_FUNC_ARG_NONE)

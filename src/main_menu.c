@@ -181,7 +181,7 @@ EWRAM_DATA bool8 gRunSetupSeedIsCustom;
 EWRAM_DATA u8 gRunSetupStarterMode;
 EWRAM_DATA u32 gRunSetupWorldSeed;
 EWRAM_DATA u8 gRunSetupFilterMode;
-EWRAM_DATA u8 gRunSetupFilterValue;
+EWRAM_DATA u16 gRunSetupFilterValue;
 static EWRAM_DATA u8 sRunSetupRandomizer;
 static EWRAM_DATA bool8 sRunSetupStarter;
 static EWRAM_DATA bool8 sRunSetupCustom;
@@ -192,6 +192,7 @@ static EWRAM_DATA u32 sRunSetupSeed;
 static EWRAM_DATA u8 sRunSetupPage;
 static EWRAM_DATA u8 sRunSetupFilter;
 static EWRAM_DATA u8 sRunSetupType;
+static EWRAM_DATA u16 sRunSetupAbility;
 static EWRAM_DATA u8 sRunSetupNidokingSpriteId;
 static EWRAM_DATA u8 sRunSetupArcanineSpriteId;
 
@@ -325,6 +326,9 @@ static const u8 sText_RunSetupNext[] = _("NEXT");
 static const u8 sText_RunSetupBack[] = _("BACK");
 static const u8 sText_RunSetupFilter[] = _("FILTER");
 static const u8 sText_RunSetupType[] = _("TYPE");
+static const u8 sText_RunSetupAbility[] = _("ABILITY");
+static const u8 sText_RunSetupBoth[] = _("BOTH");
+static const u8 sText_RunSetupLimitedPool[] = _("WARNING: VERY LIMITED POOL");
 static const u8 sText_RunSetupOff[] = _("OFF");
 static const u8 sText_RunSetupTypeFilter[] = _("TYPE");
 static const u8 sText_RunSetupRestricted[] = _("1-3 SPECIES PER AREA");
@@ -1804,6 +1808,7 @@ static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
         sRunSetupPage = 0;
         sRunSetupFilter = RUN_FILTER_NONE;
         sRunSetupType = TYPE_NORMAL;
+        sRunSetupAbility = ABILITY_INTIMIDATE;
         sRunSetupSeed = (((u32)Random() << 16) | Random()) % 100000000;
         FreeAllWindowBuffers();
         DestroyTask(taskId);
@@ -1924,6 +1929,26 @@ static void RunSetup_DrawNarrowChoice(const u8 *text, u8 x, u8 y, bool32 selecte
     AddTextPrinterParameterized3(0, FONT_SMALL, textX, y + 2, colors, TEXT_SKIP_DRAW, text);
 }
 
+static u32 RunSetup_CountEligibleFilterMons(void)
+{
+    u32 count = 0;
+    enum Species species;
+
+    for (species = SPECIES_BULBASAUR; species < NUM_SPECIES; species++)
+    {
+        bool32 typeOk = (GetSpeciesType(species, 0) == sRunSetupType || GetSpeciesType(species, 1) == sRunSetupType);
+        bool32 abilityOk = (GetSpeciesAbility(species, 0) == sRunSetupAbility
+                         || GetSpeciesAbility(species, 1) == sRunSetupAbility
+                         || GetSpeciesAbility(species, 2) == sRunSetupAbility);
+
+        if ((sRunSetupFilter == RUN_FILTER_TYPE && typeOk)
+         || (sRunSetupFilter == RUN_FILTER_ABILITY && abilityOk)
+         || (sRunSetupFilter == RUN_FILTER_TYPE_ABILITY && typeOk && abilityOk))
+            count++;
+    }
+    return count;
+}
+
 static void RunSetup_Draw(u8 cursor)
 {
     const u8 *wild = sRunSetupRandomizer == RUN_WILD_SCALED ? sText_RunSetupScaled
@@ -1931,7 +1956,10 @@ static void RunSetup_Draw(u8 cursor)
                      : sText_RunSetupNormal;
     const u8 *starters = sRunSetupStarter ? sText_RunSetupRandom : sText_RunSetupNormal;
     const u8 *seed = sRunSetupCustom ? sText_RunSetupCustom : sText_RunSetupRandom;
-    const u8 *filter = sRunSetupFilter == RUN_FILTER_TYPE ? gTypesInfo[sRunSetupType].name : sText_RunSetupOff;
+    const u8 *filter = sRunSetupFilter == RUN_FILTER_TYPE ? gTypesInfo[sRunSetupType].name
+                     : sRunSetupFilter == RUN_FILTER_ABILITY ? gAbilitiesInfo[sRunSetupAbility].name
+                     : sRunSetupFilter == RUN_FILTER_TYPE_ABILITY ? sText_RunSetupBoth
+                     : sText_RunSetupOff;
     const u8 *title = sRunSetupConfirm ? sText_RunSetupConfirm
                       : sRunSetupPage == 1 ? sText_RunSetupFilterTitle
                       : sText_RunSetupTitle;
@@ -1958,16 +1986,23 @@ static void RunSetup_Draw(u8 cursor)
     }
     else if (sRunSetupPage == 1)
     {
-        AddTextPrinterParameterized3(0, FONT_NORMAL, 16, 35, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupFilter);
-        AddTextPrinterParameterized3(0, FONT_NORMAL, 16, 57, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupType);
-        RunSetup_DrawChoice(sText_RunSetupOff, 98, 34, sRunSetupFilter == RUN_FILTER_NONE);
-        RunSetup_DrawChoice(sText_RunSetupTypeFilter, 151, 34, sRunSetupFilter == RUN_FILTER_TYPE);
-        RunSetup_DrawChoice(filter, 124, 56, cursor == 1);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 46, 82, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupRestricted);
-        RunSetup_DrawChoice(sText_RunSetupBack, 52, 110, cursor == 2);
-        RunSetup_DrawChoice(sText_RunSetupConfirmButton, 108, 110, cursor == 3);
-        if (cursor < 2)
-            AddTextPrinterParameterized3(0, FONT_NORMAL, 2, 35 + 22 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
+        u32 eligible = RunSetup_CountEligibleFilterMons();
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 31, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupFilter);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 51, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupType);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 71, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupAbility);
+        RunSetup_DrawChoice(sText_RunSetupOff, 83, 30, sRunSetupFilter == RUN_FILTER_NONE);
+        RunSetup_DrawChoice(sText_RunSetupTypeFilter, 136, 30, sRunSetupFilter == RUN_FILTER_TYPE);
+        RunSetup_DrawChoice(sText_RunSetupAbility, 189, 30, sRunSetupFilter == RUN_FILTER_ABILITY);
+        RunSetup_DrawChoice(gTypesInfo[sRunSetupType].name, 105, 50, cursor == 1);
+        RunSetup_DrawChoice(gAbilitiesInfo[sRunSetupAbility].name, 105, 70, cursor == 2);
+        if (sRunSetupFilter == RUN_FILTER_TYPE_ABILITY)
+            AddTextPrinterParameterized3(0, FONT_SMALL, 25, 91, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupLimitedPool);
+        else if (eligible <= 5 && sRunSetupFilter != RUN_FILTER_NONE)
+            AddTextPrinterParameterized3(0, FONT_SMALL, 25, 91, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupLimitedPool);
+        RunSetup_DrawChoice(sText_RunSetupBack, 52, 110, cursor == 3);
+        RunSetup_DrawChoice(sText_RunSetupConfirmButton, 108, 110, cursor == 4);
+        if (cursor < 3)
+            AddTextPrinterParameterized3(0, FONT_NORMAL, 2, 31 + 20 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
     }
     else
     {
@@ -2035,7 +2070,10 @@ static void Task_RunSetup_Input(u8 taskId)
             gRunSetupStarterMode = sRunSetupStarter ? RUN_STARTER_RANDOM : RUN_STARTER_NORMAL;
             gRunSetupWorldSeed = sRunSetupSeed;
             gRunSetupFilterMode = sRunSetupFilter;
-            gRunSetupFilterValue = sRunSetupType;
+            gRunSetupFilterValue = sRunSetupFilter == RUN_FILTER_TYPE ? sRunSetupType
+                                 : sRunSetupFilter == RUN_FILTER_ABILITY ? sRunSetupAbility
+                                 : sRunSetupFilter == RUN_FILTER_TYPE_ABILITY ? (sRunSetupAbility << 5) | sRunSetupType
+                                 : 0;
             sRunSetupReturnToBirch = TRUE;
             RunSetup_DestroyIcons();
             FreeAllWindowBuffers();
@@ -2047,7 +2085,63 @@ static void Task_RunSetup_Input(u8 taskId)
 
     if (sRunSetupPage == 1)
     {
+        u32 eligible;
         if (JOY_NEW(DPAD_UP))
+            *cursor = (*cursor + 4) % 5;
+        else if (JOY_NEW(DPAD_DOWN))
+            *cursor = (*cursor + 1) % 5;
+        else if (JOY_NEW(DPAD_LEFT) && (*cursor == 3 || *cursor == 4))
+            *cursor = 3;
+        else if (JOY_NEW(DPAD_RIGHT) && (*cursor == 3 || *cursor == 4))
+            *cursor = 4;
+        else if ((JOY_NEW(DPAD_LEFT)) && *cursor == 0)
+            sRunSetupFilter = sRunSetupFilter == RUN_FILTER_NONE ? RUN_FILTER_TYPE_ABILITY : sRunSetupFilter - 1;
+        else if ((JOY_NEW(DPAD_RIGHT | A_BUTTON)) && *cursor == 0)
+        {
+            sRunSetupFilter = sRunSetupFilter == RUN_FILTER_TYPE_ABILITY ? RUN_FILTER_NONE : sRunSetupFilter + 1;
+            if (sRunSetupFilter != RUN_FILTER_NONE && sRunSetupRandomizer == RUN_WILD_NORMAL)
+                sRunSetupRandomizer = RUN_WILD_SCALED;
+        }
+        else if (JOY_NEW(DPAD_LEFT) && *cursor == 1)
+        {
+            sRunSetupType = sRunSetupType <= TYPE_NORMAL ? TYPE_FAIRY : sRunSetupType - 1;
+            if (sRunSetupType == TYPE_MYSTERY) sRunSetupType--;
+        }
+        else if (JOY_NEW(DPAD_RIGHT | A_BUTTON) && *cursor == 1)
+        {
+            sRunSetupType = sRunSetupType >= TYPE_FAIRY ? TYPE_NORMAL : sRunSetupType + 1;
+            if (sRunSetupType == TYPE_MYSTERY) sRunSetupType++;
+        }
+        else if (JOY_NEW(DPAD_LEFT) && *cursor == 2)
+            sRunSetupAbility = sRunSetupAbility <= 1 ? ABILITIES_COUNT - 1 : sRunSetupAbility - 1;
+        else if (JOY_NEW(DPAD_RIGHT | A_BUTTON) && *cursor == 2)
+            sRunSetupAbility = sRunSetupAbility >= ABILITIES_COUNT - 1 ? 1 : sRunSetupAbility + 1;
+        else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 3))
+        {
+            sRunSetupPage = 0;
+            *cursor = 3;
+        }
+        else if (JOY_NEW(A_BUTTON) && *cursor == 4)
+        {
+            eligible = RunSetup_CountEligibleFilterMons();
+            if (sRunSetupFilter != RUN_FILTER_NONE && eligible == 0)
+            {
+                PlaySE(SE_BOO);
+                RunSetup_Draw(*cursor);
+                return;
+            }
+            sRunSetupConfirm = TRUE;
+            *cursor = 1;
+        }
+        else
+            return;
+
+        PlaySE(SE_SELECT);
+        RunSetup_Draw(*cursor);
+        return;
+    }
+
+    if (JOY_NEW(DPAD_UP))
             *cursor = (*cursor + 3) % 4;
         else if (JOY_NEW(DPAD_DOWN))
             *cursor = (*cursor + 1) % 4;

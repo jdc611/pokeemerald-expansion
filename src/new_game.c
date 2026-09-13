@@ -59,7 +59,7 @@ extern EWRAM_DATA bool8 gRunSetupSeedIsCustom;
 extern EWRAM_DATA u8 gRunSetupStarterMode;
 extern EWRAM_DATA u32 gRunSetupWorldSeed;
 extern EWRAM_DATA u8 gRunSetupFilterMode;
-extern EWRAM_DATA u8 gRunSetupFilterValue;
+extern EWRAM_DATA u16 gRunSetupFilterValue;
 extern const u8 EventScript_ResetAllMapFlags[];
 extern const u8 EventScript_ResetAllMapFlagsFrlg[];
 

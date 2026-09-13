@@ -279,7 +279,7 @@ struct SaveBlock3
     u8 starterMode;
     u8 rivalMode;
     u8 filterMode;
-    u8 filterValue;
+    u16 filterValue;
     u8 futureEvolutionEligible;
 }; /* max size 1624 bytes */
 

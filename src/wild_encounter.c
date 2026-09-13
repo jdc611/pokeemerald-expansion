@@ -593,10 +593,15 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
     seed ^= ((u32)area << 8);
     if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE)
     {
-        // Restricted runs intentionally expose only one to three distinct
-        // species in each encounter method on a map.
         u8 uniqueSlots = 1 + ((seed >> 8) % 3);
-
+        seedMonIndex %= uniqueSlots;
+    }
+    else if (gSaveBlock3Ptr->filterMode == RUN_FILTER_ABILITY
+          || gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE_ABILITY)
+    {
+        // Ability pools are intentionally tiny: normally one species,
+        // occasionally two. Repeats across routes are expected.
+        u8 uniqueSlots = ((seed >> 13) % 5 == 0) ? 2 : 1;
         seedMonIndex %= uniqueSlots;
     }
     // Weighted water slots repeat a smaller set so randomized routes do not
@@ -617,7 +622,7 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
 
     // Only the four rare land slots rotate with an area's Night table.
     // This keeps most of a randomized route stable between Day and Night.
-    if (gSaveBlock3Ptr->filterMode != RUN_FILTER_TYPE
+    if (gSaveBlock3Ptr->filterMode == RUN_FILTER_NONE
      && area == WILD_AREA_LAND && wildMonIndex >= 8)
     {
         u32 headerId = GetCurrentMapWildMonHeaderId();
@@ -626,18 +631,20 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
             seed ^= 0x4E494748; // "NIGH"
     }
 
-    if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE)
+    if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE
+     || gSaveBlock3Ptr->filterMode == RUN_FILTER_ABILITY
+     || gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE_ABILITY)
     {
         filterArgs.arg1 = gSaveBlock3Ptr->filterValue;
         if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
-        {
             filterArgs.arg2 = GetScaledWildTier(wildMonInfo, area, wildMonIndex, seedMonIndex);
-            generator = SPECIES_GENERATOR_SCALED_TYPE_FILTERED;
-        }
+
+        if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE)
+            generator = gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED ? SPECIES_GENERATOR_SCALED_TYPE_FILTERED : SPECIES_GENERATOR_TYPE_FILTERED;
+        else if (gSaveBlock3Ptr->filterMode == RUN_FILTER_ABILITY)
+            generator = gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED ? SPECIES_GENERATOR_SCALED_ABILITY_FILTERED : SPECIES_GENERATOR_ABILITY_FILTERED;
         else
-        {
-            generator = SPECIES_GENERATOR_TYPE_FILTERED;
-        }
+            generator = gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED ? SPECIES_GENERATOR_SCALED_TYPE_ABILITY_FILTERED : SPECIES_GENERATOR_TYPE_ABILITY_FILTERED;
     }
     else if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
     {
