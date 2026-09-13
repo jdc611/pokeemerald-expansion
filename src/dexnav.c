@@ -196,6 +196,8 @@ static const u8 sText_HeldItem[] = _("{STR_VAR_1}");
 static const u8 sText_StartExit[] = _("{START_BUTTON} EXIT");
 static const u8 sText_DexNavChain[] = _("CHAIN {STR_VAR_1}");
 static const u8 sText_DexNavChainLong[] = _("CHAIN {STR_VAR_1}");
+static const u8 sText_Day[] = _("DAY");
+static const u8 sText_Night[] = _("NIGHT");
 
 static const u8 sText_ArrowLeft[] = _("{LEFT_ARROW}");
 static const u8 sText_ArrowRight[] = _("{RIGHT_ARROW}");
@@ -1869,6 +1871,15 @@ static enum Species GetDexNavSeededSpecies(enum WildPokemonArea area, u8 wildMon
     seed ^= ((u32)area << 8);
     seed ^= wildMonIndex;
 
+    // Match the wild generator: only rare land slots change at night.
+    if (area == WILD_AREA_LAND && wildMonIndex >= 8)
+    {
+        u32 headerId = GetCurrentMapWildMonHeaderId();
+
+        if (headerId != HEADER_NONE && GetTimeOfDayForEncounters(headerId, area) == TIME_NIGHT)
+            seed ^= 0x4E494748; // "NIGH"
+    }
+
     SeedRng(seed);
     species = GetRandomSpecies(SPECIES_GENERATOR_NO_SUPERMONS, &filterArgs);
 
@@ -2136,6 +2147,9 @@ static void PrintCurrentSpeciesInfo(void)
 
 static void PrintMapName(void)
 {
+    const u8 *period = GetTimeOfDay() == TIME_NIGHT ? sText_Night : sText_Day;
+
+    AddTextPrinterParameterized3(WINDOW_REGISTERED, FONT_SMALL, 92, 1, sFontColor_White, TEXT_SKIP_DRAW, period);
     GetMapName(gStringVar3, GetCurrentRegionMapSectionId(), 0);
     AddTextPrinterParameterized3(WINDOW_REGISTERED, FONT_NORMAL, 108 +
                                  GetStringRightAlignXOffset(1, gStringVar3, MAP_NAME_LENGTH * GetFontAttribute(1, FONTATTR_MAX_LETTER_WIDTH)),

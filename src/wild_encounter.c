@@ -547,6 +547,16 @@ static enum Species GetSeededWildSpecies(enum WildPokemonArea area, u8 wildMonIn
     seed ^= ((u32)area << 8);
     seed ^= wildMonIndex;
 
+    // Only the four rare land slots rotate with an area's Night table.
+    // This keeps most of a randomized route stable between Day and Night.
+    if (area == WILD_AREA_LAND && wildMonIndex >= 8)
+    {
+        u32 headerId = GetCurrentMapWildMonHeaderId();
+
+        if (headerId != HEADER_NONE && GetTimeOfDayForEncounters(headerId, area) == TIME_NIGHT)
+            seed ^= 0x4E494748; // "NIGH"
+    }
+
     SeedRng(seed);
     species = GetRandomSpecies(SPECIES_GENERATOR_NO_SUPERMONS, &filterArgs);
 
