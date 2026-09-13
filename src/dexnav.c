@@ -178,6 +178,23 @@ static const u32 sDexNavGuiTiles[] = INCGFX_U32("graphics/dexnav/gui_tiles.png",
 static const u32 sDexNavGuiTilemap[] = INCGFX_U32("graphics/dexnav/gui_tilemap.bin", ".smolTM");
 static const u32 sDexNavGuiPal[] = INCGFX_U32("graphics/dexnav/gui.pal", ".gbapal");
 
+// The original Water header tile reserves its upper pixels for the baked-in
+// WATER lettering. Fishing is drawn at runtime, so it needs a complete cyan
+// tile rather than repeating those transparent upper pixels as a black band.
+static const u32 sFishingHeaderTile[] =
+{
+    0x88888888,
+    0x88888888,
+    0x88888888,
+    0x88888888,
+    0x88888888,
+    0xEEEEEEEE,
+    0x88888888,
+    0x88888888,
+};
+
+#define FISHING_HEADER_TILE 0xB0
+
 static const u32 sSelectionCursorGfx[] = INCGFX_U32("graphics/dexnav/cursor.png", ".4bpp.smol");
 static const u16 sSelectionCursorPal[] = INCGFX_U16("graphics/dexnav/cursor.png", ".gbapal");
 static const u32 sCapturedAllMonsTiles[] = INCGFX_U32("graphics/dexnav/captured_all.png", ".4bpp.smol");  //uses selection cursor pal
@@ -1615,31 +1632,28 @@ static void PrepareFishingDexNavLayout(void)
     u32 x;
     u16 *tilemap = (u16 *)sBg1TilemapBuffer;
 
-    // Replace the unused three-slot Hidden box with a full-width Fishing box.
-    // Extend Water's cyan header and frame treatment across the left panel.
-    for (x = 0; x < 19; x++)
-        tilemap[15 * 32 + x] = tilemap[1 * 32 + 5];
-    tilemap[15 * 32 + 19] = tilemap[1 * 32 + 18];
+    // Replace the unused Hidden box with a full-width Fishing panel. Its
+    // header, sides, interior, and bottom all use Water's visual language.
+    for (x = 0; x < 20; x++)
+        tilemap[15 * 32 + x] = FISHING_HEADER_TILE;
 
-    tilemap[16 * 32] = tilemap[2 * 32 + 1];
-    for (x = 1; x < 19; x++)
-        tilemap[16 * 32 + x] = tilemap[2 * 32 + 5];
-    tilemap[16 * 32 + 19] = tilemap[2 * 32 + 18];
-
-    tilemap[17 * 32] = tilemap[4 * 32 + 1];
-    tilemap[18 * 32] = tilemap[4 * 32 + 1];
     for (x = 1; x < 19; x++)
     {
+        tilemap[16 * 32 + x] = tilemap[4 * 32 + 5];
         tilemap[17 * 32 + x] = tilemap[4 * 32 + 5];
         tilemap[18 * 32 + x] = tilemap[4 * 32 + 5];
     }
-    tilemap[17 * 32 + 19] = tilemap[4 * 32 + 18];
-    tilemap[18 * 32 + 19] = tilemap[4 * 32 + 18];
+    tilemap[16 * 32] = tilemap[4 * 32 + 1];
+    tilemap[17 * 32] = tilemap[4 * 32 + 1];
+    tilemap[18 * 32] = tilemap[4 * 32 + 1];
+    tilemap[16 * 32 + 19] = tilemap[4 * 32 + 17];
+    tilemap[17 * 32 + 19] = tilemap[4 * 32 + 17];
+    tilemap[18 * 32 + 19] = tilemap[4 * 32 + 17];
 
     tilemap[19 * 32] = tilemap[6 * 32 + 1];
     for (x = 1; x < 19; x++)
         tilemap[19 * 32 + x] = tilemap[6 * 32 + 5];
-    tilemap[19 * 32 + 19] = tilemap[6 * 32 + 18];
+    tilemap[19 * 32 + 19] = tilemap[6 * 32 + 17];
 }
 
 static bool8 DexNav_LoadGraphics(void)
@@ -1654,6 +1668,7 @@ static bool8 DexNav_LoadGraphics(void)
     case 1:
         if (FreeTempTileDataBuffersIfPossible() != TRUE)
         {
+            LoadBgTiles(1, sFishingHeaderTile, sizeof(sFishingHeaderTile), FISHING_HEADER_TILE);
             DecompressDataWithHeaderWram(sDexNavGuiTilemap, sBg1TilemapBuffer);
             PrepareFishingDexNavLayout();
             ScheduleBgCopyTilemapToVram(1);
