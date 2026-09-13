@@ -249,7 +249,7 @@ static const struct WindowTemplate sDexNavGuiWindowTemplates[] =
     {
         .bg = 0,
         .tilemapLeft = 0,
-        .tilemapTop = 15,
+        .tilemapTop = 14,
         .width = 8,
         .height = 2,
         .paletteNum = 15,
@@ -1617,12 +1617,11 @@ static void PrepareFishingDexNavLayout(void)
 
     // Replace the unused three-slot Hidden box with a full-width Fishing box.
     // Reusing the existing frame tiles keeps it visually identical to Land.
-    // Build a green section header from the Land header's frame and blank
-    // grass tile, then draw the Fishing title over it in the window layer.
-    tilemap[15 * 32] = tilemap[7 * 32 + 19] ^ 0x400;
-    for (x = 1; x < 19; x++)
-        tilemap[15 * 32 + x] = tilemap[7 * 32 + 4];
-    tilemap[15 * 32 + 19] = tilemap[7 * 32 + 19];
+    // Fishing uses the same cyan header treatment as Water, extended across
+    // the full left panel without retaining the baked-in WATER lettering.
+    for (x = 0; x < 19; x++)
+        tilemap[15 * 32 + x] = tilemap[1 * 32 + 5];
+    tilemap[15 * 32 + 19] = tilemap[1 * 32 + 18];
 
     for (x = 0; x < 20; x++)
     {
@@ -1844,7 +1843,7 @@ static void DexNav_InitWindows(void)
     InitWindows(sDexNavGuiWindowTemplates);
     DeactivateAllTextPrinters();
     FillWindowPixelBuffer(WINDOW_FISHING_LABEL, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
-    AddTextPrinterParameterized3(WINDOW_FISHING_LABEL, FONT_SMALL_NARROW, 2, 0, sFontColor_White, 0, sText_Fishing);
+    AddTextPrinterParameterized3(WINDOW_FISHING_LABEL, FONT_SMALL_NARROW, 2, 6, sFontColor_White, 0, sText_Fishing);
     PutWindowTilemap(WINDOW_FISHING_LABEL);
     CopyWindowToVram(WINDOW_FISHING_LABEL, COPYWIN_FULL);
     ScheduleBgCopyTilemapToVram(0);
