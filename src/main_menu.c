@@ -2059,7 +2059,9 @@ static void Task_RunSetup_Input(u8 taskId)
         {
             sRunSetupFilter = sRunSetupFilter == RUN_FILTER_NONE ? RUN_FILTER_TYPE : RUN_FILTER_NONE;
             if (sRunSetupFilter == RUN_FILTER_TYPE && sRunSetupRandomizer == RUN_WILD_NORMAL)
-                sRunSetupRandomizer = RUN_WILD_RANDOM;
+                // Filtered runs default to progression-aware encounters. The player
+                // can still explicitly choose RANDOM on page 1 for an unscaled run.
+                sRunSetupRandomizer = RUN_WILD_SCALED;
         }
         else if ((JOY_NEW(DPAD_LEFT)) && *cursor == 1)
         {
