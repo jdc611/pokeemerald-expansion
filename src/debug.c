@@ -2685,20 +2685,6 @@ static void DebugAction_Trainers_TryBattle(u8 taskId)
 static void DebugAction_ImportantBattle(u8 taskId, const void *params)
 {
     sDebugMenuListData->data[0] = *(const u16 *)params;
-
-    // Roxanne is the template battle for the important-battle overhaul.
-    // Give the player a clean, fully healed party two levels below her cap so
-    // the shortcut is immediately useful from any save file. The three Hoenn
-    // starters provide favorable, neutral, and unfavorable Rock matchups.
-    if (sDebugMenuListData->data[0] == TRAINER_ROXANNE_1)
-    {
-        ZeroPlayerPartyMons();
-        ScriptGiveMon(SPECIES_TREECKO, 13, ITEM_NONE);
-        ScriptGiveMon(SPECIES_TORCHIC, 13, ITEM_NONE);
-        ScriptGiveMon(SPECIES_MUDKIP, 13, ITEM_NONE);
-        HealPlayerParty();
-    }
-
     sDebugMenuListData->data[1] = -1;
     sDebugMenuListData->data[2] = TRAINER_NONE;
     sDebugMenuListData->data[4] = PARTNER_NONE;
