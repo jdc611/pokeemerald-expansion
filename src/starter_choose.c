@@ -61,6 +61,7 @@ static void BeginCustomStarterSelection(void);
 static void Task_CustomStarterInput(u8 taskId);
 static void BuildCustomStarterList(void);
 static bool32 IsCustomStarterEligible(enum Species species);
+static bool32 IsCustomStarterBaseEligible(enum Species species);
 static u8 GetCustomStarterTab(enum Species species);
 static void CustomStarterJumpToTab(u8 taskId, u8 tab);
 static void CustomStarterDraw(u8 taskId);
@@ -104,7 +105,7 @@ static const struct WindowTemplate sCustomWindowTemplates[] =
         .tilemapLeft = 1,
         .tilemapTop = 1,
         .width = 28,
-        .height = 16,
+        .height = 18,
         .paletteNum = 14,
         .baseBlock = 0x0200
     },
@@ -754,6 +755,28 @@ static void Task_CreateStarterLabel(u8 taskId)
 
 static bool32 IsCustomStarterEligible(enum Species species)
 {
+    u16 i;
+
+    if (!IsCustomStarterBaseEligible(species))
+        return FALSE;
+
+    // Species data contains many internal alternate-form records with the same
+    // displayed name and typing. Keep the first selectable form for each exact
+    // National Dex/type combination, while retaining forms whose typing differs.
+    for (i = 0; i < sCustomStarterCount; i++)
+    {
+        enum Species priorSpecies = sCustomStarterList[i];
+        if (gSpeciesInfo[priorSpecies].natDexNum == gSpeciesInfo[species].natDexNum
+         && gSpeciesInfo[priorSpecies].types[0] == gSpeciesInfo[species].types[0]
+         && gSpeciesInfo[priorSpecies].types[1] == gSpeciesInfo[species].types[1])
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+static bool32 IsCustomStarterBaseEligible(enum Species species)
+{
     if (species <= SPECIES_NONE || species >= NUM_SPECIES || species == SPECIES_EGG)
         return FALSE;
     if (!IsSpeciesEnabled(species))
@@ -786,17 +809,21 @@ static void BuildCustomStarterList(void)
             sCustomStarterList[sCustomStarterCount++] = species;
     }
 
-    // Insertion sort keeps this one-time startup pass small and deterministic.
-    for (i = 1; i < sCustomStarterCount; i++)
+    // Shell sort avoids the long black pause caused by insertion-sorting the
+    // full species list on GBA hardware.
+    for (u16 gap = sCustomStarterCount / 2; gap > 0; gap /= 2)
     {
-        u16 key = sCustomStarterList[i];
-        s16 j = i - 1;
-        while (j >= 0 && StringCompare(GetSpeciesName(sCustomStarterList[j]), GetSpeciesName(key)) > 0)
+        for (i = gap; i < sCustomStarterCount; i++)
         {
-            sCustomStarterList[j + 1] = sCustomStarterList[j];
-            j--;
+            u16 key = sCustomStarterList[i];
+            s16 j = i;
+            while (j >= gap && StringCompare(GetSpeciesName(sCustomStarterList[j - gap]), GetSpeciesName(key)) > 0)
+            {
+                sCustomStarterList[j] = sCustomStarterList[j - gap];
+                j -= gap;
+            }
+            sCustomStarterList[j] = key;
         }
-        sCustomStarterList[j + 1] = key;
     }
 }
 
@@ -877,7 +904,7 @@ static void CustomStarterDraw(u8 taskId)
         AddTextPrinterParameterized(0, FONT_SMALL, gTypesInfo[gSpeciesInfo[species].types[0]].name, 145, 113, TEXT_SKIP_DRAW, NULL);
         if (gSpeciesInfo[species].types[1] != gSpeciesInfo[species].types[0])
             AddTextPrinterParameterized(0, FONT_SMALL, gTypesInfo[gSpeciesInfo[species].types[1]].name, 181, 113, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomControls, 4, 119, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomControls, 4, 130, TEXT_SKIP_DRAW, NULL);
     }
     else if (gTasks[taskId].tCustomState == 1)
     {
@@ -889,7 +916,7 @@ static void CustomStarterDraw(u8 taskId)
             AddTextPrinterParameterized(0, FONT_NORMAL, gText_SelectorArrow2, 112, 82, TEXT_SKIP_DRAW, NULL);
         AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomNormal, 32, 82, TEXT_SKIP_DRAW, NULL);
         AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomShiny, 128, 82, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomBack, 8, 112, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomBack, 8, 128, TEXT_SKIP_DRAW, NULL);
     }
     else
     {
@@ -902,7 +929,7 @@ static void CustomStarterDraw(u8 taskId)
             AddTextPrinterParameterized(0, FONT_NORMAL, gText_SelectorArrow2, 112, 88, TEXT_SKIP_DRAW, NULL);
         AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomYes, 40, 88, TEXT_SKIP_DRAW, NULL);
         AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomNo, 128, 88, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomBack, 8, 112, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomBack, 8, 128, TEXT_SKIP_DRAW, NULL);
     }
 
     PutWindowTilemap(0);
