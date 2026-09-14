@@ -50,6 +50,10 @@
 #include "union_room.h"
 #include "dexnav.h"
 #include "run_settings.h"
+#include "caps.h"
+#include "region_map.h"
+#include "pokemon.h"
+#include "data.h"
 #include "wild_encounter.h"
 #include "constants/battle_frontier.h"
 #include "constants/rgb.h"
@@ -84,6 +88,9 @@ enum
     MENU_ACTION_MOVE_RELEARNER,
     MENU_ACTION_GAME_OPTIONS,
     MENU_ACTION_GAME_INFO,
+    MENU_ACTION_POKERIDER,
+    MENU_ACTION_TRAIN_TO_CAP,
+    MENU_ACTION_MGM,
     MENU_ACTION_DEXNAV_INFO,
     MENU_ACTION_BACK_GAME_OPTIONS,
 };
@@ -140,6 +147,9 @@ static bool8 StartMenuAutoRepel(void);
 static bool8 StartMenuMoveRelearner(void);
 static bool8 StartMenuGameOptions(void);
 static bool8 StartMenuGameInfo(void);
+static bool8 StartMenuPokeRider(void);
+static bool8 StartMenuTrainToCap(void);
+static bool8 StartMenuMGM(void);
 static bool8 StartMenuDexNavInfo(void);
 static bool8 StartMenuBackGameOptions(void);
 
@@ -241,6 +251,11 @@ static const u8 sText_GameInfoRandom[] = _("RANDOM");
 static const u8 sText_GameInfoScaled[] = _("SCALED");
 static const u8 sText_GameInfoCustom[] = _("CUSTOM");
 static const u8 sText_GameInfoUnknown[] = _("UNKNOWN");
+static const u8 sText_GameInfoCap[] = _("LEVEL CAP: {STR_VAR_1}");
+static const u8 sText_GameInfoMgmOn[] = _("MGM: ON");
+static const u8 sText_GameInfoMgmOff[] = _("MGM: OFF");
+static const u8 sText_MgmOn[] = _("MGM: ON");
+static const u8 sText_MgmOff[] = _("MGM: OFF");
 
 static const struct MenuAction sStartMenuItems[] =
 {
@@ -269,6 +284,9 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_MOVE_RELEARNER] = {COMPOUND_STRING("MOVE RELEARNER"), {.u8_void = StartMenuMoveRelearner}},
     [MENU_ACTION_GAME_OPTIONS] = {COMPOUND_STRING("GAME OPTIONS"), {.u8_void = StartMenuGameOptions}},
     [MENU_ACTION_GAME_INFO] = {COMPOUND_STRING("GAME INFO"), {.u8_void = StartMenuGameInfo}},
+    [MENU_ACTION_POKERIDER] = {COMPOUND_STRING("POKéRIDER"), {.u8_void = StartMenuPokeRider}},
+    [MENU_ACTION_TRAIN_TO_CAP] = {COMPOUND_STRING("TRAIN TO CAP"), {.u8_void = StartMenuTrainToCap}},
+    [MENU_ACTION_MGM] = {COMPOUND_STRING("MGM"), {.u8_void = StartMenuMGM}},
     [MENU_ACTION_DEXNAV_INFO] = {COMPOUND_STRING("DEXNAV INFO"), {.u8_void = StartMenuDexNavInfo}},
     [MENU_ACTION_BACK_GAME_OPTIONS] = {COMPOUND_STRING("BACK"), {.u8_void = StartMenuBackGameOptions}},
 };
@@ -427,10 +445,12 @@ static void BuildNormalStartMenu(void)
     }
     else
     {
+        AddStartMenuAction(MENU_ACTION_POKERIDER);
+        AddStartMenuAction(MENU_ACTION_TRAIN_TO_CAP);
         AddStartMenuAction(MENU_ACTION_MOVE_RELEARNER);
         AddStartMenuAction(MENU_ACTION_GAME_OPTIONS);
+        AddStartMenuAction(MENU_ACTION_MGM);
         AddStartMenuAction(MENU_ACTION_GAME_INFO);
-        // Reserved for level caps and future rules tools.
         AddStartMenuAction(MENU_ACTION_EXIT);
     }
 }
@@ -586,6 +606,10 @@ static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
             else if (sCurrentStartMenuActions[index] == MENU_ACTION_AUTO_REPEL)
             {
                 StringCopy(gStringVar4, VarGet(VAR_AUTO_REPEL_ENABLED) ? sText_AutoRepelOn : sText_AutoRepelOff);
+            }
+            else if (sCurrentStartMenuActions[index] == MENU_ACTION_MGM)
+            {
+                StringCopy(gStringVar4, IsMinimalGrindingMode() ? sText_MgmOn : sText_MgmOff);
             }
             else if (sCurrentStartMenuActions[index] == MENU_ACTION_DEXNAV_INFO)
             {
@@ -1759,7 +1783,7 @@ static bool8 StartMenuGameInfo(void)
 
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();
-    windowId = AddGameOptionsWindow(7);
+    windowId = AddGameOptionsWindow(9);
     DrawStdWindowFrame(windowId, FALSE);
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
 
@@ -1796,7 +1820,12 @@ static bool8 StartMenuGameInfo(void)
     ConvertIntToDecimalStringN(gStringVar1, gSaveBlock3Ptr->worldSeed, STR_CONV_MODE_LEFT_ALIGN, 8);
     StringExpandPlaceholders(gStringVar4, sText_GameInfoValue);
     PrintGameInfoLine(gStringVar4, 89);
-    PrintGameInfoLine(sText_GameInfoBack, 105);
+
+    ConvertIntToDecimalStringN(gStringVar1, GetCurrentLevelCap(), STR_CONV_MODE_LEFT_ALIGN, 3);
+    StringExpandPlaceholders(gStringVar4, sText_GameInfoCap);
+    PrintGameInfoLine(gStringVar4, 105);
+    PrintGameInfoLine(IsMinimalGrindingMode() ? sText_GameInfoMgmOn : sText_GameInfoMgmOff, 121);
+    PrintGameInfoLine(sText_GameInfoBack, 137);
 
     PutWindowTilemap(windowId);
     CopyWindowToVram(windowId, COPYWIN_FULL);
@@ -1815,6 +1844,63 @@ static bool8 HandleGameInfoInput(void)
         InitStartMenu();
         gMenuCallback = HandleStartMenuInput;
     }
+    return FALSE;
+}
+
+static bool8 StartMenuPokeRider(void)
+{
+    if (!gPaletteFade.active)
+    {
+        RemoveExtraStartMenuWindows();
+        HideStartMenu();
+        gMain.savedCallback = CB2_ReturnToField;
+        SetMainCallback2(CB2_OpenFlyMap);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static bool8 StartMenuTrainToCap(void)
+{
+    u32 i;
+    u8 cap = GetCurrentLevelCap();
+
+    for (i = 0; i < gPlayerPartyCount; i++)
+    {
+        struct Pokemon *mon = &gPlayerParty[i];
+        enum Species species = GetMonData(mon, MON_DATA_SPECIES);
+        u8 level = GetMonData(mon, MON_DATA_LEVEL);
+        u32 exp;
+
+        if (species == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG) || level >= cap)
+            continue;
+
+        exp = gExperienceTables[gSpeciesInfo[species].growthRate][cap];
+        SetMonData(mon, MON_DATA_EXP, &exp);
+        SetMonData(mon, MON_DATA_LEVEL, &cap);
+        CalculateMonStats(mon);
+        if (IsMinimalGrindingMode())
+            ApplyMinimalGrindingModeToMon(mon);
+    }
+
+    PlaySE(SE_EXP_MAX);
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+    RemoveStartMenuWindow();
+    InitStartMenu();
+    gMenuCallback = HandleStartMenuInput;
+    return FALSE;
+}
+
+static bool8 StartMenuMGM(void)
+{
+    gSaveBlock3Ptr->minimalGrindingMode ^= 1;
+    if (IsMinimalGrindingMode())
+        ApplyMinimalGrindingModeToParty();
+
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+    RemoveStartMenuWindow();
+    InitStartMenu();
+    gMenuCallback = HandleStartMenuInput;
     return FALSE;
 }
 

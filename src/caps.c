@@ -3,6 +3,7 @@
 #include "event_data.h"
 #include "caps.h"
 #include "pokemon.h"
+#include "constants/pokemon.h"
 
 
 u32 GetCurrentLevelCap(void)
@@ -115,4 +116,45 @@ u32 GetCurrentEVCap(void)
     }
 
     return MAX_TOTAL_EVS;
+}
+
+
+bool32 IsMinimalGrindingMode(void)
+{
+    return gSaveBlock3Ptr != NULL && gSaveBlock3Ptr->minimalGrindingMode;
+}
+
+void ApplyMinimalGrindingModeToMon(struct Pokemon *mon)
+{
+    u8 perfectIv = MAX_PER_STAT_IVS;
+    u8 neutralEv = 85; // 85 * 6 = 510, the legal total EV maximum.
+
+    if (mon == NULL || GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
+        return;
+
+    SetMonData(mon, MON_DATA_HP_IV, &perfectIv);
+    SetMonData(mon, MON_DATA_ATK_IV, &perfectIv);
+    SetMonData(mon, MON_DATA_DEF_IV, &perfectIv);
+    SetMonData(mon, MON_DATA_SPEED_IV, &perfectIv);
+    SetMonData(mon, MON_DATA_SPATK_IV, &perfectIv);
+    SetMonData(mon, MON_DATA_SPDEF_IV, &perfectIv);
+
+    SetMonData(mon, MON_DATA_HP_EV, &neutralEv);
+    SetMonData(mon, MON_DATA_ATK_EV, &neutralEv);
+    SetMonData(mon, MON_DATA_DEF_EV, &neutralEv);
+    SetMonData(mon, MON_DATA_SPEED_EV, &neutralEv);
+    SetMonData(mon, MON_DATA_SPATK_EV, &neutralEv);
+    SetMonData(mon, MON_DATA_SPDEF_EV, &neutralEv);
+    CalculateMonStats(mon);
+}
+
+void ApplyMinimalGrindingModeToParty(void)
+{
+    u32 i;
+
+    if (!IsMinimalGrindingMode())
+        return;
+
+    for (i = 0; i < gPlayerPartyCount; i++)
+        ApplyMinimalGrindingModeToMon(&gPlayerParty[i]);
 }

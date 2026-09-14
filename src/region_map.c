@@ -2513,7 +2513,10 @@ static void CB_ExitFlyMap(void)
             }
             else
             {
-                SetMainCallback2(CB2_ReturnToPartyMenuFromFlyMap);
+                if (gMain.savedCallback == CB2_ReturnToField)
+                    SetMainCallback2(CB2_ReturnToField);
+                else
+                    SetMainCallback2(CB2_ReturnToPartyMenuFromFlyMap);
             }
             TRY_FREE_AND_SET_NULL(sFlyMap);
             FreeAllWindowBuffers();
