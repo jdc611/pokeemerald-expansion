@@ -788,7 +788,14 @@ static bool32 IsCustomStarterBaseEligible(enum Species species)
         return FALSE;
     if (!IsSpeciesEnabled(species))
         return FALSE;
-    if (gSpeciesInfo[species].isMegaEvolution)
+    // Exclude temporary/battle-only forms. Their base species may be an
+    // evolved Pokémon even when the form record has no direct pre-evolution.
+    if (gSpeciesInfo[species].isMegaEvolution
+     || gSpeciesInfo[species].isPrimalReversion
+     || gSpeciesInfo[species].isUltraBurst
+     || gSpeciesInfo[species].isGigantamax
+     || gSpeciesInfo[species].isTeraForm
+     || gSpeciesInfo[species].isTotem)
         return FALSE;
 
     // Legendary-class species are intentionally available even when they are
@@ -801,7 +808,8 @@ static bool32 IsCustomStarterBaseEligible(enum Species species)
         return TRUE;
 
     // Ordinary custom starters must begin at the start of their evolution line.
-    return GetSpeciesPreEvolution(species) == SPECIES_NONE;
+    return GetSpeciesPreEvolution(species) == SPECIES_NONE
+        && GetSpeciesPreEvolution(GET_BASE_SPECIES_ID(species)) == SPECIES_NONE;
 }
 
 static void BuildCustomStarterList(void)

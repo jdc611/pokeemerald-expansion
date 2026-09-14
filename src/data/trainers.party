@@ -9511,7 +9511,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Treecko
 Level: 5
@@ -9524,7 +9524,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Slugma
 Level: 18
@@ -9545,7 +9545,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Slugma
 Level: 29
@@ -9566,7 +9566,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Check Bad Move / Try To Faint / Force Setup First Turn
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Torchic
 Level: 5
@@ -9579,7 +9579,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Wingull
 Level: 18
@@ -9600,7 +9600,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Pelipper
 Level: 29
@@ -9621,7 +9621,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Mudkip
 Level: 5
@@ -9634,7 +9634,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Lombre
 Level: 18
@@ -9655,7 +9655,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Lombre
 Level: 29
@@ -9676,7 +9676,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Treecko
 Level: 5
@@ -9689,7 +9689,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Wingull
 Level: 18
@@ -9710,7 +9710,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Slugma
 Level: 29
@@ -9731,7 +9731,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Torchic
 Level: 5
@@ -9744,7 +9744,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Wingull
 Level: 18
@@ -9765,7 +9765,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Pelipper
 Level: 29
@@ -9786,7 +9786,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Mudkip
 Level: 5
@@ -9799,7 +9799,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Lombre
 Level: 18
@@ -9820,7 +9820,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Lombre
 Level: 29
@@ -10852,7 +10852,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Check Bad Move
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Lotad
 Level: 13
@@ -10869,7 +10869,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Check Bad Move
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Wingull
 Level: 13
@@ -10976,7 +10976,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Slugma
 Level: 13
@@ -10993,7 +10993,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Check Bad Move / Try To Faint / Force Setup First Turn
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Wingull
 Level: 13
@@ -12255,7 +12255,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Tropius
 Level: 31
@@ -12280,7 +12280,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Tropius
 Level: 31
@@ -12305,7 +12305,7 @@ Pic: Brendan
 Gender: Male
 Music: Male
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Tropius
 Level: 31
@@ -12330,7 +12330,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Tropius
 Level: 31
@@ -12355,7 +12355,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Tropius
 Level: 31
@@ -12380,7 +12380,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Tropius
 Level: 31
@@ -14130,7 +14130,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Lotad
 Level: 13
@@ -14147,7 +14147,7 @@ Pic: May
 Gender: Female
 Music: Female
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Torkoal
 Level: 13
