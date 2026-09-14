@@ -322,6 +322,7 @@ static void DebugAction_Trainers_SetRematch(u8 taskId);
 static void DebugAction_Trainers_SetRematchReadiness(u8 taskId);
 static void DebugAction_Trainers_TryBattle(u8 taskId);
 static void DebugAction_Trainers_RechargeVsSeeker(u8 taskId);
+static void DebugAction_ImportantBattle(u8 taskId, const void *params);
 
 static void DebugAction_Outbreak_ClearActive(u8 taskId);
 
@@ -778,12 +779,153 @@ static const u8 *const sDebugMenu_Actions_BagUse_Options[] =
     COMPOUND_STRING("No Bag: {STR_VAR_1}Invalid value"),
 };
 
+enum DebugImportantBattle
+{
+    DEBUG_BATTLE_ROXANNE,
+    DEBUG_BATTLE_BRAWLY,
+    DEBUG_BATTLE_WATTSON,
+    DEBUG_BATTLE_FLANNERY,
+    DEBUG_BATTLE_NORMAN,
+    DEBUG_BATTLE_WINONA,
+    DEBUG_BATTLE_TATE_LIZA,
+    DEBUG_BATTLE_JUAN,
+    DEBUG_BATTLE_SIDNEY,
+    DEBUG_BATTLE_PHOEBE,
+    DEBUG_BATTLE_GLACIA,
+    DEBUG_BATTLE_DRAKE,
+    DEBUG_BATTLE_WALLACE,
+    DEBUG_BATTLE_ARCHIE,
+    DEBUG_BATTLE_MAXIE_CHIMNEY,
+    DEBUG_BATTLE_MAXIE_HIDEOUT,
+    DEBUG_BATTLE_MAXIE_MOSSDEEP,
+    DEBUG_BATTLE_WALLY_FINAL,
+    DEBUG_BATTLE_R103_GRASS,
+    DEBUG_BATTLE_R103_FIRE,
+    DEBUG_BATTLE_R103_WATER,
+    DEBUG_BATTLE_RUSTBORO_GRASS,
+    DEBUG_BATTLE_RUSTBORO_FIRE,
+    DEBUG_BATTLE_RUSTBORO_WATER,
+    DEBUG_BATTLE_R110_GRASS,
+    DEBUG_BATTLE_R110_FIRE,
+    DEBUG_BATTLE_R110_WATER,
+    DEBUG_BATTLE_R119_GRASS,
+    DEBUG_BATTLE_R119_FIRE,
+    DEBUG_BATTLE_R119_WATER,
+    DEBUG_BATTLE_LILYCOVE_GRASS,
+    DEBUG_BATTLE_LILYCOVE_FIRE,
+    DEBUG_BATTLE_LILYCOVE_WATER,
+};
+
+static const u16 sDebugImportantTrainerIds[] =
+{
+    [DEBUG_BATTLE_ROXANNE]          = TRAINER_ROXANNE_1,
+    [DEBUG_BATTLE_BRAWLY]           = TRAINER_BRAWLY_1,
+    [DEBUG_BATTLE_WATTSON]          = TRAINER_WATTSON_1,
+    [DEBUG_BATTLE_FLANNERY]         = TRAINER_FLANNERY_1,
+    [DEBUG_BATTLE_NORMAN]           = TRAINER_NORMAN_1,
+    [DEBUG_BATTLE_WINONA]           = TRAINER_WINONA_1,
+    [DEBUG_BATTLE_TATE_LIZA]        = TRAINER_TATE_AND_LIZA_1,
+    [DEBUG_BATTLE_JUAN]             = TRAINER_JUAN_1,
+    [DEBUG_BATTLE_SIDNEY]           = TRAINER_SIDNEY,
+    [DEBUG_BATTLE_PHOEBE]           = TRAINER_PHOEBE,
+    [DEBUG_BATTLE_GLACIA]           = TRAINER_GLACIA,
+    [DEBUG_BATTLE_DRAKE]            = TRAINER_DRAKE,
+    [DEBUG_BATTLE_WALLACE]          = TRAINER_WALLACE,
+    [DEBUG_BATTLE_ARCHIE]           = TRAINER_ARCHIE,
+    [DEBUG_BATTLE_MAXIE_CHIMNEY]    = TRAINER_MAXIE_MT_CHIMNEY,
+    [DEBUG_BATTLE_MAXIE_HIDEOUT]    = TRAINER_MAXIE_MAGMA_HIDEOUT,
+    [DEBUG_BATTLE_MAXIE_MOSSDEEP]   = TRAINER_MAXIE_MOSSDEEP,
+    [DEBUG_BATTLE_WALLY_FINAL]      = TRAINER_WALLY_VR_5,
+    [DEBUG_BATTLE_R103_GRASS]       = TRAINER_BRENDAN_ROUTE_103_MUDKIP,
+    [DEBUG_BATTLE_R103_FIRE]        = TRAINER_BRENDAN_ROUTE_103_TREECKO,
+    [DEBUG_BATTLE_R103_WATER]       = TRAINER_BRENDAN_ROUTE_103_TORCHIC,
+    [DEBUG_BATTLE_RUSTBORO_GRASS]   = TRAINER_BRENDAN_RUSTBORO_MUDKIP,
+    [DEBUG_BATTLE_RUSTBORO_FIRE]    = TRAINER_BRENDAN_RUSTBORO_TREECKO,
+    [DEBUG_BATTLE_RUSTBORO_WATER]   = TRAINER_BRENDAN_RUSTBORO_TORCHIC,
+    [DEBUG_BATTLE_R110_GRASS]       = TRAINER_BRENDAN_ROUTE_110_MUDKIP,
+    [DEBUG_BATTLE_R110_FIRE]        = TRAINER_BRENDAN_ROUTE_110_TREECKO,
+    [DEBUG_BATTLE_R110_WATER]       = TRAINER_BRENDAN_ROUTE_110_TORCHIC,
+    [DEBUG_BATTLE_R119_GRASS]       = TRAINER_BRENDAN_ROUTE_119_MUDKIP,
+    [DEBUG_BATTLE_R119_FIRE]        = TRAINER_BRENDAN_ROUTE_119_TREECKO,
+    [DEBUG_BATTLE_R119_WATER]       = TRAINER_BRENDAN_ROUTE_119_TORCHIC,
+    [DEBUG_BATTLE_LILYCOVE_GRASS]   = TRAINER_BRENDAN_LILYCOVE_MUDKIP,
+    [DEBUG_BATTLE_LILYCOVE_FIRE]    = TRAINER_BRENDAN_LILYCOVE_TREECKO,
+    [DEBUG_BATTLE_LILYCOVE_WATER]   = TRAINER_BRENDAN_LILYCOVE_TORCHIC,
+};
+
+#define IMPORTANT_BATTLE(label, index) { COMPOUND_STRING(label), DebugAction_ImportantBattle, &sDebugImportantTrainerIds[index] }
+
+static const struct DebugMenuOption sDebugMenu_Actions_ImportantGyms[] =
+{
+    IMPORTANT_BATTLE("Roxanne", DEBUG_BATTLE_ROXANNE),
+    IMPORTANT_BATTLE("Brawly", DEBUG_BATTLE_BRAWLY),
+    IMPORTANT_BATTLE("Wattson", DEBUG_BATTLE_WATTSON),
+    IMPORTANT_BATTLE("Flannery", DEBUG_BATTLE_FLANNERY),
+    IMPORTANT_BATTLE("Norman", DEBUG_BATTLE_NORMAN),
+    IMPORTANT_BATTLE("Winona", DEBUG_BATTLE_WINONA),
+    IMPORTANT_BATTLE("Tate & Liza", DEBUG_BATTLE_TATE_LIZA),
+    IMPORTANT_BATTLE("Juan", DEBUG_BATTLE_JUAN),
+    { NULL }
+};
+
+static const struct DebugMenuOption sDebugMenu_Actions_ImportantLeague[] =
+{
+    IMPORTANT_BATTLE("Sidney", DEBUG_BATTLE_SIDNEY),
+    IMPORTANT_BATTLE("Phoebe", DEBUG_BATTLE_PHOEBE),
+    IMPORTANT_BATTLE("Glacia", DEBUG_BATTLE_GLACIA),
+    IMPORTANT_BATTLE("Drake", DEBUG_BATTLE_DRAKE),
+    IMPORTANT_BATTLE("Wallace", DEBUG_BATTLE_WALLACE),
+    { NULL }
+};
+
+static const struct DebugMenuOption sDebugMenu_Actions_ImportantRivals[] =
+{
+    IMPORTANT_BATTLE("R103 - Grass", DEBUG_BATTLE_R103_GRASS),
+    IMPORTANT_BATTLE("R103 - Fire", DEBUG_BATTLE_R103_FIRE),
+    IMPORTANT_BATTLE("R103 - Water", DEBUG_BATTLE_R103_WATER),
+    IMPORTANT_BATTLE("Rustboro - Grass", DEBUG_BATTLE_RUSTBORO_GRASS),
+    IMPORTANT_BATTLE("Rustboro - Fire", DEBUG_BATTLE_RUSTBORO_FIRE),
+    IMPORTANT_BATTLE("Rustboro - Water", DEBUG_BATTLE_RUSTBORO_WATER),
+    IMPORTANT_BATTLE("R110 - Grass", DEBUG_BATTLE_R110_GRASS),
+    IMPORTANT_BATTLE("R110 - Fire", DEBUG_BATTLE_R110_FIRE),
+    IMPORTANT_BATTLE("R110 - Water", DEBUG_BATTLE_R110_WATER),
+    IMPORTANT_BATTLE("R119 - Grass", DEBUG_BATTLE_R119_GRASS),
+    IMPORTANT_BATTLE("R119 - Fire", DEBUG_BATTLE_R119_FIRE),
+    IMPORTANT_BATTLE("R119 - Water", DEBUG_BATTLE_R119_WATER),
+    IMPORTANT_BATTLE("Lilycove - Grass", DEBUG_BATTLE_LILYCOVE_GRASS),
+    IMPORTANT_BATTLE("Lilycove - Fire", DEBUG_BATTLE_LILYCOVE_FIRE),
+    IMPORTANT_BATTLE("Lilycove - Water", DEBUG_BATTLE_LILYCOVE_WATER),
+    { NULL }
+};
+
+static const struct DebugMenuOption sDebugMenu_Actions_ImportantStory[] =
+{
+    IMPORTANT_BATTLE("Archie", DEBUG_BATTLE_ARCHIE),
+    IMPORTANT_BATTLE("Maxie - Mt Chimney", DEBUG_BATTLE_MAXIE_CHIMNEY),
+    IMPORTANT_BATTLE("Maxie - Hideout", DEBUG_BATTLE_MAXIE_HIDEOUT),
+    IMPORTANT_BATTLE("Maxie - Mossdeep", DEBUG_BATTLE_MAXIE_MOSSDEEP),
+    IMPORTANT_BATTLE("Wally - Victory Road", DEBUG_BATTLE_WALLY_FINAL),
+    { NULL }
+};
+
+#undef IMPORTANT_BATTLE
+
+static const struct DebugMenuOption sDebugMenu_Actions_ImportantBattles[] =
+{
+    { COMPOUND_STRING("Gym Leaders…"), DebugAction_OpenSubMenu, sDebugMenu_Actions_ImportantGyms },
+    { COMPOUND_STRING("Pokémon League…"), DebugAction_OpenSubMenu, sDebugMenu_Actions_ImportantLeague },
+    { COMPOUND_STRING("Rival Battles…"), DebugAction_OpenSubMenu, sDebugMenu_Actions_ImportantRivals },
+    { COMPOUND_STRING("Story Bosses…"), DebugAction_OpenSubMenu, sDebugMenu_Actions_ImportantStory },
+    { NULL }
+};
+
 static const struct DebugMenuOption sDebugMenu_Actions_TestHub[] =
 {
     { COMPOUND_STRING("Early Free Roam"),       DebugAction_Util_CheatStart },
     { COMPOUND_STRING("Fly / Checkpoints…"),    DebugAction_Util_Fly },
     { COMPOUND_STRING("Set Test Party"),        DebugAction_Party_SetParty },
     { COMPOUND_STRING("Heal Party"),            DebugAction_Party_HealParty },
+    { COMPOUND_STRING("Important Battles…"),    DebugAction_OpenSubMenu, sDebugMenu_Actions_ImportantBattles },
     { COMPOUND_STRING("Fill Bag…"),             DebugAction_OpenSubMenu, sDebugMenu_Actions_PCBag_Fill },
     { COMPOUND_STRING("Give X…"),               DebugAction_OpenSubMenu, sDebugMenu_Actions_Give },
     { COMPOUND_STRING("Progress / Flags…"),     DebugAction_OpenSubMenuFlagsVars, sDebugMenu_Actions_Flags },
@@ -2538,6 +2680,16 @@ static void DebugAction_Trainers_TryBattle(u8 taskId)
     CalculateEnemyPartyCount();
     BattleSetup_StartTrainerBattle_Debug();
     Debug_DestroyMenu_Full(taskId);
+}
+
+static void DebugAction_ImportantBattle(u8 taskId, const void *params)
+{
+    sDebugMenuListData->data[0] = *(const u16 *)params;
+    sDebugMenuListData->data[1] = -1;
+    sDebugMenuListData->data[2] = TRAINER_NONE;
+    sDebugMenuListData->data[4] = PARTNER_NONE;
+    sDebugMenuListData->data[5] = FALSE;
+    DebugAction_Trainers_TryBattle(taskId);
 }
 
 static void DebugAction_Trainers_RechargeVsSeeker(u8 taskId)
