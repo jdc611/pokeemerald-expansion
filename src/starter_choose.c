@@ -72,7 +72,7 @@ EWRAM_DATA u16 gCustomStarterSpecies = SPECIES_NONE;
 EWRAM_DATA bool8 gCustomStarterShiny = FALSE;
 static EWRAM_DATA u16 sCustomStarterList[NUM_SPECIES];
 static EWRAM_DATA u16 sCustomStarterCount;
-static EWRAM_DATA u8 sCustomPreviewSpriteId = SPRITE_NONE;
+static EWRAM_DATA u8 sCustomPreviewSpriteId;
 
 const u16 gBirchBagGrass_Pal[] = INCGFX_U16("graphics/starter_choose/tiles.png", ".gbapal");
 static const u16 sPokeballSelection_Pal[] = INCGFX_U16("graphics/starter_choose/pokeball_selection.png", ".gbapal");
