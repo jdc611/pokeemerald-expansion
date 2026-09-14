@@ -329,6 +329,7 @@ static const u8 sText_RunSetupYes[] = _("YES");
 static const u8 sText_RunSetupNo[] = _("NO");
 static const u8 sText_RunSetupRandom[] = _("RANDOM");
 static const u8 sText_RunSetupNormal[] = _("NORMAL");
+static const u8 sText_RunSetupHoenn[] = _("HOENN");
 static const u8 sText_RunSetupScaled[] = _("SCALED");
 static const u8 sText_RunSetupCustom[] = _("CUSTOM");
 static const u8 sText_RunSetupNeedSeed[] = _("ENTER AT LEAST ONE DIGIT");
@@ -2220,7 +2221,7 @@ static void RunSetup_Draw(u8 cursor)
                      : sText_RunSetupNormal;
     const u8 *starters = sRunSetupStarter == RUN_STARTER_RANDOM ? sText_RunSetupRandom
                          : sRunSetupStarter == RUN_STARTER_CHOOSE ? sText_RunSetupCustom
-                         : sText_RunSetupNormal;
+                         : sText_RunSetupHoenn;
     const u8 *seed = sRunSetupCustom ? sText_RunSetupCustom : sText_RunSetupRandom;
     const u8 *filter = sRunSetupFilter == RUN_FILTER_TYPE ? gTypesInfo[sRunSetupType].name
                      : sRunSetupFilter == RUN_FILTER_ABILITY ? gAbilitiesInfo[sRunSetupAbility].name
@@ -2277,7 +2278,7 @@ static void RunSetup_Draw(u8 cursor)
         RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 88, 34, sRunSetupRandomizer == RUN_WILD_NORMAL);
         RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 127, 34, sRunSetupRandomizer == RUN_WILD_RANDOM);
         RunSetup_DrawNarrowChoice(sText_RunSetupScaled, 166, 34, sRunSetupRandomizer == RUN_WILD_SCALED);
-        RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 82, 56, sRunSetupStarter == RUN_STARTER_NORMAL);
+        RunSetup_DrawNarrowChoice(sText_RunSetupHoenn, 82, 56, sRunSetupStarter == RUN_STARTER_NORMAL);
         RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 128, 56, sRunSetupStarter == RUN_STARTER_RANDOM);
         RunSetup_DrawNarrowChoice(sText_RunSetupCustom, 174, 56, sRunSetupStarter == RUN_STARTER_CHOOSE);
         RunSetup_DrawChoice(sText_RunSetupRandom, 98, 78, !sRunSetupCustom);
