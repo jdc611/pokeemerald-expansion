@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.github/scripts/apply_qol_batch.py'
+      - '.github/workflows/apply-qol-batch.yml'
   workflow_dispatch: {}
 
 permissions:
