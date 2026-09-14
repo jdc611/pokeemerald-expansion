@@ -533,15 +533,31 @@ Gender: Male
 Music: Aqua
 Items: Super Potion
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Mightyena
 Level: 34
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
+IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
+- Crunch
+- Play Rough
+- Fire Fang
+- Taunt
 
-Golbat
+Poliwrath
 Level: 34
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
+IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
+- Waterfall
+- Brick Break
+- Ice Punch
+- Bulk Up
+
+Golbat @ Sitrus Berry
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Air Slash
+- Poison Fang
+- Bite
+- Roost
 
 === TRAINER_ZANDER ===
 Name: ZANDER
@@ -563,15 +579,31 @@ Pic: Aqua Admin F
 Gender: Female
 Music: Aqua
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Carvanha
 Level: 28
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Crunch
+- Aqua Jet
+- Ice Fang
+- Protect
 
-Mightyena
+Lombre
 Level: 28
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Giga Drain
+- Bubble Beam
+- Fake Out
+- Rain Dance
+
+Mightyena @ Oran Berry
+Level: 28
+IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
+- Crunch
+- Play Rough
+- Fire Fang
+- Taunt
 
 === TRAINER_SHELLY_SEAFLOOR_CAVERN ===
 Name: SHELLY
@@ -579,16 +611,41 @@ Class: Aqua Admin
 Pic: Aqua Admin F
 Gender: Female
 Music: Aqua
+Items: Super Potion
 Double Battle: No
-AI: Basic Trainer
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
-Sharpedo
+Tentacruel
 Level: 37
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Scald
+- Sludge Bomb
+- Ice Beam
+- Toxic Spikes
+
+Ludicolo
+Level: 37
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Giga Drain
+- Surf
+- Ice Beam
+- Fake Out
 
 Mightyena
 Level: 37
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Crunch
+- Play Rough
+- Fire Fang
+- Taunt
+
+Sharpedo @ Sitrus Berry
+Level: 37
+IVs: 28 HP / 28 Atk / 28 Def / 28 SpA / 28 SpD / 28 Spe
+- Crunch
+- Liquidation
+- Ice Fang
+- Protect
 
 === TRAINER_ARCHIE ===
 Name: ARCHIE
@@ -11238,23 +11295,39 @@ Pic: Magma Admin
 Gender: Male
 Music: Magma
 Double Battle: No
-AI: Basic Trainer
-
-Numel
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
-Poochyena
-Level: 20
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Numel
 Level: 22
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
+IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+- Flame Burst
+- Bulldoze
+- Rock Tomb
+- Yawn
 
-Zubat
+Houndour
 Level: 22
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
+IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+- Fire Fang
+- Bite
+- Smog
+- Roar
+
+Koffing
+Level: 22
+IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+- Sludge
+- Clear Smog
+- Assurance
+- Will O Wisp
+
+Golbat @ Oran Berry
+Level: 22
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Wing Attack
+- Poison Fang
+- Bite
+- Confuse Ray
 
 === TRAINER_JONATHAN ===
 Name: JONATHAN
@@ -14053,24 +14126,41 @@ Class: Magma Admin
 Pic: Magma Admin
 Gender: Male
 Music: Magma
+Items: Super Potion
 Double Battle: No
-AI: Check Bad Move
-
-Numel
-Level: 26
-IVs: 9 HP / 9 Atk / 9 Def / 9 SpA / 9 SpD / 9 Spe
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Mightyena
-Level: 28
-IVs: 9 HP / 9 Atk / 9 Def / 9 SpA / 9 SpD / 9 Spe
-
-Zubat
-Level: 30
-IVs: 9 HP / 9 Atk / 9 Def / 9 SpA / 9 SpD / 9 Spe
-
-Camerupt
 Level: 33
-IVs: 9 HP / 9 Atk / 9 Def / 9 SpA / 9 SpD / 9 Spe
+IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
+- Crunch
+- Fire Fang
+- Play Rough
+- Taunt
+
+Golbat
+Level: 33
+IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
+- Air Slash
+- Poison Fang
+- Bite
+- Roost
+
+Houndoom
+Level: 33
+IVs: 25 HP / 25 Atk / 25 Def / 25 SpA / 25 SpD / 25 Spe
+- Flamethrower
+- Dark Pulse
+- Sludge Bomb
+- Will O Wisp
+
+Camerupt @ Sitrus Berry
+Level: 33
+IVs: 28 HP / 28 Atk / 28 Def / 28 SpA / 28 SpD / 28 Spe
+- Lava Plume
+- Earth Power
+- Rock Slide
+- Yawn
 
 === TRAINER_DARCY ===
 Name: DARCY
