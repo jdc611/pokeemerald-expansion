@@ -1,0 +1,32 @@
+name: Apply Custom Starter Patch
+
+on:
+  push:
+    paths:
+      - '.github/scripts/apply_custom_starter.py'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply custom starter patch
+        run: python3 .github/scripts/apply_custom_starter.py
+
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/main_menu.c src/starter_choose.c src/battle_setup.c include/starter_choose.h
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Add custom starter selector'
+          git push
