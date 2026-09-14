@@ -2682,26 +2682,87 @@ static void DebugAction_Trainers_TryBattle(u8 taskId)
     Debug_DestroyMenu_Full(taskId);
 }
 
+static u8 Debug_GetImportantBattleCap(u16 trainerId)
+{
+    const struct Trainer *trainer = GetTrainerStructFromId(trainerId);
+    u8 cap = 1;
+
+    for (u32 i = 0; i < trainer->partySize; i++)
+    {
+        if (trainer->party[i].lvl > cap)
+            cap = trainer->party[i].lvl;
+    }
+    return cap;
+}
+
+static void Debug_PrepareImportantBattleParty(u16 trainerId)
+{
+    static const u16 sEarlyParty[] =
+    {
+        SPECIES_TREECKO,
+        SPECIES_TORCHIC,
+        SPECIES_MUDKIP,
+        SPECIES_TAILLOW,
+        SPECIES_RALTS,
+        SPECIES_SHROOMISH,
+    };
+    static const u16 sMidParty[] =
+    {
+        SPECIES_GROVYLE,
+        SPECIES_COMBUSKEN,
+        SPECIES_MARSHTOMP,
+        SPECIES_KIRLIA,
+        SPECIES_MANECTRIC,
+        SPECIES_CROBAT,
+    };
+    static const u16 sLateParty[] =
+    {
+        SPECIES_SCEPTILE,
+        SPECIES_BLAZIKEN,
+        SPECIES_SWAMPERT,
+        SPECIES_GARDEVOIR,
+        SPECIES_MANECTRIC,
+        SPECIES_CROBAT,
+    };
+    const struct Trainer *trainer = GetTrainerStructFromId(trainerId);
+    const u16 *species;
+    u8 cap = Debug_GetImportantBattleCap(trainerId);
+    u8 testLevel = cap > 2 ? cap - 2 : cap;
+
+    if (cap <= 19)
+        species = sEarlyParty;
+    else if (cap <= 35)
+        species = sMidParty;
+    else
+        species = sLateParty;
+
+    ZeroPlayerPartyMons();
+    for (u32 i = 0; i < trainer->partySize && i < PARTY_SIZE; i++)
+        ScriptGiveMon(species[i], testLevel, ITEM_NONE);
+    HealPlayerParty();
+}
+
 static void DebugAction_ImportantBattle(u8 taskId, const void *params)
 {
-    sDebugMenuListData->data[0] = *(const u16 *)params;
+    u16 trainerId = *(const u16 *)params;
 
-    // Roxanne is the template for the important-battle overhaul. Prepare and
-    // fully heal a test party two levels below her level-15 cap.
-    if (sDebugMenuListData->data[0] == TRAINER_ROXANNE_1)
-    {
-        ZeroPlayerPartyMons();
-        ScriptGiveMon(SPECIES_TREECKO, 13, ITEM_NONE);
-        ScriptGiveMon(SPECIES_TORCHIC, 13, ITEM_NONE);
-        ScriptGiveMon(SPECIES_MUDKIP, 13, ITEM_NONE);
-        HealPlayerParty();
-    }
-
+    Debug_PrepareImportantBattleParty(trainerId);
+    sDebugMenuListData->data[0] = trainerId;
     sDebugMenuListData->data[1] = -1;
     sDebugMenuListData->data[2] = TRAINER_NONE;
     sDebugMenuListData->data[4] = PARTNER_NONE;
     sDebugMenuListData->data[5] =
-        GetTrainerStructFromId(sDebugMenuListData->data[0])->battleType == TRAINER_BATTLE_TYPE_DOUBLES;
+        GetTrainerStructFromId(trainerId)->battleType == TRAINER_BATTLE_TYPE_DOUBLES;
+
+    // Reproduce the complete Mossdeep partner battle rather than testing
+    // Maxie's half of the encounter in isolation.
+    if (trainerId == TRAINER_MAXIE_MOSSDEEP)
+    {
+        sDebugMenuListData->data[2] = TRAINER_TABITHA_MOSSDEEP;
+        sDebugMenuListData->data[4] = PARTNER_STEVEN;
+        sDebugMenuListData->data[5] = TRUE;
+    }
+
     DebugAction_Trainers_TryBattle(taskId);
 }
 
