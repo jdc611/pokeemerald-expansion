@@ -1,4 +1,5 @@
 #include "global.h"
+#include "battle_main.h"
 #include "bg.h"
 #include "data.h"
 #include "decompress.h"
@@ -18,6 +19,7 @@
 #include "sprite.h"
 #include "starter_choose.h"
 #include "strings.h"
+#include "string_util.h"
 #include "task.h"
 #include "text.h"
 #include "text_window.h"
@@ -255,6 +257,7 @@ static const u8 sText_CustomYes[] = _("YES");
 static const u8 sText_CustomNo[] = _("NO");
 static const u8 sText_CustomControls[] = _("L/R TABS   A SELECT");
 static const u8 sText_CustomBack[] = _("A CONFIRM   B BACK");
+static const u8 sText_CustomNoneEligible[] = _("NO ELIGIBLE POKéMON");
 static const u8 sLetterE[] = _("E");
 static const u8 sLetterI[] = _("I");
 static const u8 sLetterM[] = _("M");
@@ -760,7 +763,8 @@ static bool32 IsCustomStarterEligible(enum Species species)
 
     // Legendary-class species are intentionally available even when they are
     // technically a later stage (for example Solgaleo/Lunala or Urshifu).
-    if (gSpeciesInfo[species].isLegendary
+    if (gSpeciesInfo[species].isRestrictedLegendary
+     || gSpeciesInfo[species].isSubLegendary
      || gSpeciesInfo[species].isMythical
      || gSpeciesInfo[species].isUltraBeast
      || gSpeciesInfo[species].isParadox)
@@ -842,7 +846,7 @@ static void CustomStarterDraw(u8 taskId)
 
     if (sCustomStarterCount == 0)
     {
-        AddTextPrinterParameterized(0, FONT_NORMAL, _("NO ELIGIBLE POKéMON"), 8, 8, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomNoneEligible, 8, 8, TEXT_SKIP_DRAW, NULL);
         CopyWindowToVram(0, COPYWIN_FULL);
         return;
     }
