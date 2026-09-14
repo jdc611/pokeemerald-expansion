@@ -1,5 +1,4 @@
 from pathlib import Path
-import re
 
 
 def replace_once(text, old, new, label):
@@ -32,9 +31,7 @@ def replace_function_body(text, func_name, transform, label):
     return text[:start] + new + text[end:]
 
 
-# -----------------------------------------------------------------------------
-# Save data: persistent Minimal Grinding Mode toggle.
-# -----------------------------------------------------------------------------
+# Persistent Minimal Grinding Mode toggle.
 p = Path('include/global.h')
 s = p.read_text()
 s = replace_once(
@@ -45,11 +42,8 @@ s = replace_once(
 p.write_text(s)
 
 
-# -----------------------------------------------------------------------------
-# Caps helpers used by the menu/QoL systems.
-# MGM uses perfect IVs and a legal max-EV neutral spread (85 x 6 = 510),
-# eliminating grinding without creating illegal total EVs.
-# -----------------------------------------------------------------------------
+# Cap/MGM helpers. 31 IVs everywhere plus a legal 510-EV balanced spread
+# removes IV/EV grinding while avoiding an illegal six-stat 252 EV spread.
 p = Path('include/caps.h')
 s = p.read_text()
 s = replace_once(
@@ -76,7 +70,7 @@ bool32 IsMinimalGrindingMode(void)
 void ApplyMinimalGrindingModeToMon(struct Pokemon *mon)
 {
     u8 perfectIv = MAX_PER_STAT_IVS;
-    u8 neutralEv = MAX_TOTAL_EVS / NUM_STATS;
+    u8 neutralEv = 85; // 85 * 6 = 510, the legal total EV maximum.
 
     if (mon == NULL || GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
         return;
@@ -111,11 +105,8 @@ void ApplyMinimalGrindingModeToParty(void)
 p.write_text(s)
 
 
-# -----------------------------------------------------------------------------
-# Infinite Rare Candy: the existing cap-aware callback already supports
-# evolution checks when the level cannot increase. Keep that behavior, but do
-# not consume Rare Candy from the bag.
-# -----------------------------------------------------------------------------
+# Infinite Rare Candy. The existing callback already checks normal evolution at
+# the level cap; only suppress consumption so one candy can be reused forever.
 p = Path('src/party_menu.c')
 s = p.read_text()
 
@@ -127,13 +118,14 @@ s = replace_function_body(s, 'void ItemUseCB_RareCandy(u8 taskId, TaskFunc task)
 p.write_text(s)
 
 
-# -----------------------------------------------------------------------------
-# Start menu additions: PokéRider, Train to Cap, MGM toggle, and expanded Game
-# Info. PokéRider opens the normal Fly map without requiring a party Fly user.
-# -----------------------------------------------------------------------------
+# Start menu QoL: PokéRider, one-tap party cap training, MGM toggle, Game Info.
 p = Path('src/start_menu.c')
 s = p.read_text()
-s = replace_once(s, '#include "run_settings.h"\n', '#include "run_settings.h"\n#include "caps.h"\n#include "region_map.h"\n', 'start menu QoL includes')
+s = replace_once(
+    s,
+    '#include "run_settings.h"\n',
+    '#include "run_settings.h"\n#include "caps.h"\n#include "region_map.h"\n#include "pokemon.h"\n#include "data.h"\n',
+    'start menu QoL includes')
 
 s = replace_once(
     s,
@@ -150,7 +142,7 @@ s = replace_once(
 s = replace_once(
     s,
     'static const u8 sText_GameInfoUnknown[] = _("UNKNOWN");\n',
-    'static const u8 sText_GameInfoUnknown[] = _("UNKNOWN");\nstatic const u8 sText_GameInfoCap[] = _("LEVEL CAP: {STR_VAR_1}");\nstatic const u8 sText_GameInfoMgmOn[] = _("MGM: ON");\nstatic const u8 sText_GameInfoMgmOff[] = _("MGM: OFF");\nstatic const u8 sText_MgmOn[] = _("MGM: ON");\nstatic const u8 sText_MgmOff[] = _("MGM: OFF");\nstatic const u8 sText_TrainedToCap[] = _("Party trained to the current level cap!");\n',
+    'static const u8 sText_GameInfoUnknown[] = _("UNKNOWN");\nstatic const u8 sText_GameInfoCap[] = _("LEVEL CAP: {STR_VAR_1}");\nstatic const u8 sText_GameInfoMgmOn[] = _("MGM: ON");\nstatic const u8 sText_GameInfoMgmOff[] = _("MGM: OFF");\nstatic const u8 sText_MgmOn[] = _("MGM: ON");\nstatic const u8 sText_MgmOff[] = _("MGM: OFF");\n',
     'QoL menu strings')
 
 s = replace_once(
@@ -165,14 +157,15 @@ s = replace_once(
     '        AddStartMenuAction(MENU_ACTION_POKERIDER);\n        AddStartMenuAction(MENU_ACTION_TRAIN_TO_CAP);\n        AddStartMenuAction(MENU_ACTION_MOVE_RELEARNER);\n        AddStartMenuAction(MENU_ACTION_GAME_OPTIONS);\n        AddStartMenuAction(MENU_ACTION_MGM);\n        AddStartMenuAction(MENU_ACTION_GAME_INFO);\n        AddStartMenuAction(MENU_ACTION_EXIT);',
     'page 2 QoL actions')
 
-# Dynamic MGM menu text.
+# MGM label is live ON/OFF text, inserted immediately before the existing
+# DexNav dynamic label so this survives the current menu formatting.
 s = replace_once(
     s,
-    '            else if (sCurrentStartMenuActions[index] == MENU_ACTION_AUTO_REPEL)\n            {\n                StringCopy(gStringVar4, VarGet(VAR_AUTO_REPEL_ENABLED) ? sText_AutoRepelOn : sText_AutoRepelOff);\n            }\n            else\n',
-    '            else if (sCurrentStartMenuActions[index] == MENU_ACTION_AUTO_REPEL)\n            {\n                StringCopy(gStringVar4, VarGet(VAR_AUTO_REPEL_ENABLED) ? sText_AutoRepelOn : sText_AutoRepelOff);\n            }\n            else if (sCurrentStartMenuActions[index] == MENU_ACTION_MGM)\n            {\n                StringCopy(gStringVar4, IsMinimalGrindingMode() ? sText_MgmOn : sText_MgmOff);\n            }\n            else\n',
+    '            else if (sCurrentStartMenuActions[index] == MENU_ACTION_DEXNAV_INFO)\n',
+    '            else if (sCurrentStartMenuActions[index] == MENU_ACTION_MGM)\n            {\n                StringCopy(gStringVar4, IsMinimalGrindingMode() ? sText_MgmOn : sText_MgmOff);\n            }\n            else if (sCurrentStartMenuActions[index] == MENU_ACTION_DEXNAV_INFO)\n',
     'dynamic MGM text')
 
-# Expand Game Info window height and add cap/MGM rows.
+# Expand Game Info with current cap and MGM state.
 s = replace_once(s, '    windowId = AddGameOptionsWindow(7);\n', '    windowId = AddGameOptionsWindow(9);\n', 'Game Info window height')
 s = replace_once(
     s,
@@ -206,21 +199,20 @@ static bool8 StartMenuTrainToCap(void)
         struct Pokemon *mon = &gPlayerParty[i];
         enum Species species = GetMonData(mon, MON_DATA_SPECIES);
         u8 level = GetMonData(mon, MON_DATA_LEVEL);
+        u32 exp;
+
         if (species == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG) || level >= cap)
             continue;
 
+        exp = gExperienceTables[gSpeciesInfo[species].growthRate][cap];
+        SetMonData(mon, MON_DATA_EXP, &exp);
         SetMonData(mon, MON_DATA_LEVEL, &cap);
-        {
-            u32 exp = gExperienceTables[gSpeciesInfo[species].growthRate][cap];
-            SetMonData(mon, MON_DATA_EXP, &exp);
-        }
         CalculateMonStats(mon);
         if (IsMinimalGrindingMode())
             ApplyMinimalGrindingModeToMon(mon);
     }
 
     PlaySE(SE_EXP_MAX);
-    DisplayItemMessageOnField(0, sText_TrainedToCap, NULL);
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();
     InitStartMenu();
@@ -246,11 +238,8 @@ s = s.replace(insert_before, qol_callbacks + insert_before, 1)
 p.write_text(s)
 
 
-# -----------------------------------------------------------------------------
-# Fly map cancellation: when opened via PokéRider from the Start menu, return to
-# the overworld instead of trying to restore a Party menu that was never open.
-# We use gMain.savedCallback as the discriminator, set above to CB2_ReturnToField.
-# -----------------------------------------------------------------------------
+# PokéRider cancellation should return to field rather than a nonexistent Party
+# menu. Using savedCallback keeps the patch small and localized for this build.
 p = Path('src/region_map.c')
 s = p.read_text()
 s = replace_once(
