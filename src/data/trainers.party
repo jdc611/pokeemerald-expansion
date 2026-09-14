@@ -639,6 +639,7 @@ IVs: 30 HP / 30 Atk / 30 Def / 30 SpA / 30 SpD / 30 Spe
 - Liquidation
 - Ice Fang
 - Protect
+
 === TRAINER_LEAH ===
 Name: LEAH
 Class: Hex Maniac
@@ -4664,6 +4665,7 @@ IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
 - Psycho Cut
 - Sucker Punch
 - Swords Dance
+
 === TRAINER_PHOEBE ===
 Name: PHOEBE
 Class: Elite Four
@@ -4714,6 +4716,7 @@ IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
 - Shadow Claw
 - Shadow Sneak
 - Swords Dance
+
 === TRAINER_GLACIA ===
 Name: GLACIA
 Class: Elite Four
@@ -4764,6 +4767,7 @@ IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
 - Ice Beam
 - Rest
 - Sleep Talk
+
 === TRAINER_DRAKE ===
 Name: DRAKE
 Class: Elite Four
@@ -4814,6 +4818,7 @@ IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
 - Aerial Ace
 - Flamethrower
 - Dragon Dance
+
 === TRAINER_ROXANNE_1 ===
 Name: ROXANNE
 Class: Leader
@@ -4879,6 +4884,7 @@ IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
 - Knock Off
 - Rock Tomb
 - Bulk Up
+
 === TRAINER_WATTSON_1 ===
 Name: WATTSON
 Class: Leader
@@ -4919,6 +4925,7 @@ IVs: 28 HP / 28 Atk / 28 Def / 28 SpA / 28 SpD / 28 Spe
 - Flame Burst
 - Bite
 - Quick Attack
+
 === TRAINER_FLANNERY_1 ===
 Name: FLANNERY
 Class: Leader
@@ -4959,6 +4966,7 @@ IVs: 30 HP / 30 Atk / 30 Def / 30 SpA / 30 SpD / 30 Spe
 - Body Slam
 - Sunny Day
 - Protect
+
 === TRAINER_NORMAN_1 ===
 Name: NORMAN
 Class: Leader
@@ -5007,6 +5015,7 @@ IVs: 30 HP / 30 Atk / 30 Def / 30 SpA / 30 SpD / 30 Spe
 - Hammer Arm
 - Feint Attack
 - Yawn
+
 === TRAINER_WINONA_1 ===
 Name: WINONA
 Class: Leader
@@ -5063,6 +5072,7 @@ IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
 - Aerial Ace
 - Earthquake
 - Dragon Dance
+
 === TRAINER_TATE_AND_LIZA_1 ===
 Name: TATE&LIZA
 Class: Leader
@@ -5119,6 +5129,7 @@ IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
 - Rock Slide
 - Solar Beam
 - Protect
+
 === TRAINER_JUAN_1 ===
 Name: JUAN
 Class: Leader
@@ -5175,6 +5186,7 @@ IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
 - Dragon Pulse
 - Ice Beam
 - Rest
+
 === TRAINER_JERRY_1 ===
 Name: JERRY
 Class: School Kid
@@ -6349,6 +6361,7 @@ IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
 - Scald
 - Ice Beam
 - Toxic
+
 === TRAINER_ANDREW ===
 Name: ANDREW
 Class: Fisherman
@@ -9445,6 +9458,7 @@ IVs: 30 HP / 30 Atk / 30 Def / 30 SpA / 30 SpD / 30 Spe
 - Earth Power
 - Rock Slide
 - Protect
+
 === TRAINER_EDWIN_2 ===
 Name: EDWIN
 Class: Collector
@@ -9579,6 +9593,7 @@ IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
 - Leer
 - Absorb
 - Quick Attack
+
 === TRAINER_BRENDAN_ROUTE_110_MUDKIP ===
 Name: BRENDAN
 Class: Rival
@@ -9611,6 +9626,7 @@ IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
 - Leaf Blade
 - Quick Attack
 - Rock Tomb
+
 === TRAINER_BRENDAN_ROUTE_119_MUDKIP ===
 Name: BRENDAN
 Class: Rival
@@ -9651,6 +9667,7 @@ IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
 - Giga Drain
 - Aerial Ace
 - Quick Attack
+
 === TRAINER_BRENDAN_ROUTE_103_TREECKO ===
 Name: BRENDAN
 Class: Rival
@@ -9667,6 +9684,7 @@ IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
 - Growl
 - Ember
 - Peck
+
 === TRAINER_BRENDAN_ROUTE_110_TREECKO ===
 Name: BRENDAN
 Class: Rival
@@ -9699,6 +9717,7 @@ IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
 - Flame Charge
 - Peck
 - Bulk Up
+
 === TRAINER_BRENDAN_ROUTE_119_TREECKO ===
 Name: BRENDAN
 Class: Rival
@@ -9739,6 +9758,7 @@ IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
 - Brick Break
 - Aerial Ace
 - Bulk Up
+
 === TRAINER_BRENDAN_ROUTE_103_TORCHIC ===
 Name: BRENDAN
 Class: Rival
@@ -9755,6 +9775,7 @@ IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
 - Growl
 - Water Gun
 - Mud Slap
+
 === TRAINER_BRENDAN_ROUTE_110_TORCHIC ===
 Name: BRENDAN
 Class: Rival
@@ -9787,6 +9808,7 @@ IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
 - Mud Shot
 - Rock Tomb
 - Protect
+
 === TRAINER_BRENDAN_ROUTE_119_TORCHIC ===
 Name: BRENDAN
 Class: Rival
@@ -9827,6 +9849,7 @@ IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
 - Bulldoze
 - Rock Slide
 - Protect
+
 === TRAINER_MAY_ROUTE_103_MUDKIP ===
 Name: MAY
 Class: Rival
@@ -9843,6 +9866,7 @@ IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
 - Leer
 - Absorb
 - Quick Attack
+
 === TRAINER_MAY_ROUTE_110_MUDKIP ===
 Name: MAY
 Class: Rival
@@ -9875,6 +9899,7 @@ IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
 - Leaf Blade
 - Quick Attack
 - Rock Tomb
+
 === TRAINER_MAY_ROUTE_119_MUDKIP ===
 Name: MAY
 Class: Rival
@@ -9915,6 +9940,7 @@ IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
 - Giga Drain
 - Aerial Ace
 - Quick Attack
+
 === TRAINER_MAY_ROUTE_103_TREECKO ===
 Name: MAY
 Class: Rival
@@ -9931,6 +9957,7 @@ IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
 - Growl
 - Ember
 - Peck
+
 === TRAINER_MAY_ROUTE_110_TREECKO ===
 Name: MAY
 Class: Rival
@@ -9963,6 +9990,7 @@ IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
 - Flame Charge
 - Peck
 - Bulk Up
+
 === TRAINER_MAY_ROUTE_119_TREECKO ===
 Name: MAY
 Class: Rival
@@ -10003,6 +10031,7 @@ IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
 - Brick Break
 - Aerial Ace
 - Bulk Up
+
 === TRAINER_MAY_ROUTE_103_TORCHIC ===
 Name: MAY
 Class: Rival
@@ -10019,6 +10048,7 @@ IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
 - Growl
 - Water Gun
 - Mud Slap
+
 === TRAINER_MAY_ROUTE_110_TORCHIC ===
 Name: MAY
 Class: Rival
@@ -10051,6 +10081,7 @@ IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
 - Mud Shot
 - Rock Tomb
 - Protect
+
 === TRAINER_MAY_ROUTE_119_TORCHIC ===
 Name: MAY
 Class: Rival
@@ -10091,6 +10122,7 @@ IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
 - Bulldoze
 - Rock Slide
 - Protect
+
 === TRAINER_ISAAC_1 ===
 Name: ISAAC
 Class: Pkmn Breeder
@@ -11126,6 +11158,7 @@ IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
 - Peck
 - Quick Attack
 - Sand Attack
+
 === TRAINER_BRENDAN_RUSTBORO_MUDKIP ===
 Name: BRENDAN
 Class: Rival
@@ -11150,6 +11183,7 @@ IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
 - Quick Attack
 - Pursuit
 - Leer
+
 === TRAINER_PAXTON ===
 Name: PAXTON
 Class: Expert
@@ -11264,6 +11298,7 @@ IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
 - Rock Tomb
 - Mud Slap
 - Bide
+
 === TRAINER_MAY_RUSTBORO_MUDKIP ===
 Name: MAY
 Class: Rival
@@ -11288,6 +11323,7 @@ IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
 - Quick Attack
 - Pursuit
 - Leer
+
 === TRAINER_MAXIE_MAGMA_HIDEOUT ===
 Name: MAXIE
 Class: Magma Leader
@@ -11337,6 +11373,7 @@ IVs: 30 HP / 30 Atk / 30 Def / 30 SpA / 30 SpD / 30 Spe
 - Earth Power
 - Rock Slide
 - Yawn
+
 === TRAINER_MAXIE_MT_CHIMNEY ===
 Name: MAXIE
 Class: Magma Leader
@@ -11370,6 +11407,7 @@ IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
 - Bulldoze
 - Rock Slide
 - Yawn
+
 === TRAINER_TIANA ===
 Name: TIANA
 Class: Lass
@@ -12578,6 +12616,7 @@ IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
 - Moonblast
 - Thunderbolt
 - Calm Mind
+
 === TRAINER_BRENDAN_LILYCOVE_MUDKIP ===
 Name: BRENDAN
 Class: Rival
@@ -12634,6 +12673,7 @@ IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
 - Giga Drain
 - Aerial Ace
 - Rock Slide
+
 === TRAINER_BRENDAN_LILYCOVE_TREECKO ===
 Name: BRENDAN
 Class: Rival
@@ -12690,6 +12730,7 @@ IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
 - Brick Break
 - Aerial Ace
 - Bulk Up
+
 === TRAINER_BRENDAN_LILYCOVE_TORCHIC ===
 Name: BRENDAN
 Class: Rival
@@ -12746,6 +12787,7 @@ IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
 - Bulldoze
 - Ice Punch
 - Rock Slide
+
 === TRAINER_MAY_LILYCOVE_MUDKIP ===
 Name: MAY
 Class: Rival
@@ -12802,6 +12844,7 @@ IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
 - Giga Drain
 - Aerial Ace
 - Rock Slide
+
 === TRAINER_MAY_LILYCOVE_TREECKO ===
 Name: MAY
 Class: Rival
@@ -12858,6 +12901,7 @@ IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
 - Brick Break
 - Aerial Ace
 - Bulk Up
+
 === TRAINER_MAY_LILYCOVE_TORCHIC ===
 Name: MAY
 Class: Rival
@@ -12914,6 +12958,7 @@ IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
 - Bulldoze
 - Ice Punch
 - Rock Slide
+
 === TRAINER_JONAH ===
 Name: JONAH
 Class: Fisherman
@@ -14078,6 +14123,7 @@ IVs: 30 HP / 30 Atk / 30 Def / 30 SpA / 30 SpD / 30 Spe
 - Earth Power
 - Rock Slide
 - Protect
+
 === TRAINER_PETE ===
 Name: PETE
 Class: Swimmer M
@@ -14674,6 +14720,7 @@ IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
 - Peck
 - Quick Attack
 - Sand Attack
+
 === TRAINER_MAY_RUSTBORO_TORCHIC ===
 Name: MAY
 Class: Rival
@@ -14698,6 +14745,7 @@ IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
 - Rock Tomb
 - Mud Slap
 - Bide
+
 === TRAINER_ROXANNE_2 ===
 Name: ROXANNE
 Class: Leader
