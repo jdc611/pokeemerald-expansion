@@ -799,6 +799,11 @@ enum DebugImportantBattle
     DEBUG_BATTLE_MAXIE_HIDEOUT,
     DEBUG_BATTLE_MAXIE_MOSSDEEP,
     DEBUG_BATTLE_WALLY_FINAL,
+    DEBUG_BATTLE_SHELLY_WEATHER,
+    DEBUG_BATTLE_SHELLY_SEAFLOOR,
+    DEBUG_BATTLE_MATT,
+    DEBUG_BATTLE_TABITHA_CHIMNEY,
+    DEBUG_BATTLE_TABITHA_HIDEOUT,
     DEBUG_BATTLE_R103_GRASS,
     DEBUG_BATTLE_R103_FIRE,
     DEBUG_BATTLE_R103_WATER,
@@ -836,6 +841,11 @@ static const u16 sDebugImportantTrainerIds[] =
     [DEBUG_BATTLE_MAXIE_HIDEOUT]    = TRAINER_MAXIE_MAGMA_HIDEOUT,
     [DEBUG_BATTLE_MAXIE_MOSSDEEP]   = TRAINER_MAXIE_MOSSDEEP,
     [DEBUG_BATTLE_WALLY_FINAL]      = TRAINER_WALLY_VR_5,
+    [DEBUG_BATTLE_SHELLY_WEATHER]   = TRAINER_SHELLY_WEATHER_INSTITUTE,
+    [DEBUG_BATTLE_SHELLY_SEAFLOOR]  = TRAINER_SHELLY_SEAFLOOR_CAVERN,
+    [DEBUG_BATTLE_MATT]             = TRAINER_MATT,
+    [DEBUG_BATTLE_TABITHA_CHIMNEY]  = TRAINER_TABITHA_MT_CHIMNEY,
+    [DEBUG_BATTLE_TABITHA_HIDEOUT]  = TRAINER_TABITHA_MAGMA_HIDEOUT,
     [DEBUG_BATTLE_R103_GRASS]       = TRAINER_BRENDAN_ROUTE_103_MUDKIP,
     [DEBUG_BATTLE_R103_FIRE]        = TRAINER_BRENDAN_ROUTE_103_TREECKO,
     [DEBUG_BATTLE_R103_WATER]       = TRAINER_BRENDAN_ROUTE_103_TORCHIC,
@@ -898,6 +908,16 @@ static const struct DebugMenuOption sDebugMenu_Actions_ImportantRivals[] =
     { NULL }
 };
 
+static const struct DebugMenuOption sDebugMenu_Actions_ImportantAdmins[] =
+{
+    IMPORTANT_BATTLE("Shelly - Weather", DEBUG_BATTLE_SHELLY_WEATHER),
+    IMPORTANT_BATTLE("Shelly - Seafloor", DEBUG_BATTLE_SHELLY_SEAFLOOR),
+    IMPORTANT_BATTLE("Matt", DEBUG_BATTLE_MATT),
+    IMPORTANT_BATTLE("Tabitha - Chimney", DEBUG_BATTLE_TABITHA_CHIMNEY),
+    IMPORTANT_BATTLE("Tabitha - Hideout", DEBUG_BATTLE_TABITHA_HIDEOUT),
+    { NULL }
+};
+
 static const struct DebugMenuOption sDebugMenu_Actions_ImportantStory[] =
 {
     IMPORTANT_BATTLE("Archie", DEBUG_BATTLE_ARCHIE),
@@ -915,6 +935,7 @@ static const struct DebugMenuOption sDebugMenu_Actions_ImportantBattles[] =
     { COMPOUND_STRING("Gym Leaders…"), DebugAction_OpenSubMenu, sDebugMenu_Actions_ImportantGyms },
     { COMPOUND_STRING("Pokémon League…"), DebugAction_OpenSubMenu, sDebugMenu_Actions_ImportantLeague },
     { COMPOUND_STRING("Rival Battles…"), DebugAction_OpenSubMenu, sDebugMenu_Actions_ImportantRivals },
+    { COMPOUND_STRING("Team Admins…"), DebugAction_OpenSubMenu, sDebugMenu_Actions_ImportantAdmins },
     { COMPOUND_STRING("Story Bosses…"), DebugAction_OpenSubMenu, sDebugMenu_Actions_ImportantStory },
     { NULL }
 };
