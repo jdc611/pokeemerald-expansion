@@ -2688,7 +2688,8 @@ static void DebugAction_ImportantBattle(u8 taskId, const void *params)
     sDebugMenuListData->data[1] = -1;
     sDebugMenuListData->data[2] = TRAINER_NONE;
     sDebugMenuListData->data[4] = PARTNER_NONE;
-    sDebugMenuListData->data[5] = FALSE;
+    sDebugMenuListData->data[5] =
+        GetTrainerStructFromId(sDebugMenuListData->data[0])->battleType == TRAINER_BATTLE_TYPE_DOUBLES;
     DebugAction_Trainers_TryBattle(taskId);
 }
 
