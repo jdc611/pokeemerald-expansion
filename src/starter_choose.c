@@ -65,6 +65,7 @@ static bool32 IsCustomStarterEligible(enum Species species);
 static bool32 IsCustomStarterBaseEligible(enum Species species);
 static u8 GetCustomStarterTab(enum Species species);
 static void CustomStarterJumpToTab(u8 taskId, u8 tab);
+static void CustomStarterJumpToLetter(u8 taskId, s8 direction);
 static void CustomStarterDraw(u8 taskId);
 static void CustomStarterUpdatePreview(u8 taskId);
 static void CustomStarterDestroyPreview(void);
@@ -258,11 +259,12 @@ static const u8 sText_CustomShiny[] = _("SHINY");
 static const u8 sText_CustomConfirm[] = _("USE THIS STARTER?");
 static const u8 sText_CustomYes[] = _("YES");
 static const u8 sText_CustomNo[] = _("NO");
-static const u8 sText_CustomControls[] = _("L/R TABS   A SELECT");
+static const u8 sText_CustomControls[] = _("DPAD L/R LETTER   L/R TABS");
 static const u8 sText_CustomBack[] = _("A CONFIRM   B BACK");
 static const u8 sText_CustomNoneEligible[] = _("NO ELIGIBLE POKéMON");
 static const u8 sText_CustomLoading[] = _("LOADING POKéMON...");
 static const u8 sText_CustomPleaseWait[] = _("PLEASE WAIT");
+static const u8 sCustomAlphabet[] = _("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 static const u8 sLetterE[] = _("E");
 static const u8 sLetterI[] = _("I");
 static const u8 sLetterM[] = _("M");
@@ -970,6 +972,44 @@ static void CustomStarterJumpToTab(u8 taskId, u8 tab)
     }
 }
 
+static void CustomStarterJumpToLetter(u8 taskId, s8 direction)
+{
+    u8 currentLetter = GetSpeciesName(sCustomStarterList[gTasks[taskId].tCustomIndex])[0];
+    u8 currentIndex = 0;
+    u8 offset;
+    u16 i;
+
+    for (i = 0; i < 26; i++)
+    {
+        if (sCustomAlphabet[i] == currentLetter)
+        {
+            currentIndex = i;
+            break;
+        }
+    }
+
+    // Skip letters with no eligible starters and wrap between A and Z.
+    for (offset = 1; offset <= 26; offset++)
+    {
+        u8 targetIndex = direction > 0
+                       ? (currentIndex + offset) % 26
+                       : (currentIndex + 26 - offset) % 26;
+        u8 targetLetter = sCustomAlphabet[targetIndex];
+
+        for (i = 0; i < sCustomStarterCount; i++)
+        {
+            if (GetSpeciesName(sCustomStarterList[i])[0] == targetLetter)
+            {
+                gTasks[taskId].tCustomIndex = i;
+                gTasks[taskId].tCustomTab = GetCustomStarterTab(sCustomStarterList[i]);
+                CustomStarterUpdatePreview(taskId);
+                CustomStarterDraw(taskId);
+                return;
+            }
+        }
+    }
+}
+
 static void Task_CustomStarterInput(u8 taskId)
 {
     if (gTasks[taskId].tCustomState == CUSTOM_STARTER_STATE_LOADING)
@@ -1009,6 +1049,14 @@ static void Task_CustomStarterInput(u8 taskId)
             gTasks[taskId].tCustomTab = GetCustomStarterTab(sCustomStarterList[gTasks[taskId].tCustomIndex]);
             CustomStarterUpdatePreview(taskId);
             CustomStarterDraw(taskId);
+        }
+        else if (JOY_NEW(DPAD_LEFT))
+        {
+            CustomStarterJumpToLetter(taskId, -1);
+        }
+        else if (JOY_NEW(DPAD_RIGHT))
+        {
+            CustomStarterJumpToLetter(taskId, 1);
         }
         else if (JOY_NEW(L_BUTTON))
         {
