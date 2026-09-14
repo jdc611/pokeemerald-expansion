@@ -21,6 +21,8 @@
 u32 GetCurrentLevelCap(void);
 u32 GetSoftLevelCapExpValue(u32 level, u32 expValue);
 u32 GetCurrentEVCap(void);
+
+// Player-facing level-cap and Minimal Grinding Mode helpers.
 bool32 IsMinimalGrindingMode(void);
 void ApplyMinimalGrindingModeToMon(struct Pokemon *mon);
 void ApplyMinimalGrindingModeToParty(void);
