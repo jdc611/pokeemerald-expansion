@@ -37,6 +37,7 @@
 #include "secret_base.h"
 #include "sound.h"
 #include "starter_choose.h"
+#include "run_settings.h"
 #include "strings.h"
 #include "string_util.h"
 #include "task.h"
@@ -994,6 +995,16 @@ static void CB2_GiveStarter(void)
     *GetVarPointer(VAR_STARTER_MON) = gSpecialVar_Result;
     starterMon = GetStarterPokemon(gSpecialVar_Result);
     ScriptGiveMon(starterMon, 5, ITEM_NONE);
+    if (gSaveBlock3Ptr->starterMode == RUN_STARTER_CHOOSE && gCustomStarterShiny)
+    {
+        struct Pokemon *starter = &gParties[B_TRAINER_PLAYER][0];
+        u32 otId = GetMonData(starter, MON_DATA_OT_ID);
+        u32 personality = GetMonData(starter, MON_DATA_PERSONALITY);
+        u16 shinyLow = (u16)otId ^ (u16)(otId >> 16) ^ (u16)(personality >> 16);
+        personality = (personality & 0xFFFF0000) | shinyLow;
+        UpdateMonPersonality(&starter->box, personality);
+        CalculateMonStats(starter);
+    }
     ResetTasks();
     PlayBattleBGM();
     SetMainCallback2(CB2_StartFirstBattle);

@@ -29,6 +29,9 @@
 #include "run_settings.h"
 
 #define STARTER_MON_COUNT   3
+#define CUSTOM_STARTER_ROWS  8
+#define CUSTOM_STARTER_TABS  6
+
 
 // Position of the sprite of the selected starter Pokémon
 #define STARTER_PKMN_POS_X (DISPLAY_WIDTH / 2)
@@ -52,8 +55,22 @@ static u8 CreatePokemonFrontSprite(enum Species species, u8 x, u8 y);
 static void SpriteCB_SelectionHand(struct Sprite *sprite);
 static void SpriteCB_Pokeball(struct Sprite *sprite);
 static void SpriteCB_StarterPokemon(struct Sprite *sprite);
+static void BeginCustomStarterSelection(void);
+static void Task_CustomStarterInput(u8 taskId);
+static void BuildCustomStarterList(void);
+static bool32 IsCustomStarterEligible(enum Species species);
+static u8 GetCustomStarterTab(enum Species species);
+static void CustomStarterJumpToTab(u8 taskId, u8 tab);
+static void CustomStarterDraw(u8 taskId);
+static void CustomStarterUpdatePreview(u8 taskId);
+static void CustomStarterDestroyPreview(void);
 
 static u16 sStarterLabelWindowId;
+EWRAM_DATA u16 gCustomStarterSpecies = SPECIES_NONE;
+EWRAM_DATA bool8 gCustomStarterShiny = FALSE;
+static EWRAM_DATA u16 sCustomStarterList[NUM_SPECIES];
+static EWRAM_DATA u16 sCustomStarterCount;
+static EWRAM_DATA u8 sCustomPreviewSpriteId = SPRITE_NONE;
 
 const u16 gBirchBagGrass_Pal[] = INCGFX_U16("graphics/starter_choose/tiles.png", ".gbapal");
 static const u16 sPokeballSelection_Pal[] = INCGFX_U16("graphics/starter_choose/pokeball_selection.png", ".gbapal");
@@ -72,6 +89,20 @@ static const struct WindowTemplate sWindowTemplates[] =
         .tilemapTop = 15,
         .width = 24,
         .height = 4,
+        .paletteNum = 14,
+        .baseBlock = 0x0200
+    },
+    DUMMY_WIN_TEMPLATE,
+};
+
+static const struct WindowTemplate sCustomWindowTemplates[] =
+{
+    {
+        .bg = 0,
+        .tilemapLeft = 1,
+        .tilemapTop = 1,
+        .width = 28,
+        .height = 16,
         .paletteNum = 14,
         .baseBlock = 0x0200
     },
@@ -211,6 +242,24 @@ static const struct BgTemplate sBgTemplates[] =
 };
 
 static const u8 sTextColors[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE, TEXT_COLOR_LIGHT_GRAY};
+static const u8 sCustomTabs[CUSTOM_STARTER_TABS][5] =
+{
+    _("A-D"), _("E-H"), _("I-L"), _("M-P"), _("Q-T"), _("U-Z"),
+};
+static const u8 sText_CustomStarterTitle[] = _("CHOOSE YOUR STARTER");
+static const u8 sText_CustomAppearance[] = _("CHOOSE APPEARANCE");
+static const u8 sText_CustomNormal[] = _("NORMAL");
+static const u8 sText_CustomShiny[] = _("SHINY");
+static const u8 sText_CustomConfirm[] = _("USE THIS STARTER?");
+static const u8 sText_CustomYes[] = _("YES");
+static const u8 sText_CustomNo[] = _("NO");
+static const u8 sText_CustomControls[] = _("L/R TABS   A SELECT");
+static const u8 sText_CustomBack[] = _("A CONFIRM   B BACK");
+static const u8 sLetterE[] = _("E");
+static const u8 sLetterI[] = _("I");
+static const u8 sLetterM[] = _("M");
+static const u8 sLetterQ[] = _("Q");
+static const u8 sLetterU[] = _("U");
 
 static const struct OamData sOam_Hand =
 {
@@ -407,7 +456,9 @@ static const struct SpriteTemplate sSpriteTemplate_StarterCircle =
 // .text
 u16 GetStarterPokemon(u16 chosenStarterId)
 {
-    if (chosenStarterId > STARTER_MON_COUNT)
+    if (gSaveBlock3Ptr->starterMode == RUN_STARTER_CHOOSE && gCustomStarterSpecies != SPECIES_NONE)
+        return gCustomStarterSpecies;
+    if (chosenStarterId >= STARTER_MON_COUNT)
         chosenStarterId = 0;
     return sStarterMon[chosenStarterId];
 }
@@ -462,7 +513,7 @@ void CB2_ChooseStarter(void)
 
     ResetBgsAndClearDma3BusyFlags(0);
     InitBgsFromTemplates(0, sBgTemplates, ARRAY_COUNT(sBgTemplates));
-    InitWindows(sWindowTemplates);
+    InitWindows(gSaveBlock3Ptr->starterMode == RUN_STARTER_CHOOSE ? sCustomWindowTemplates : sWindowTemplates);
 
     DeactivateAllTextPrinters();
     LoadUserWindowBorderGfx(0, 0x2A8, BG_PLTT_ID(13));
@@ -497,6 +548,12 @@ void CB2_ChooseStarter(void)
     ShowBg(0);
     ShowBg(2);
     ShowBg(3);
+
+    if (gSaveBlock3Ptr->starterMode == RUN_STARTER_CHOOSE)
+    {
+        BeginCustomStarterSelection();
+        return;
+    }
 
     taskId = CreateTask(Task_StarterChoose, 0);
     gTasks[taskId].tStarterSelection = 1;
@@ -683,6 +740,301 @@ static void Task_CreateStarterLabel(u8 taskId)
 {
     CreateStarterPokemonLabel(gTasks[taskId].tStarterSelection);
     gTasks[taskId].func = Task_HandleStarterChooseInput;
+}
+
+// Custom starter task data
+#define tCustomIndex         data[0]
+#define tCustomTab           data[1]
+#define tCustomState         data[2]
+#define tCustomShiny         data[3]
+#define tCustomConfirmChoice data[4]
+
+static bool32 IsCustomStarterEligible(enum Species species)
+{
+    if (species <= SPECIES_NONE || species >= NUM_SPECIES || species == SPECIES_EGG)
+        return FALSE;
+    if (!IsSpeciesEnabled(species))
+        return FALSE;
+    if (gSpeciesInfo[species].isMegaEvolution)
+        return FALSE;
+
+    // Legendary-class species are intentionally available even when they are
+    // technically a later stage (for example Solgaleo/Lunala or Urshifu).
+    if (gSpeciesInfo[species].isLegendary
+     || gSpeciesInfo[species].isMythical
+     || gSpeciesInfo[species].isUltraBeast
+     || gSpeciesInfo[species].isParadox)
+        return TRUE;
+
+    // Ordinary custom starters must begin at the start of their evolution line.
+    return GetSpeciesPreEvolution(species) == SPECIES_NONE;
+}
+
+static void BuildCustomStarterList(void)
+{
+    enum Species species;
+    u16 i;
+
+    sCustomStarterCount = 0;
+    for (species = SPECIES_BULBASAUR; species < NUM_SPECIES; species++)
+    {
+        if (IsCustomStarterEligible(species))
+            sCustomStarterList[sCustomStarterCount++] = species;
+    }
+
+    // Insertion sort keeps this one-time startup pass small and deterministic.
+    for (i = 1; i < sCustomStarterCount; i++)
+    {
+        u16 key = sCustomStarterList[i];
+        s16 j = i - 1;
+        while (j >= 0 && StringCompare(GetSpeciesName(sCustomStarterList[j]), GetSpeciesName(key)) > 0)
+        {
+            sCustomStarterList[j + 1] = sCustomStarterList[j];
+            j--;
+        }
+        sCustomStarterList[j + 1] = key;
+    }
+}
+
+static u8 GetCustomStarterTab(enum Species species)
+{
+    u8 first = GetSpeciesName(species)[0];
+    if (first < sLetterE[0]) return 0;
+    if (first < sLetterI[0]) return 1;
+    if (first < sLetterM[0]) return 2;
+    if (first < sLetterQ[0]) return 3;
+    if (first < sLetterU[0]) return 4;
+    return 5;
+}
+
+static void CustomStarterDestroyPreview(void)
+{
+    if (sCustomPreviewSpriteId != SPRITE_NONE)
+    {
+        FreeAndDestroyMonPicSprite(sCustomPreviewSpriteId);
+        sCustomPreviewSpriteId = SPRITE_NONE;
+    }
+}
+
+static void CustomStarterUpdatePreview(u8 taskId)
+{
+    enum Species species;
+    bool8 shiny;
+
+    CustomStarterDestroyPreview();
+    if (sCustomStarterCount == 0)
+        return;
+
+    species = sCustomStarterList[gTasks[taskId].tCustomIndex];
+    shiny = gTasks[taskId].tCustomState == 0 ? FALSE : gTasks[taskId].tCustomShiny;
+    sCustomPreviewSpriteId = CreateMonPicSprite_Affine(species, shiny, 0, MON_PIC_AFFINE_FRONT, 188, 72, 14, TAG_NONE);
+    if (sCustomPreviewSpriteId != SPRITE_NONE)
+        gSprites[sCustomPreviewSpriteId].oam.priority = 0;
+}
+
+static void CustomStarterDraw(u8 taskId)
+{
+    u16 i, start;
+    u8 tab;
+    enum Species species;
+
+    FillWindowPixelBuffer(0, PIXEL_FILL(1));
+
+    if (sCustomStarterCount == 0)
+    {
+        AddTextPrinterParameterized(0, FONT_NORMAL, _("NO ELIGIBLE POKéMON"), 8, 8, TEXT_SKIP_DRAW, NULL);
+        CopyWindowToVram(0, COPYWIN_FULL);
+        return;
+    }
+
+    species = sCustomStarterList[gTasks[taskId].tCustomIndex];
+
+    if (gTasks[taskId].tCustomState == 0)
+    {
+        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomStarterTitle, 4, 1, TEXT_SKIP_DRAW, NULL);
+        for (tab = 0; tab < CUSTOM_STARTER_TABS; tab++)
+        {
+            u8 x = 4 + tab * 35;
+            if (tab == gTasks[taskId].tCustomTab)
+                AddTextPrinterParameterized(0, FONT_SMALL, gText_SelectorArrow2, x, 13, TEXT_SKIP_DRAW, NULL);
+            AddTextPrinterParameterized(0, FONT_SMALL, sCustomTabs[tab], x + 8, 13, TEXT_SKIP_DRAW, NULL);
+        }
+
+        start = (gTasks[taskId].tCustomIndex / CUSTOM_STARTER_ROWS) * CUSTOM_STARTER_ROWS;
+        for (i = 0; i < CUSTOM_STARTER_ROWS && start + i < sCustomStarterCount; i++)
+        {
+            u8 y = 29 + i * 12;
+            if (start + i == gTasks[taskId].tCustomIndex)
+                AddTextPrinterParameterized(0, FONT_SMALL, gText_SelectorArrow2, 4, y, TEXT_SKIP_DRAW, NULL);
+            AddTextPrinterParameterized(0, FONT_SMALL, GetSpeciesName(sCustomStarterList[start + i]), 15, y, TEXT_SKIP_DRAW, NULL);
+        }
+
+        AddTextPrinterParameterized(0, FONT_SMALL, GetSpeciesName(species), 145, 101, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_SMALL, gTypesInfo[gSpeciesInfo[species].types[0]].name, 145, 113, TEXT_SKIP_DRAW, NULL);
+        if (gSpeciesInfo[species].types[1] != gSpeciesInfo[species].types[0])
+            AddTextPrinterParameterized(0, FONT_SMALL, gTypesInfo[gSpeciesInfo[species].types[1]].name, 181, 113, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomControls, 4, 119, TEXT_SKIP_DRAW, NULL);
+    }
+    else if (gTasks[taskId].tCustomState == 1)
+    {
+        AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomAppearance, 8, 8, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_NORMAL, GetSpeciesName(species), 8, 30, TEXT_SKIP_DRAW, NULL);
+        if (!gTasks[taskId].tCustomShiny)
+            AddTextPrinterParameterized(0, FONT_NORMAL, gText_SelectorArrow2, 16, 82, TEXT_SKIP_DRAW, NULL);
+        else
+            AddTextPrinterParameterized(0, FONT_NORMAL, gText_SelectorArrow2, 112, 82, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomNormal, 32, 82, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomShiny, 128, 82, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomBack, 8, 112, TEXT_SKIP_DRAW, NULL);
+    }
+    else
+    {
+        AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomConfirm, 8, 8, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_NORMAL, GetSpeciesName(species), 8, 30, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_NORMAL, gTasks[taskId].tCustomShiny ? sText_CustomShiny : sText_CustomNormal, 8, 50, TEXT_SKIP_DRAW, NULL);
+        if (gTasks[taskId].tCustomConfirmChoice == 0)
+            AddTextPrinterParameterized(0, FONT_NORMAL, gText_SelectorArrow2, 24, 88, TEXT_SKIP_DRAW, NULL);
+        else
+            AddTextPrinterParameterized(0, FONT_NORMAL, gText_SelectorArrow2, 112, 88, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomYes, 40, 88, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomNo, 128, 88, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomBack, 8, 112, TEXT_SKIP_DRAW, NULL);
+    }
+
+    PutWindowTilemap(0);
+    CopyWindowToVram(0, COPYWIN_FULL);
+}
+
+static void CustomStarterJumpToTab(u8 taskId, u8 tab)
+{
+    u16 i;
+    gTasks[taskId].tCustomTab = tab;
+    for (i = 0; i < sCustomStarterCount; i++)
+    {
+        if (GetCustomStarterTab(sCustomStarterList[i]) == tab)
+        {
+            gTasks[taskId].tCustomIndex = i;
+            CustomStarterUpdatePreview(taskId);
+            CustomStarterDraw(taskId);
+            return;
+        }
+    }
+}
+
+static void Task_CustomStarterInput(u8 taskId)
+{
+    if (sCustomStarterCount == 0)
+        return;
+
+    if (gTasks[taskId].tCustomState == 0)
+    {
+        if (JOY_NEW(DPAD_UP))
+        {
+            if (gTasks[taskId].tCustomIndex == 0)
+                gTasks[taskId].tCustomIndex = sCustomStarterCount - 1;
+            else
+                gTasks[taskId].tCustomIndex--;
+            gTasks[taskId].tCustomTab = GetCustomStarterTab(sCustomStarterList[gTasks[taskId].tCustomIndex]);
+            CustomStarterUpdatePreview(taskId);
+            CustomStarterDraw(taskId);
+        }
+        else if (JOY_NEW(DPAD_DOWN))
+        {
+            gTasks[taskId].tCustomIndex = (gTasks[taskId].tCustomIndex + 1) % sCustomStarterCount;
+            gTasks[taskId].tCustomTab = GetCustomStarterTab(sCustomStarterList[gTasks[taskId].tCustomIndex]);
+            CustomStarterUpdatePreview(taskId);
+            CustomStarterDraw(taskId);
+        }
+        else if (JOY_NEW(L_BUTTON))
+        {
+            u8 tab = gTasks[taskId].tCustomTab == 0 ? CUSTOM_STARTER_TABS - 1 : gTasks[taskId].tCustomTab - 1;
+            CustomStarterJumpToTab(taskId, tab);
+        }
+        else if (JOY_NEW(R_BUTTON))
+        {
+            u8 tab = (gTasks[taskId].tCustomTab + 1) % CUSTOM_STARTER_TABS;
+            CustomStarterJumpToTab(taskId, tab);
+        }
+        else if (JOY_NEW(A_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            gTasks[taskId].tCustomState = 1;
+            gTasks[taskId].tCustomShiny = FALSE;
+            CustomStarterUpdatePreview(taskId);
+            CustomStarterDraw(taskId);
+        }
+    }
+    else if (gTasks[taskId].tCustomState == 1)
+    {
+        if (JOY_NEW(DPAD_LEFT) || JOY_NEW(DPAD_RIGHT))
+        {
+            gTasks[taskId].tCustomShiny ^= 1;
+            CustomStarterUpdatePreview(taskId);
+            CustomStarterDraw(taskId);
+        }
+        else if (JOY_NEW(B_BUTTON))
+        {
+            gTasks[taskId].tCustomState = 0;
+            CustomStarterUpdatePreview(taskId);
+            CustomStarterDraw(taskId);
+        }
+        else if (JOY_NEW(A_BUTTON))
+        {
+            gTasks[taskId].tCustomState = 2;
+            gTasks[taskId].tCustomConfirmChoice = 0;
+            CustomStarterDraw(taskId);
+        }
+    }
+    else
+    {
+        if (JOY_NEW(DPAD_LEFT) || JOY_NEW(DPAD_RIGHT))
+        {
+            gTasks[taskId].tCustomConfirmChoice ^= 1;
+            CustomStarterDraw(taskId);
+        }
+        else if (JOY_NEW(B_BUTTON))
+        {
+            gTasks[taskId].tCustomState = 1;
+            CustomStarterDraw(taskId);
+        }
+        else if (JOY_NEW(A_BUTTON))
+        {
+            if (gTasks[taskId].tCustomConfirmChoice == 0)
+            {
+                gCustomStarterSpecies = sCustomStarterList[gTasks[taskId].tCustomIndex];
+                gCustomStarterShiny = gTasks[taskId].tCustomShiny;
+                gSpecialVar_Result = 0;
+                CustomStarterDestroyPreview();
+                ResetAllPicSprites();
+                SetMainCallback2(gMain.savedCallback);
+            }
+            else
+            {
+                gTasks[taskId].tCustomState = 1;
+                CustomStarterDraw(taskId);
+            }
+        }
+    }
+}
+
+static void BeginCustomStarterSelection(void)
+{
+    u8 taskId;
+
+    BuildCustomStarterList();
+    gCustomStarterSpecies = SPECIES_NONE;
+    gCustomStarterShiny = FALSE;
+    sCustomPreviewSpriteId = SPRITE_NONE;
+
+    taskId = CreateTask(Task_CustomStarterInput, 0);
+    gTasks[taskId].tCustomIndex = 0;
+    gTasks[taskId].tCustomTab = sCustomStarterCount ? GetCustomStarterTab(sCustomStarterList[0]) : 0;
+    gTasks[taskId].tCustomState = 0;
+    gTasks[taskId].tCustomShiny = FALSE;
+    gTasks[taskId].tCustomConfirmChoice = 0;
+
+    CustomStarterUpdatePreview(taskId);
+    CustomStarterDraw(taskId);
 }
 
 static u8 CreatePokemonFrontSprite(enum Species species, u8 x, u8 y)

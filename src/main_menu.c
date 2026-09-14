@@ -187,7 +187,7 @@ EWRAM_DATA u32 gRunSetupWorldSeed;
 EWRAM_DATA u8 gRunSetupFilterMode;
 EWRAM_DATA u16 gRunSetupFilterValue;
 static EWRAM_DATA u8 sRunSetupRandomizer;
-static EWRAM_DATA bool8 sRunSetupStarter;
+static EWRAM_DATA u8 sRunSetupStarter;
 static EWRAM_DATA bool8 sRunSetupCustom;
 static EWRAM_DATA bool8 sRunSetupConfirm;
 static EWRAM_DATA bool8 sRunSetupReturnToBirch;
@@ -1820,7 +1820,7 @@ static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
     if (!RunTextPrintersAndIsPrinter0Active())
     {
         sRunSetupRandomizer = FALSE;
-        sRunSetupStarter = FALSE;
+        sRunSetupStarter = RUN_STARTER_NORMAL;
         sRunSetupCustom = FALSE;
         sRunSetupConfirm = FALSE;
         sRunSetupEmptySeed = FALSE;
@@ -2218,7 +2218,9 @@ static void RunSetup_Draw(u8 cursor)
     const u8 *wild = sRunSetupRandomizer == RUN_WILD_SCALED ? sText_RunSetupScaled
                      : sRunSetupRandomizer == RUN_WILD_RANDOM ? sText_RunSetupRandom
                      : sText_RunSetupNormal;
-    const u8 *starters = sRunSetupStarter ? sText_RunSetupRandom : sText_RunSetupNormal;
+    const u8 *starters = sRunSetupStarter == RUN_STARTER_RANDOM ? sText_RunSetupRandom
+                         : sRunSetupStarter == RUN_STARTER_CHOOSE ? sText_RunSetupCustom
+                         : sText_RunSetupNormal;
     const u8 *seed = sRunSetupCustom ? sText_RunSetupCustom : sText_RunSetupRandom;
     const u8 *filter = sRunSetupFilter == RUN_FILTER_TYPE ? gTypesInfo[sRunSetupType].name
                      : sRunSetupFilter == RUN_FILTER_ABILITY ? gAbilitiesInfo[sRunSetupAbility].name
@@ -2275,8 +2277,9 @@ static void RunSetup_Draw(u8 cursor)
         RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 88, 34, sRunSetupRandomizer == RUN_WILD_NORMAL);
         RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 127, 34, sRunSetupRandomizer == RUN_WILD_RANDOM);
         RunSetup_DrawNarrowChoice(sText_RunSetupScaled, 166, 34, sRunSetupRandomizer == RUN_WILD_SCALED);
-        RunSetup_DrawChoice(sText_RunSetupNormal, 98, 56, !sRunSetupStarter);
-        RunSetup_DrawChoice(sText_RunSetupRandom, 151, 56, sRunSetupStarter);
+        RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 82, 56, sRunSetupStarter == RUN_STARTER_NORMAL);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 128, 56, sRunSetupStarter == RUN_STARTER_RANDOM);
+        RunSetup_DrawNarrowChoice(sText_RunSetupCustom, 174, 56, sRunSetupStarter == RUN_STARTER_CHOOSE);
         RunSetup_DrawChoice(sText_RunSetupRandom, 98, 78, !sRunSetupCustom);
         RunSetup_DrawChoice(sText_RunSetupCustom, 151, 78, sRunSetupCustom);
 
@@ -2453,7 +2456,7 @@ static void Task_RunSetup_Input(u8 taskId)
         {
             gRunSetupRandomizerEnabled = sRunSetupRandomizer;
             gRunSetupSeedIsCustom = sRunSetupCustom;
-            gRunSetupStarterMode = sRunSetupStarter ? RUN_STARTER_RANDOM : RUN_STARTER_NORMAL;
+            gRunSetupStarterMode = sRunSetupStarter;
             gRunSetupWorldSeed = sRunSetupSeed;
             gRunSetupFilterMode = sRunSetupFilter;
             gRunSetupFilterValue = sRunSetupFilter == RUN_FILTER_TYPE ? sRunSetupType
@@ -2529,7 +2532,12 @@ static void Task_RunSetup_Input(u8 taskId)
         if (*cursor == 0)
             sRunSetupRandomizer = (sRunSetupRandomizer == RUN_WILD_NORMAL) ? RUN_WILD_NORMAL : sRunSetupRandomizer - 1;
         else if (*cursor == 1)
-            sRunSetupStarter = FALSE;
+        {
+            if (sRunSetupStarter == RUN_STARTER_CHOOSE)
+                sRunSetupStarter = RUN_STARTER_RANDOM;
+            else if (sRunSetupStarter == RUN_STARTER_RANDOM)
+                sRunSetupStarter = RUN_STARTER_NORMAL;
+        }
         else
             sRunSetupCustom = FALSE;
     }
@@ -2538,7 +2546,12 @@ static void Task_RunSetup_Input(u8 taskId)
         if (*cursor == 0)
             sRunSetupRandomizer = (sRunSetupRandomizer == RUN_WILD_SCALED) ? RUN_WILD_SCALED : sRunSetupRandomizer + 1;
         else if (*cursor == 1)
-            sRunSetupStarter = TRUE;
+        {
+            if (sRunSetupStarter == RUN_STARTER_NORMAL)
+                sRunSetupStarter = RUN_STARTER_RANDOM;
+            else if (sRunSetupStarter == RUN_STARTER_RANDOM)
+                sRunSetupStarter = RUN_STARTER_CHOOSE;
+        }
         else
             sRunSetupCustom = TRUE;
     }
@@ -2547,7 +2560,9 @@ static void Task_RunSetup_Input(u8 taskId)
         if (*cursor == 0)
             sRunSetupRandomizer = (sRunSetupRandomizer + 1) % 3;
         else if (*cursor == 1)
-            sRunSetupStarter ^= 1;
+            sRunSetupStarter = sRunSetupStarter == RUN_STARTER_NORMAL ? RUN_STARTER_RANDOM
+                             : sRunSetupStarter == RUN_STARTER_RANDOM ? RUN_STARTER_CHOOSE
+                             : RUN_STARTER_NORMAL;
         else if (*cursor == 2)
             sRunSetupCustom ^= 1;
     }
