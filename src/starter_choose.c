@@ -31,8 +31,9 @@
 #include "run_settings.h"
 
 #define STARTER_MON_COUNT   3
-#define CUSTOM_STARTER_ROWS  8
+#define CUSTOM_STARTER_ROWS  7
 #define CUSTOM_STARTER_TABS  6
+#define CUSTOM_STARTER_STATE_LOADING 3
 
 
 // Position of the sprite of the selected starter Pokémon
@@ -67,6 +68,7 @@ static void CustomStarterJumpToTab(u8 taskId, u8 tab);
 static void CustomStarterDraw(u8 taskId);
 static void CustomStarterUpdatePreview(u8 taskId);
 static void CustomStarterDestroyPreview(void);
+static void CustomStarterDrawLoading(void);
 
 static u16 sStarterLabelWindowId;
 EWRAM_DATA u16 gCustomStarterSpecies = SPECIES_NONE;
@@ -105,7 +107,7 @@ static const struct WindowTemplate sCustomWindowTemplates[] =
         .tilemapLeft = 1,
         .tilemapTop = 1,
         .width = 28,
-        .height = 18,
+        .height = 16,
         .paletteNum = 14,
         .baseBlock = 0x0200
     },
@@ -259,6 +261,8 @@ static const u8 sText_CustomNo[] = _("NO");
 static const u8 sText_CustomControls[] = _("L/R TABS   A SELECT");
 static const u8 sText_CustomBack[] = _("A CONFIRM   B BACK");
 static const u8 sText_CustomNoneEligible[] = _("NO ELIGIBLE POKéMON");
+static const u8 sText_CustomLoading[] = _("LOADING POKéMON...");
+static const u8 sText_CustomPleaseWait[] = _("PLEASE WAIT");
 static const u8 sLetterE[] = _("E");
 static const u8 sLetterI[] = _("I");
 static const u8 sLetterM[] = _("M");
@@ -752,6 +756,7 @@ static void Task_CreateStarterLabel(u8 taskId)
 #define tCustomState         data[2]
 #define tCustomShiny         data[3]
 #define tCustomConfirmChoice data[4]
+#define tCustomLoadingTimer  data[5]
 
 static bool32 IsCustomStarterEligible(enum Species species)
 {
@@ -900,11 +905,11 @@ static void CustomStarterDraw(u8 taskId)
             AddTextPrinterParameterized(0, FONT_SMALL, GetSpeciesName(sCustomStarterList[start + i]), 15, y, TEXT_SKIP_DRAW, NULL);
         }
 
-        AddTextPrinterParameterized(0, FONT_SMALL, GetSpeciesName(species), 145, 101, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(0, FONT_SMALL, gTypesInfo[gSpeciesInfo[species].types[0]].name, 145, 113, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_SMALL, GetSpeciesName(species), 145, 92, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_SMALL, gTypesInfo[gSpeciesInfo[species].types[0]].name, 145, 104, TEXT_SKIP_DRAW, NULL);
         if (gSpeciesInfo[species].types[1] != gSpeciesInfo[species].types[0])
-            AddTextPrinterParameterized(0, FONT_SMALL, gTypesInfo[gSpeciesInfo[species].types[1]].name, 181, 113, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomControls, 4, 130, TEXT_SKIP_DRAW, NULL);
+            AddTextPrinterParameterized(0, FONT_SMALL, gTypesInfo[gSpeciesInfo[species].types[1]].name, 181, 104, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomControls, 4, 116, TEXT_SKIP_DRAW, NULL);
     }
     else if (gTasks[taskId].tCustomState == 1)
     {
@@ -916,7 +921,7 @@ static void CustomStarterDraw(u8 taskId)
             AddTextPrinterParameterized(0, FONT_NORMAL, gText_SelectorArrow2, 112, 82, TEXT_SKIP_DRAW, NULL);
         AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomNormal, 32, 82, TEXT_SKIP_DRAW, NULL);
         AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomShiny, 128, 82, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomBack, 8, 128, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomBack, 8, 112, TEXT_SKIP_DRAW, NULL);
     }
     else
     {
@@ -929,9 +934,22 @@ static void CustomStarterDraw(u8 taskId)
             AddTextPrinterParameterized(0, FONT_NORMAL, gText_SelectorArrow2, 112, 88, TEXT_SKIP_DRAW, NULL);
         AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomYes, 40, 88, TEXT_SKIP_DRAW, NULL);
         AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomNo, 128, 88, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomBack, 8, 128, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomBack, 8, 112, TEXT_SKIP_DRAW, NULL);
     }
 
+    PutWindowTilemap(0);
+    CopyWindowToVram(0, COPYWIN_FULL);
+}
+
+static void CustomStarterDrawLoading(void)
+{
+    s32 x;
+
+    FillWindowPixelBuffer(0, PIXEL_FILL(1));
+    x = GetStringCenterAlignXOffset(FONT_NORMAL, sText_CustomLoading, 224);
+    AddTextPrinterParameterized(0, FONT_NORMAL, sText_CustomLoading, x, 48, TEXT_SKIP_DRAW, NULL);
+    x = GetStringCenterAlignXOffset(FONT_SMALL, sText_CustomPleaseWait, 224);
+    AddTextPrinterParameterized(0, FONT_SMALL, sText_CustomPleaseWait, x, 72, TEXT_SKIP_DRAW, NULL);
     PutWindowTilemap(0);
     CopyWindowToVram(0, COPYWIN_FULL);
 }
@@ -954,6 +972,22 @@ static void CustomStarterJumpToTab(u8 taskId, u8 tab)
 
 static void Task_CustomStarterInput(u8 taskId)
 {
+    if (gTasks[taskId].tCustomState == CUSTOM_STARTER_STATE_LOADING)
+    {
+        // Let the loading message fade fully into view before the expensive
+        // list build blocks the main loop.
+        if (gPaletteFade.active || ++gTasks[taskId].tCustomLoadingTimer < 2)
+            return;
+
+        BuildCustomStarterList();
+        gTasks[taskId].tCustomIndex = 0;
+        gTasks[taskId].tCustomTab = sCustomStarterCount ? GetCustomStarterTab(sCustomStarterList[0]) : 0;
+        gTasks[taskId].tCustomState = 0;
+        CustomStarterUpdatePreview(taskId);
+        CustomStarterDraw(taskId);
+        return;
+    }
+
     if (sCustomStarterCount == 0)
         return;
 
@@ -1052,20 +1086,19 @@ static void BeginCustomStarterSelection(void)
 {
     u8 taskId;
 
-    BuildCustomStarterList();
     gCustomStarterSpecies = SPECIES_NONE;
     gCustomStarterShiny = FALSE;
     sCustomPreviewSpriteId = SPRITE_NONE;
 
     taskId = CreateTask(Task_CustomStarterInput, 0);
     gTasks[taskId].tCustomIndex = 0;
-    gTasks[taskId].tCustomTab = sCustomStarterCount ? GetCustomStarterTab(sCustomStarterList[0]) : 0;
-    gTasks[taskId].tCustomState = 0;
+    gTasks[taskId].tCustomTab = 0;
+    gTasks[taskId].tCustomState = CUSTOM_STARTER_STATE_LOADING;
     gTasks[taskId].tCustomShiny = FALSE;
     gTasks[taskId].tCustomConfirmChoice = 0;
+    gTasks[taskId].tCustomLoadingTimer = 0;
 
-    CustomStarterUpdatePreview(taskId);
-    CustomStarterDraw(taskId);
+    CustomStarterDrawLoading();
 }
 
 static u8 CreatePokemonFrontSprite(enum Species species, u8 x, u8 y)
