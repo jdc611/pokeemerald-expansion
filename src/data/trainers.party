@@ -9575,7 +9575,10 @@ AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 Treecko
 Level: 5
 IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
-
+- Pound
+- Leer
+- Absorb
+- Quick Attack
 === TRAINER_BRENDAN_ROUTE_110_MUDKIP ===
 Name: BRENDAN
 Class: Rival
@@ -9586,17 +9589,28 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Slugma
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
+Level: 20
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Flame Burst
+- Rock Throw
+- Yawn
+- Clear Smog
 
 Wingull
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
-Grovyle
 Level: 20
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Water Pulse
+- Wing Attack
+- Quick Attack
+- Supersonic
 
+Grovyle @ Oran Berry
+Level: 20
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Mega Drain
+- Leaf Blade
+- Quick Attack
+- Rock Tomb
 === TRAINER_BRENDAN_ROUTE_119_MUDKIP ===
 Name: BRENDAN
 Class: Rival
@@ -9607,17 +9621,36 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Slugma
-Level: 29
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Flamethrower
+- Rock Slide
+- Yawn
+- Clear Smog
 
 Pelipper
-Level: 29
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
-
-Grovyle
 Level: 31
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Scald
+- Air Slash
+- Roost
+- Protect
 
+Manectric
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Thunderbolt
+- Flame Burst
+- Bite
+- Volt Switch
+
+Grovyle @ Sitrus Berry
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Leaf Blade
+- Giga Drain
+- Aerial Ace
+- Quick Attack
 === TRAINER_BRENDAN_ROUTE_103_TREECKO ===
 Name: BRENDAN
 Class: Rival
@@ -9630,7 +9663,10 @@ AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 Torchic
 Level: 5
 IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
-
+- Scratch
+- Growl
+- Ember
+- Peck
 === TRAINER_BRENDAN_ROUTE_110_TREECKO ===
 Name: BRENDAN
 Class: Rival
@@ -9641,17 +9677,28 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Wingull
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
+Level: 20
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Water Pulse
+- Wing Attack
+- Quick Attack
+- Supersonic
 
 Lombre
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
-Combusken
 Level: 20
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Bubble Beam
+- Mega Drain
+- Fake Out
+- Nature Power
 
+Combusken @ Oran Berry
+Level: 20
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Double Kick
+- Flame Charge
+- Peck
+- Bulk Up
 === TRAINER_BRENDAN_ROUTE_119_TREECKO ===
 Name: BRENDAN
 Class: Rival
@@ -9662,17 +9709,36 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Pelipper
-Level: 29
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Scald
+- Air Slash
+- Roost
+- Protect
 
 Lombre
-Level: 29
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
-
-Combusken
 Level: 31
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Giga Drain
+- Bubble Beam
+- Fake Out
+- Knock Off
 
+Manectric
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Thunderbolt
+- Flame Burst
+- Bite
+- Volt Switch
+
+Combusken @ Sitrus Berry
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Blaze Kick
+- Brick Break
+- Aerial Ace
+- Bulk Up
 === TRAINER_BRENDAN_ROUTE_103_TORCHIC ===
 Name: BRENDAN
 Class: Rival
@@ -9685,7 +9751,10 @@ AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 Mudkip
 Level: 5
 IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
-
+- Tackle
+- Growl
+- Water Gun
+- Mud Slap
 === TRAINER_BRENDAN_ROUTE_110_TORCHIC ===
 Name: BRENDAN
 Class: Rival
@@ -9696,17 +9765,28 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Lombre
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
+Level: 20
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Bubble Beam
+- Mega Drain
+- Fake Out
+- Nature Power
 
 Slugma
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
-Marshtomp
 Level: 20
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Flame Burst
+- Rock Throw
+- Yawn
+- Clear Smog
 
+Marshtomp @ Oran Berry
+Level: 20
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Water Pulse
+- Mud Shot
+- Rock Tomb
+- Protect
 === TRAINER_BRENDAN_ROUTE_119_TORCHIC ===
 Name: BRENDAN
 Class: Rival
@@ -9717,17 +9797,36 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Lombre
-Level: 29
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Giga Drain
+- Bubble Beam
+- Fake Out
+- Knock Off
 
 Slugma
-Level: 29
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
-
-Marshtomp
 Level: 31
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Flamethrower
+- Rock Slide
+- Yawn
+- Clear Smog
 
+Golbat
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Air Slash
+- Poison Fang
+- Bite
+- Roost
+
+Marshtomp @ Sitrus Berry
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Waterfall
+- Bulldoze
+- Rock Slide
+- Protect
 === TRAINER_MAY_ROUTE_103_MUDKIP ===
 Name: MAY
 Class: Rival
@@ -9740,7 +9839,10 @@ AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 Treecko
 Level: 5
 IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
-
+- Pound
+- Leer
+- Absorb
+- Quick Attack
 === TRAINER_MAY_ROUTE_110_MUDKIP ===
 Name: MAY
 Class: Rival
@@ -9750,18 +9852,29 @@ Music: Female
 Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
-Wingull
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
 Slugma
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
-Grovyle
 Level: 20
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Flame Burst
+- Rock Throw
+- Yawn
+- Clear Smog
 
+Wingull
+Level: 20
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Water Pulse
+- Wing Attack
+- Quick Attack
+- Supersonic
+
+Grovyle @ Oran Berry
+Level: 20
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Mega Drain
+- Leaf Blade
+- Quick Attack
+- Rock Tomb
 === TRAINER_MAY_ROUTE_119_MUDKIP ===
 Name: MAY
 Class: Rival
@@ -9772,17 +9885,36 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Slugma
-Level: 29
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
-
-Lombre
-Level: 29
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
-
-Grovyle
 Level: 31
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Flamethrower
+- Rock Slide
+- Yawn
+- Clear Smog
 
+Pelipper
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Scald
+- Air Slash
+- Roost
+- Protect
+
+Manectric
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Thunderbolt
+- Flame Burst
+- Bite
+- Volt Switch
+
+Grovyle @ Sitrus Berry
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Leaf Blade
+- Giga Drain
+- Aerial Ace
+- Quick Attack
 === TRAINER_MAY_ROUTE_103_TREECKO ===
 Name: MAY
 Class: Rival
@@ -9795,7 +9927,10 @@ AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 Torchic
 Level: 5
 IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
-
+- Scratch
+- Growl
+- Ember
+- Peck
 === TRAINER_MAY_ROUTE_110_TREECKO ===
 Name: MAY
 Class: Rival
@@ -9806,17 +9941,28 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Wingull
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
+Level: 20
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Water Pulse
+- Wing Attack
+- Quick Attack
+- Supersonic
 
 Lombre
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
-Combusken
 Level: 20
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Bubble Beam
+- Mega Drain
+- Fake Out
+- Nature Power
 
+Combusken @ Oran Berry
+Level: 20
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Double Kick
+- Flame Charge
+- Peck
+- Bulk Up
 === TRAINER_MAY_ROUTE_119_TREECKO ===
 Name: MAY
 Class: Rival
@@ -9827,17 +9973,36 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Pelipper
-Level: 29
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Scald
+- Air Slash
+- Roost
+- Protect
 
 Lombre
-Level: 29
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
-
-Combusken
 Level: 31
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Giga Drain
+- Bubble Beam
+- Fake Out
+- Knock Off
 
+Manectric
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Thunderbolt
+- Flame Burst
+- Bite
+- Volt Switch
+
+Combusken @ Sitrus Berry
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Blaze Kick
+- Brick Break
+- Aerial Ace
+- Bulk Up
 === TRAINER_MAY_ROUTE_103_TORCHIC ===
 Name: MAY
 Class: Rival
@@ -9850,7 +10015,10 @@ AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 Mudkip
 Level: 5
 IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
-
+- Tackle
+- Growl
+- Water Gun
+- Mud Slap
 === TRAINER_MAY_ROUTE_110_TORCHIC ===
 Name: MAY
 Class: Rival
@@ -9861,17 +10029,28 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Lombre
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
+Level: 20
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Bubble Beam
+- Mega Drain
+- Fake Out
+- Nature Power
 
 Slugma
-Level: 18
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
-Marshtomp
 Level: 20
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Flame Burst
+- Rock Throw
+- Yawn
+- Clear Smog
 
+Marshtomp @ Oran Berry
+Level: 20
+IVs: 16 HP / 16 Atk / 16 Def / 16 SpA / 16 SpD / 16 Spe
+- Water Pulse
+- Mud Shot
+- Rock Tomb
+- Protect
 === TRAINER_MAY_ROUTE_119_TORCHIC ===
 Name: MAY
 Class: Rival
@@ -9882,17 +10061,36 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Lombre
-Level: 29
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Giga Drain
+- Bubble Beam
+- Fake Out
+- Knock Off
 
 Slugma
-Level: 29
-IVs: 12 HP / 12 Atk / 12 Def / 12 SpA / 12 SpD / 12 Spe
-
-Marshtomp
 Level: 31
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Flamethrower
+- Rock Slide
+- Yawn
+- Clear Smog
 
+Golbat
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Air Slash
+- Poison Fang
+- Bite
+- Roost
+
+Marshtomp @ Sitrus Berry
+Level: 31
+IVs: 22 HP / 22 Atk / 22 Def / 22 SpA / 22 SpD / 22 Spe
+- Waterfall
+- Bulldoze
+- Rock Slide
+- Protect
 === TRAINER_ISAAC_1 ===
 Name: ISAAC
 Class: Pkmn Breeder
@@ -10914,13 +11112,20 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Lotad
-Level: 13
-IVs: 3 HP / 3 Atk / 3 Def / 3 SpA / 3 SpD / 3 Spe
+Level: 15
+IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
+- Bubble Beam
+- Absorb
+- Astonish
+- Nature Power
 
 Torchic
 Level: 15
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
+IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
+- Ember
+- Peck
+- Quick Attack
+- Sand Attack
 === TRAINER_BRENDAN_RUSTBORO_MUDKIP ===
 Name: BRENDAN
 Class: Rival
@@ -10931,13 +11136,20 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Wingull
-Level: 13
-IVs: 3 HP / 3 Atk / 3 Def / 3 SpA / 3 SpD / 3 Spe
+Level: 15
+IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
+- Water Gun
+- Wing Attack
+- Supersonic
+- Quick Attack
 
 Treecko
 Level: 15
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
+IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
+- Mega Drain
+- Quick Attack
+- Pursuit
+- Leer
 === TRAINER_PAXTON ===
 Name: PAXTON
 Class: Expert
@@ -11038,13 +11250,20 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Slugma
-Level: 13
-IVs: 3 HP / 3 Atk / 3 Def / 3 SpA / 3 SpD / 3 Spe
+Level: 15
+IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
+- Ember
+- Rock Throw
+- Yawn
+- Smog
 
 Mudkip
 Level: 15
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
+IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
+- Water Gun
+- Rock Tomb
+- Mud Slap
+- Bide
 === TRAINER_MAY_RUSTBORO_MUDKIP ===
 Name: MAY
 Class: Rival
@@ -11055,13 +11274,20 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Wingull
-Level: 13
-IVs: 3 HP / 3 Atk / 3 Def / 3 SpA / 3 SpD / 3 Spe
+Level: 15
+IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
+- Water Gun
+- Wing Attack
+- Supersonic
+- Quick Attack
 
 Treecko
 Level: 15
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
+IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
+- Mega Drain
+- Quick Attack
+- Pursuit
+- Leer
 === TRAINER_MAXIE_MAGMA_HIDEOUT ===
 Name: MAXIE
 Class: Magma Leader
@@ -12361,22 +12587,53 @@ Music: Male
 Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
-Tropius
-Level: 31
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+Pelipper
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Scald
+- Air Slash
+- Ice Beam
+- Roost
 
 Slugma
-Level: 32
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
-
-Pelipper
-Level: 32
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
-
-Grovyle
 Level: 34
-IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Flamethrower
+- Rock Slide
+- Earth Power
+- Yawn
 
+Manectric
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Thunderbolt
+- Flamethrower
+- Bite
+- Volt Switch
+
+Hariyama
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Drain Punch
+- Knock Off
+- Rock Slide
+- Fake Out
+
+Gardevoir
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Psychic
+- Moonblast
+- Thunderbolt
+- Calm Mind
+
+Grovyle @ Sitrus Berry
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Leaf Blade
+- Giga Drain
+- Aerial Ace
+- Rock Slide
 === TRAINER_BRENDAN_LILYCOVE_TREECKO ===
 Name: BRENDAN
 Class: Rival
@@ -12386,22 +12643,53 @@ Music: Male
 Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
-Tropius
-Level: 31
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+Ludicolo
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Giga Drain
+- Scald
+- Ice Beam
+- Fake Out
+
+Manectric
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Thunderbolt
+- Flamethrower
+- Bite
+- Volt Switch
+
+Mightyena
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Crunch
+- Play Rough
+- Fire Fang
+- Taunt
 
 Pelipper
-Level: 32
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
-
-Ludicolo
-Level: 32
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
-
-Combusken
 Level: 34
-IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Scald
+- Air Slash
+- Ice Beam
+- Roost
 
+Donphan
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Earthquake
+- Rock Slide
+- Ice Shard
+- Knock Off
+
+Combusken @ Sitrus Berry
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Blaze Kick
+- Brick Break
+- Aerial Ace
+- Bulk Up
 === TRAINER_BRENDAN_LILYCOVE_TORCHIC ===
 Name: BRENDAN
 Class: Rival
@@ -12411,22 +12699,53 @@ Music: Male
 Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
-Tropius
-Level: 31
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
-
 Ludicolo
-Level: 32
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Giga Drain
+- Scald
+- Ice Beam
+- Fake Out
 
 Slugma
-Level: 32
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
-
-Marshtomp
 Level: 34
-IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Flamethrower
+- Rock Slide
+- Earth Power
+- Yawn
 
+Crobat
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Cross Poison
+- Acrobatics
+- U Turn
+- Roost
+
+Froslass
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Ice Beam
+- Shadow Ball
+- Thunderbolt
+- Will O Wisp
+
+Scyther
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- X Scissor
+- Aerial Ace
+- Brick Break
+- Quick Attack
+
+Marshtomp @ Sitrus Berry
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Waterfall
+- Bulldoze
+- Ice Punch
+- Rock Slide
 === TRAINER_MAY_LILYCOVE_MUDKIP ===
 Name: MAY
 Class: Rival
@@ -12436,22 +12755,53 @@ Music: Female
 Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
-Tropius
-Level: 31
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+Pelipper
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Scald
+- Air Slash
+- Ice Beam
+- Roost
 
 Slugma
-Level: 32
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
-
-Pelipper
-Level: 32
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
-
-Grovyle
 Level: 34
-IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Flamethrower
+- Rock Slide
+- Earth Power
+- Yawn
 
+Manectric
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Thunderbolt
+- Flamethrower
+- Bite
+- Volt Switch
+
+Hariyama
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Drain Punch
+- Knock Off
+- Rock Slide
+- Fake Out
+
+Gardevoir
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Psychic
+- Moonblast
+- Thunderbolt
+- Calm Mind
+
+Grovyle @ Sitrus Berry
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Leaf Blade
+- Giga Drain
+- Aerial Ace
+- Rock Slide
 === TRAINER_MAY_LILYCOVE_TREECKO ===
 Name: MAY
 Class: Rival
@@ -12461,22 +12811,53 @@ Music: Female
 Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
-Tropius
-Level: 31
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+Ludicolo
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Giga Drain
+- Scald
+- Ice Beam
+- Fake Out
+
+Manectric
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Thunderbolt
+- Flamethrower
+- Bite
+- Volt Switch
+
+Mightyena
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Crunch
+- Play Rough
+- Fire Fang
+- Taunt
 
 Pelipper
-Level: 32
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
-
-Ludicolo
-Level: 32
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
-
-Combusken
 Level: 34
-IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Scald
+- Air Slash
+- Ice Beam
+- Roost
 
+Donphan
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Earthquake
+- Rock Slide
+- Ice Shard
+- Knock Off
+
+Combusken @ Sitrus Berry
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Blaze Kick
+- Brick Break
+- Aerial Ace
+- Bulk Up
 === TRAINER_MAY_LILYCOVE_TORCHIC ===
 Name: MAY
 Class: Rival
@@ -12486,22 +12867,53 @@ Music: Female
 Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
-Tropius
-Level: 31
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
-
 Ludicolo
-Level: 32
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Giga Drain
+- Scald
+- Ice Beam
+- Fake Out
 
 Slugma
-Level: 32
-IVs: 18 HP / 18 Atk / 18 Def / 18 SpA / 18 SpD / 18 Spe
-
-Marshtomp
 Level: 34
-IVs: 24 HP / 24 Atk / 24 Def / 24 SpA / 24 SpD / 24 Spe
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Flamethrower
+- Rock Slide
+- Earth Power
+- Yawn
 
+Crobat
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Cross Poison
+- Acrobatics
+- U Turn
+- Roost
+
+Froslass
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Ice Beam
+- Shadow Ball
+- Thunderbolt
+- Will O Wisp
+
+Scyther
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- X Scissor
+- Aerial Ace
+- Brick Break
+- Quick Attack
+
+Marshtomp @ Sitrus Berry
+Level: 34
+IVs: 26 HP / 26 Atk / 26 Def / 26 SpA / 26 SpD / 26 Spe
+- Waterfall
+- Bulldoze
+- Ice Punch
+- Rock Slide
 === TRAINER_JONAH ===
 Name: JONAH
 Class: Fisherman
@@ -14248,13 +14660,20 @@ Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
 Lotad
-Level: 13
-IVs: 3 HP / 3 Atk / 3 Def / 3 SpA / 3 SpD / 3 Spe
+Level: 15
+IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
+- Bubble Beam
+- Absorb
+- Astonish
+- Nature Power
 
 Torchic
 Level: 15
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
+IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
+- Ember
+- Peck
+- Quick Attack
+- Sand Attack
 === TRAINER_MAY_RUSTBORO_TORCHIC ===
 Name: MAY
 Class: Rival
@@ -14264,14 +14683,21 @@ Music: Female
 Double Battle: No
 AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
-Torkoal
-Level: 13
-IVs: 3 HP / 3 Atk / 3 Def / 3 SpA / 3 SpD / 3 Spe
+Slugma
+Level: 15
+IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
+- Ember
+- Rock Throw
+- Yawn
+- Smog
 
 Mudkip
 Level: 15
-IVs: 6 HP / 6 Atk / 6 Def / 6 SpA / 6 SpD / 6 Spe
-
+IVs: 10 HP / 10 Atk / 10 Def / 10 SpA / 10 SpD / 10 Spe
+- Water Gun
+- Rock Tomb
+- Mud Slap
+- Bide
 === TRAINER_ROXANNE_2 ===
 Name: ROXANNE
 Class: Leader
