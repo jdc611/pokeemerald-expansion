@@ -994,16 +994,28 @@ static void CB2_GiveStarter(void)
 
     *GetVarPointer(VAR_STARTER_MON) = gSpecialVar_Result;
     starterMon = GetStarterPokemon(gSpecialVar_Result);
-    ScriptGiveMon(starterMon, 5, ITEM_NONE);
     if (gSaveBlock3Ptr->starterMode == RUN_STARTER_CHOOSE && gCustomStarterShiny)
     {
-        struct Pokemon *starter = &gParties[B_TRAINER_PLAYER][0];
-        u32 otId = GetMonData(starter, MON_DATA_OT_ID);
-        u32 personality = GetMonData(starter, MON_DATA_PERSONALITY);
-        u16 shinyLow = (u16)otId ^ (u16)(otId >> 16) ^ (u16)(personality >> 16);
-        personality = (personality & 0xFFFF0000) | shinyLow;
-        UpdateMonPersonality(&starter->box, personality);
-        CalculateMonStats(starter);
+        struct PokemonTemplate starterTemplate = {0};
+        u32 i;
+
+        starterTemplate.species = starterMon;
+        starterTemplate.level = 5;
+        starterTemplate.heldItem = ITEM_NONE;
+        starterTemplate.nature = NATURE_RANDOM;
+        starterTemplate.gender = MON_GENDER_RANDOM;
+        starterTemplate.isShiny = TRUE;
+        starterTemplate.doNotUseDefaultShinyness = TRUE;
+        starterTemplate.origin = GIFTMON_ORIGIN;
+        for (i = 0; i < NUM_STATS; i++)
+            starterTemplate.ivs[i] = USE_RANDOM_IVS;
+        for (i = 0; i < MAX_MON_MOVES; i++)
+            starterTemplate.moves[i] = MOVE_DEFAULT;
+        ScriptGiveMonParameterized(B_SIDE_PLAYER, PARTY_SIZE, &starterTemplate);
+    }
+    else
+    {
+        ScriptGiveMon(starterMon, 5, ITEM_NONE);
     }
     ResetTasks();
     PlayBattleBGM();

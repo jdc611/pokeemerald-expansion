@@ -8114,6 +8114,72 @@ static void Task_ChoosePartyMon(u8 taskId)
     }
 }
 
+static EWRAM_DATA bool8 sTrainEntireParty = FALSE;
+
+static void TrainPartyMonToCurrentCap(struct Pokemon *mon)
+{
+    enum Species species = GetMonData(mon, MON_DATA_SPECIES);
+    u8 level = GetMonData(mon, MON_DATA_LEVEL);
+    u8 cap = GetCurrentLevelCap();
+    u32 exp;
+
+    if (species == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG) || level >= cap)
+        return;
+
+    exp = gExperienceTables[gSpeciesInfo[species].growthRate][cap];
+    SetMonData(mon, MON_DATA_EXP, &exp);
+    SetMonData(mon, MON_DATA_LEVEL, &cap);
+    CalculateMonStats(mon);
+    if (IsMinimalGrindingMode())
+        ApplyMinimalGrindingModeToMon(mon);
+}
+
+static void CB2_TrainMonToCapReturn(void)
+{
+    u8 slot = GetCursorSelectionMonId();
+
+    if (!sTrainEntireParty && slot < PARTY_SIZE)
+        TrainPartyMonToCurrentCap(&gParties[B_TRAINER_PLAYER][slot]);
+
+    PlaySE(SE_EXP_MAX);
+    gFieldCallback2 = CB2_FadeFromPartyMenu;
+    SetMainCallback2(CB2_ReturnToField);
+}
+
+static void Task_HandleTrainToCapInput(u8 taskId)
+{
+    if (JOY_NEW(START_BUTTON))
+    {
+        u8 i;
+        sTrainEntireParty = TRUE;
+        for (i = 0; i < gPartiesCount[B_TRAINER_PLAYER]; i++)
+            TrainPartyMonToCurrentCap(&gParties[B_TRAINER_PLAYER][i]);
+        PlaySE(SE_SELECT);
+        Task_ClosePartyMenu(taskId);
+        return;
+    }
+
+    Task_HandleChooseMonInput(taskId);
+}
+
+static void Task_ChooseMonForTrainToCap(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        CleanupOverworldWindowsAndTilemaps();
+        sTrainEntireParty = FALSE;
+        InitPartyMenu(PARTY_MENU_TYPE_CHOOSE_MON, PARTY_LAYOUT_SINGLE, PARTY_ACTION_CHOOSE_AND_CLOSE, FALSE, PARTY_MSG_CHOOSE_MON, Task_HandleTrainToCapInput, CB2_TrainMonToCapReturn);
+        DestroyTask(taskId);
+    }
+}
+
+void ChooseMonForTrainToCap(void)
+{
+    LockPlayerFieldControls();
+    FadeScreen(FADE_TO_BLACK, 0);
+    CreateTask(Task_ChooseMonForTrainToCap, 10);
+}
+
 void ChooseMonForMoveRelearner(void)
 {
     gRelearnMode = RELEARN_MODE_SCRIPT;
