@@ -155,6 +155,6 @@ void ApplyMinimalGrindingModeToParty(void)
     if (!IsMinimalGrindingMode())
         return;
 
-    for (i = 0; i < gPlayerPartyCount; i++)
-        ApplyMinimalGrindingModeToMon(&gPlayerParty[i]);
+    for (i = 0; i < gPartiesCount[B_TRAINER_PLAYER]; i++)
+        ApplyMinimalGrindingModeToMon(&gParties[B_TRAINER_PLAYER][i]);
 }
