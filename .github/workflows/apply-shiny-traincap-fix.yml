@@ -1,0 +1,31 @@
+name: Apply Shiny Starter + Train to Cap Fix
+
+"on":
+  push:
+    paths:
+      - ".github/workflows/apply-shiny-traincap-fix.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Apply shiny starter and native party screen fixes
+        run: python3 .github/scripts/apply_shiny_traincap_fix.py
+
+      - name: Commit implemented source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/battle_setup.c src/start_menu.c src/party_menu.c include/party_menu.h
+          git commit -m "Shiny Starter + Train to Cap Party Menu Fix"
+          git push origin master
