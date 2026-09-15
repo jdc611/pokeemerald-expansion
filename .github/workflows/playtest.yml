@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: 176
+  PLAYTEST_TRIGGER: "Shiny Starter + Train to Cap Party Menu Fix"
 
 jobs:
   build:
@@ -63,5 +63,5 @@ jobs:
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
         with:
-          name: our-rom-playtest-${{ github.sha }}
+          name: Shiny-Starter-Train-to-Cap-Party-Menu-Fix-${{ github.sha }}
           path: pokeemerald.gba
