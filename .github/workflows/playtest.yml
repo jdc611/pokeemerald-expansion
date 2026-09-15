@@ -17,6 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
+  PLAYTEST_TRIGGER: 174
 
 jobs:
   build:
