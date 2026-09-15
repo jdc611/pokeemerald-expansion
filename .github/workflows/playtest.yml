@@ -36,7 +36,28 @@ jobs:
       - name: Build Emerald
         env:
           GAME_VERSION: EMERALD
-        run: make -j$(nproc) -O all
+        run: |
+          set -o pipefail
+          make -j$(nproc) -O all 2>&1 | tee build.log
+
+      - name: Surface build errors
+        if: failure()
+        run: |
+          echo "### Compiler errors" >> "$GITHUB_STEP_SUMMARY"
+          grep -nE '(^|: )(fatal error|error:|undefined reference|make(\[[0-9]+\])?: \*\*\*)' build.log | tail -80 | tee errors.txt || true
+          while IFS= read -r line; do
+            safe=${line//'%'/'%25'}
+            safe=${safe//$'\r'/'%0D'}
+            safe=${safe//$'\n'/'%0A'}
+            echo "::error::$safe"
+          done < errors.txt
+
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ github.sha }}
+          path: build.log
 
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
