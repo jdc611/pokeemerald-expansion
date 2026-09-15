@@ -1,6 +1,11 @@
 name: Apply Runtime Cleanup
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/apply-runtime-cleanup.yml"
   workflow_dispatch: {}
 
 permissions:
