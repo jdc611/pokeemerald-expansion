@@ -18,6 +18,12 @@
 #error "Invalid choice for B_EV_CAP_TYPE, must be one of [EV_CAP_NONE, EV_CAP_FLAG_LIST, EV_CAP_VARIABLE, EV_CAP_NO_GAIN]"
 #endif
 
+// start_menu.c currently uses the expansion's legacy player-party aliases for
+// Train to Cap. They are still functional, but marked deprecated upstream.
+// Keep that warning from becoming a -Werror build failure until the helper is
+// migrated fully to gParties[B_TRAINER_PLAYER].
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 u32 GetCurrentLevelCap(void);
 u32 GetSoftLevelCapExpValue(u32 level, u32 expValue);
 u32 GetCurrentEVCap(void);
