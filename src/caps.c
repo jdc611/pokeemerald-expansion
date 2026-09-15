@@ -20,23 +20,11 @@ u32 GetCurrentLevelCap(void)
         {FLAG_BADGE08_GET, 46},
         {FLAG_IS_CHAMPION, 58},
     };
-
     u32 i;
-
-    if (B_LEVEL_CAP_TYPE == LEVEL_CAP_FLAG_LIST)
-    {
-        for (i = 0; i < ARRAY_COUNT(sLevelCapFlagMap); i++)
-        {
-            if (!FlagGet(sLevelCapFlagMap[i][0]))
-                return sLevelCapFlagMap[i][1];
-        }
-    }
-    else if (B_LEVEL_CAP_TYPE == LEVEL_CAP_VARIABLE)
-    {
-        return VarGet(B_LEVEL_CAP_VARIABLE);
-    }
-
-    return MAX_LEVEL;
+    for (i = 0; i < ARRAY_COUNT(sLevelCapFlagMap); i++)
+        if (!FlagGet(sLevelCapFlagMap[i][0]))
+            return sLevelCapFlagMap[i][1];
+    return 58;
 }
 
 u32 GetSoftLevelCapExpValue(u32 level, u32 expValue)

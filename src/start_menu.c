@@ -445,11 +445,9 @@ static void BuildNormalStartMenu(void)
     }
     else
     {
-        AddStartMenuAction(MENU_ACTION_POKERIDER);
         AddStartMenuAction(MENU_ACTION_TRAIN_TO_CAP);
         AddStartMenuAction(MENU_ACTION_MOVE_RELEARNER);
         AddStartMenuAction(MENU_ACTION_GAME_OPTIONS);
-        AddStartMenuAction(MENU_ACTION_MGM);
         AddStartMenuAction(MENU_ACTION_GAME_INFO);
         AddStartMenuAction(MENU_ACTION_EXIT);
     }
@@ -1884,11 +1882,9 @@ static bool8 StartMenuTrainToCap(void)
     }
 
     PlaySE(SE_EXP_MAX);
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
-    RemoveStartMenuWindow();
-    InitStartMenu();
-    gMenuCallback = HandleStartMenuInput;
-    return FALSE;
+    HideStartMenu();
+    SetMainCallback2(CB2_ReturnToField);
+    return TRUE;
 }
 
 static bool8 StartMenuMGM(void)
