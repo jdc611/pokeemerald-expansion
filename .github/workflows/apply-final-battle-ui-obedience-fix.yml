@@ -1,0 +1,30 @@
+name: Apply Definitive Battle Obedience + UI Fix
+
+"on":
+  push:
+    paths:
+      - ".github/workflows/apply-final-battle-ui-obedience-fix.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: Apply definitive fixes
+        run: python3 .github/scripts/apply_final_battle_ui_obedience_fix.py
+      - name: Commit implemented source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/debug.c src/battle_controller_player.c src/battle_interface.c
+          git diff --cached --quiet && { echo "No source changes produced"; exit 1; }
+          git commit -m "Definitive Important Battle Obedience + UI Fix"
+          git push origin master
