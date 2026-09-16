@@ -869,9 +869,11 @@ static void SpriteCB_StatStageMarker(struct Sprite *sprite)
     enum BattlerId battler = sprite->data[1];
     u8 state = 0;
 
-    // Follow the visible health box throughout battle, including messages,
-    // action selection, and move selection. Other screens hide/recreate it.
-    if (gSprites[healthboxId].invisible || !IsBattlerAlive(battler))
+    // Stage markers belong only on the normal action HUD. Never cover status text
+    // and never leak into move details, messages, or other battle sub-screens.
+    if (gSprites[healthboxId].invisible || !IsBattlerAlive(battler)
+     || gBattleMons[battler].status1 != STATUS1_NONE
+     || gBattleResources->bufferA[0][0] != CONTROLLER_CHOOSEACTION)
     {
         sprite->invisible = TRUE;
         return;

@@ -2750,6 +2750,7 @@ static void Debug_PrepareImportantBattleParty(u16 trainerId)
     const u16 *species;
     u8 cap = Debug_GetImportantBattleCap(trainerId);
     u8 testLevel = cap;
+    FlagSet(FLAG_TEMP_2); // IMPORTANT_BATTLE_DEBUG_OBEDIENCE
 
     if (cap <= 19)
         species = sEarlyParty;
