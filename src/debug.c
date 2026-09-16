@@ -2749,7 +2749,7 @@ static void Debug_PrepareImportantBattleParty(u16 trainerId)
     const struct Trainer *trainer = GetTrainerStructFromId(trainerId);
     const u16 *species;
     u8 cap = Debug_GetImportantBattleCap(trainerId);
-    u8 testLevel = cap > 2 ? cap - 2 : cap;
+    u8 testLevel = cap;
 
     if (cap <= 19)
         species = sEarlyParty;
@@ -2760,7 +2760,11 @@ static void Debug_PrepareImportantBattleParty(u16 trainerId)
 
     ZeroPlayerPartyMons();
     for (u32 i = 0; i < trainer->partySize && i < PARTY_SIZE; i++)
+    {
         ScriptGiveMon(species[i], testLevel, ITEM_NONE);
+        // Debug battle teams are the player's own test Pokemon, never traded Pokemon.
+        SetMonData(&gPlayerParty[i], MON_DATA_OT_ID, &gSaveBlock2Ptr->playerTrainerId[0]);
+    }
     HealPlayerParty();
 }
 
