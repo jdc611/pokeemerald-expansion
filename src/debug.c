@@ -2762,8 +2762,13 @@ static void Debug_PrepareImportantBattleParty(u16 trainerId)
     for (u32 i = 0; i < trainer->partySize && i < PARTY_SIZE; i++)
     {
         ScriptGiveMon(species[i], testLevel, ITEM_NONE);
-        // Debug battle teams are the player's own test Pokemon, never traded Pokemon.
+        // Debug battle teams are native player Pokemon. Modern obedience also considers
+        // the level at which a Pokemon was obtained, so normalize both ownership and met level.
         SetMonData(&gPlayerParty[i], MON_DATA_OT_ID, &gSaveBlock2Ptr->playerTrainerId[0]);
+        {
+            u8 metLevel = testLevel;
+            SetMonData(&gPlayerParty[i], MON_DATA_MET_LEVEL, &metLevel);
+        }
     }
     HealPlayerParty();
 }
