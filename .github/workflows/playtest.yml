@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Obedience Met-Level Fix + Vivid Green Stats"
+  PLAYTEST_TRIGGER: "Definitive Battle Obedience + UI Fix"
 
 jobs:
   build:
@@ -63,5 +63,5 @@ jobs:
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
         with:
-          name: Obedience-Met-Level-Fix-Vivid-Green-Stats-${{ github.sha }}
+          name: Definitive-Battle-Obedience-UI-Fix-${{ github.sha }}
           path: pokeemerald.gba
