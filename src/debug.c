@@ -2750,6 +2750,16 @@ static void Debug_PrepareImportantBattleParty(u16 trainerId)
     const u16 *species;
     u8 cap = Debug_GetImportantBattleCap(trainerId);
     u8 testLevel = cap;
+    // Debug important-battle harness: guarantee obedience regardless of the
+    // expansion obedience generation/config. These are test battles, not story progression.
+    FlagSet(FLAG_BADGE01_GET);
+    FlagSet(FLAG_BADGE02_GET);
+    FlagSet(FLAG_BADGE03_GET);
+    FlagSet(FLAG_BADGE04_GET);
+    FlagSet(FLAG_BADGE05_GET);
+    FlagSet(FLAG_BADGE06_GET);
+    FlagSet(FLAG_BADGE07_GET);
+    FlagSet(FLAG_BADGE08_GET);
     FlagSet(FLAG_TEMP_2); // IMPORTANT_BATTLE_DEBUG_OBEDIENCE
 
     if (cap <= 19)
