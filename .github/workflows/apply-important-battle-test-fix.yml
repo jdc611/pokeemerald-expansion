@@ -1,0 +1,29 @@
+name: Apply Important Battle Test Team Parity Fix
+
+"on":
+  push:
+    paths:
+      - ".github/workflows/apply-important-battle-test-fix.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: Apply important battle test fixes
+        run: python3 .github/scripts/apply_important_battle_test_fix.py
+      - name: Commit implemented source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/debug.c src/battle_controller_player.c
+          git commit -m "Important Battle Test Team Parity + Vivid Stat Colors"
+          git push origin master
