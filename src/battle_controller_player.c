@@ -326,10 +326,15 @@ static void DrawBattleStagePanel(void)
         {
             u8 line[16] = { EOS };
 
+            static const u8 sStageUpColors[] = { 14, 5, 15 };
+            static const u8 sStageDownColors[] = { 14, 4, 15 };
+            s8 stage = gBattleMons[battler].statStages[sStagePanelStats[i]] - DEFAULT_STAT_STAGE;
+            const u8 *stageColors = stage > 0 ? sStageUpColors : (stage < 0 ? sStageDownColors : sPanelColors);
+
             AppendBattleStatStage(line, battler, i);
             AddTextPrinterParameterized3(B_WIN_STAGE_PANEL, FONT_SMALL,
                                          12 + (i % 4) * 58, 4 + (i / 4) * 18,
-                                         sPanelColors, 0, line);
+                                         stageColors, 0, line);
         }
     }
     AddTextPrinterParameterized3(B_WIN_STAGE_PANEL, FONT_SMALL, 186, 22, sPanelColors, 0, sBack);

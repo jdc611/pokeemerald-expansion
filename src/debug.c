@@ -78,6 +78,7 @@
 #include "load_save.h"
 #include "battle_partner.h"
 #include "starter_choose.h"
+#include "caps.h"
 
 enum FollowerNPCCreateDebugMenu
 {
@@ -5096,6 +5097,27 @@ static void DebugAction_Party_SetParty(u8 taskId)
     CreateNPCTrainerPartyFromTrainer(gParties[B_TRAINER_PLAYER], &sDebugTrainers[DIFFICULTY_NORMAL][DEBUG_TRAINER_PLAYER]);
     ScriptContext_Enable();
     Debug_DestroyMenu_Full(taskId);
+
+    // TEST_TEAM_CAP_CLEANUP: test parties should enter battles healthy and at the active cap.
+    {
+        u8 i;
+        u8 cap = GetCurrentLevelCap();
+        for (i = 0; i < gPlayerPartyCount; i++)
+        {
+            struct Pokemon *mon = &gPlayerParty[i];
+            enum Species species = GetMonData(mon, MON_DATA_SPECIES);
+            u32 status = 0;
+            u32 exp;
+            if (species == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
+                continue;
+            exp = gExperienceTables[gSpeciesInfo[species].growthRate][cap];
+            SetMonData(mon, MON_DATA_EXP, &exp);
+            SetMonData(mon, MON_DATA_LEVEL, &cap);
+            SetMonData(mon, MON_DATA_STATUS, &status);
+            CalculateMonStats(mon);
+            SetMonData(mon, MON_DATA_HP, &mon->hp);
+        }
+    }
 }
 
 static void DebugAction_Party_BattleSingle(u8 taskId)
