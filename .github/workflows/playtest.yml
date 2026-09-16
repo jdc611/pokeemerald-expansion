@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Battle UI + Test Team Cleanup"
+  PLAYTEST_TRIGGER: "Important Battle Test Team Parity + Vivid Stat Colors"
 
 jobs:
   build:
@@ -63,5 +63,5 @@ jobs:
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
         with:
-          name: Battle-UI-Test-Team-Cleanup-${{ github.sha }}
+          name: Important-Battle-Test-Team-Parity-Vivid-Stat-Colors-${{ github.sha }}
           path: pokeemerald.gba
