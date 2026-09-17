@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Runtime Battle Fix v2"
+  PLAYTEST_TRIGGER: "HUD Stat EXP Fix v3"
 
 jobs:
   build:
@@ -66,5 +66,5 @@ jobs:
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
         with:
-          name: Runtime-Battle-Fix-v2-${{ github.sha }}
+          name: HUD-Stat-EXP-Fix-v3-${{ github.sha }}
           path: pokeemerald.gba
