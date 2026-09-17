@@ -1,6 +1,7 @@
 #include "global.h"
 #include "battle.h"
 #include "event_data.h"
+#include "debug.h"
 #include "caps.h"
 #include "pokemon.h"
 #include "constants/pokemon.h"
@@ -22,11 +23,12 @@ u32 GetCurrentLevelCap(void)
     };
     u32 i;
 
-    // Important-battle debug mode deliberately sets every badge for obedience.
-    // Using badge flags here would therefore report 58 even for Roxanne.
-    // The debug party is normalized to the selected battle's cap, so use its
-    // highest current level as the active cap while that debug flag is set.
-    if (FlagGet(FLAG_TEMP_2))
+    // Debug trainer battles deliberately manipulate progression flags for
+    // obedience/testing, so badge flags are not a reliable cap source there.
+    // The important-battle helper normalizes the test party to that battle's
+    // intended cap. Use the party's highest level whenever the debug battle
+    // system is active; this is the same runtime state the battle actually uses.
+    if (gIsDebugBattle)
     {
         u32 debugCap = 1;
         for (i = 0; i < gPartiesCount[B_TRAINER_PLAYER]; i++)
