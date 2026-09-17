@@ -236,6 +236,7 @@ static enum Item GetNextBall(enum Item ballId)
 
 static bool8 sStagePanelOpen = FALSE;
 static u8 sStagePanelSlot = 0;
+static u16 sStagePanelSavedGreen;
 // The full-width stat panel covers frame tiles outside the two action windows.
 // Save those tiles as well so exiting restores the entire original menu.
 static u16 sStagePanelUnderlay[30 * 7];
@@ -247,21 +248,44 @@ static void SaveBattleStagePanelUnderlay(void)
 
     for (row = 0; row < 7; row++)
         CpuCopy16(tilemap + (33 + row) * 32, &sStagePanelUnderlay[row * 30], 30 * sizeof(u16));
+
+    // Palette 5 is used by the custom stage panel. Entry 6 is reserved while
+    // this panel is visible so positive stages have a guaranteed green color,
+    // independent of the battle UI's normal palette mapping.
+    sStagePanelSavedGreen = gPlttBufferUnfaded[BG_PLTT_ID(5) + 6];
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 6] = RGB(0, 31, 0);
+    gPlttBufferFaded[BG_PLTT_ID(5) + 6] = RGB(0, 31, 0);
 }
 
 static void RestoreBattleStagePanelUnderlay(void)
 {
     CopyToBgTilemapBufferRect(0, sStagePanelUnderlay, 0, 33, 30, 7);
     CopyBgTilemapBufferToVram(0);
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 6] = sStagePanelSavedGreen;
+    gPlttBufferFaded[BG_PLTT_ID(5) + 6] = sStagePanelSavedGreen;
 }
 
 static void ShowStatusDetailsPrompt(void)
 {
-    static const u8 sStatusHint[] = _("L:STATUS");
-    static const u8 sStatusHintColors[] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY };
+    static const u8 sStatusHint[] = _("L:STAT");
+    static const u8 sStatusHintColors[] = { 14, 13, 15 };
 
-    AddTextPrinterParameterized3(B_WIN_ACTION_PROMPT, FONT_SMALL, 0, 24, sStatusHintColors, 0, sStatusHint);
-    CopyWindowToVram(B_WIN_ACTION_PROMPT, COPYWIN_GFX);
+    // This is a dedicated 5x2 window above the command box. Never print the
+    // hint into B_WIN_ACTION_PROMPT; that is the "What will ... do?" window.
+    FillWindowPixelBuffer(B_WIN_STATUS_PROMPT, PIXEL_FILL(14));
+    FillWindowPixelRect(B_WIN_STATUS_PROMPT, PIXEL_FILL(13), 0, 0, 40, 2);
+    FillWindowPixelRect(B_WIN_STATUS_PROMPT, PIXEL_FILL(13), 0, 0, 2, 16);
+    FillWindowPixelRect(B_WIN_STATUS_PROMPT, PIXEL_FILL(13), 38, 0, 2, 16);
+    AddTextPrinterParameterized3(B_WIN_STATUS_PROMPT, FONT_SMALL, 4, 2, sStatusHintColors, 0, sStatusHint);
+    PutWindowTilemap(B_WIN_STATUS_PROMPT);
+    CopyWindowToVram(B_WIN_STATUS_PROMPT, COPYWIN_FULL);
+}
+
+static void HideStatusDetailsPrompt(void)
+{
+    ClearWindowTilemap(B_WIN_STATUS_PROMPT);
+    FillWindowPixelBuffer(B_WIN_STATUS_PROMPT, PIXEL_FILL(0));
+    CopyWindowToVram(B_WIN_STATUS_PROMPT, COPYWIN_FULL);
 }
 
 // Temporary battle stages, not the Pokémon's permanent Summary stats.
@@ -335,7 +359,7 @@ static void DrawBattleStagePanel(void)
         {
             u8 line[16] = { EOS };
 
-            static const u8 sStageUpColors[] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_LIGHT_GREEN, TEXT_COLOR_DARK_GRAY };
+            static const u8 sStageUpColors[] = { TEXT_COLOR_TRANSPARENT, 6, TEXT_COLOR_DARK_GRAY };
             static const u8 sStageDownColors[] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_RED, TEXT_COLOR_DARK_GRAY };
             s8 stage = gBattleMons[battler].statStages[sStagePanelStats[i]] - DEFAULT_STAT_STAGE;
             const u8 *stageColors = stage > 0 ? sStageUpColors : (stage < 0 ? sStageDownColors : sPanelColors);
@@ -391,6 +415,7 @@ static void HandleInputChooseAction(enum BattlerId battler)
         PlaySE(SE_SELECT);
         sStagePanelOpen = TRUE;
         sStagePanelSlot = 0;
+        HideStatusDetailsPrompt();
         ActionSelectionDestroyCursorAt(gActionSelectionCursor[battler]);
         SaveBattleStagePanelUnderlay();
         DrawBattleStagePanel();
@@ -467,6 +492,7 @@ static void HandleInputChooseAction(enum BattlerId battler)
     if (JOY_NEW(A_BUTTON))
     {
         PlaySE(SE_SELECT);
+        HideStatusDetailsPrompt();
         TryHideLastUsedBall();
 
         switch (gActionSelectionCursor[battler])
