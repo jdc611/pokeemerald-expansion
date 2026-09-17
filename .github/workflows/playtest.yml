@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Status Details Battle Fix v4 run"
+  PLAYTEST_TRIGGER: "Final Status Details + Cap EXP + Roxanne Team v5"
 
 jobs:
   build:
@@ -66,5 +66,5 @@ jobs:
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
         with:
-          name: Status-Details-Battle-Fix-v4-${{ github.sha }}
+          name: Final-Status-EXP-Roxanne-v5-${{ github.sha }}
           path: pokeemerald.gba
