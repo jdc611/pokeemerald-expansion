@@ -25,6 +25,8 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 u32 GetCurrentLevelCap(void);
+void SetDebugImportantBattleLevelCap(u32 cap);
+void ClearDebugImportantBattleLevelCap(void);
 u32 GetSoftLevelCapExpValue(u32 level, u32 expValue);
 u32 GetCurrentEVCap(void);
 
