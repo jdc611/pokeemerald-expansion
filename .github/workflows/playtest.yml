@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Stat Colors + Level Cap EXP"
+  PLAYTEST_TRIGGER: "Corrective Obedience + Vivid Stats + 1 EXP Cap"
 
 jobs:
   build:
@@ -29,7 +29,7 @@ jobs:
         with:
           ref: master
 
-      - name: Apply stat colors and level-cap EXP
+      - name: Apply corrective battle patch
         run: python3 .github/scripts/apply_stat_colors_levelcap_exp.py
 
       - name: Install build tools
@@ -66,5 +66,5 @@ jobs:
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
         with:
-          name: Stat-Colors-LevelCap-EXP-${{ github.sha }}
+          name: Corrective-Obedience-Vivid-Stats-1EXP-${{ github.sha }}
           path: pokeemerald.gba
