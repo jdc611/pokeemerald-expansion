@@ -237,6 +237,8 @@ static enum Item GetNextBall(enum Item ballId)
 static bool8 sStagePanelOpen = FALSE;
 static u8 sStagePanelSlot = 0;
 static u16 sStagePanelSavedGreen;
+static u16 sStagePanelSavedRed;
+static u16 sStagePanelSavedShadow;
 // The full-width stat panel covers frame tiles outside the two action windows.
 // Save those tiles as well so exiting restores the entire original menu.
 static u16 sStagePanelUnderlay[30 * 7];
@@ -253,8 +255,17 @@ static void SaveBattleStagePanelUnderlay(void)
     // this panel is visible so positive stages have a guaranteed green color,
     // independent of the battle UI's normal palette mapping.
     sStagePanelSavedGreen = gPlttBufferUnfaded[BG_PLTT_ID(5) + 6];
+    sStagePanelSavedRed = gPlttBufferUnfaded[BG_PLTT_ID(5) + 7];
+    sStagePanelSavedShadow = gPlttBufferUnfaded[BG_PLTT_ID(5) + 8];
+
+    // Dedicated high-contrast colors used only while this panel is open.
+    // 6 = vivid green, 7 = vivid red, 8 = neutral dark shadow.
     gPlttBufferUnfaded[BG_PLTT_ID(5) + 6] = RGB(0, 31, 0);
     gPlttBufferFaded[BG_PLTT_ID(5) + 6] = RGB(0, 31, 0);
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 7] = RGB(31, 0, 0);
+    gPlttBufferFaded[BG_PLTT_ID(5) + 7] = RGB(31, 0, 0);
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 8] = RGB(6, 6, 6);
+    gPlttBufferFaded[BG_PLTT_ID(5) + 8] = RGB(6, 6, 6);
 }
 
 static void RestoreBattleStagePanelUnderlay(void)
@@ -263,6 +274,10 @@ static void RestoreBattleStagePanelUnderlay(void)
     CopyBgTilemapBufferToVram(0);
     gPlttBufferUnfaded[BG_PLTT_ID(5) + 6] = sStagePanelSavedGreen;
     gPlttBufferFaded[BG_PLTT_ID(5) + 6] = sStagePanelSavedGreen;
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 7] = sStagePanelSavedRed;
+    gPlttBufferFaded[BG_PLTT_ID(5) + 7] = sStagePanelSavedRed;
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 8] = sStagePanelSavedShadow;
+    gPlttBufferFaded[BG_PLTT_ID(5) + 8] = sStagePanelSavedShadow;
 }
 
 static void ShowStatusDetailsPrompt(void)
@@ -359,8 +374,8 @@ static void DrawBattleStagePanel(void)
         {
             u8 line[16] = { EOS };
 
-            static const u8 sStageUpColors[] = { TEXT_COLOR_TRANSPARENT, 6, TEXT_COLOR_DARK_GRAY };
-            static const u8 sStageDownColors[] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_RED, TEXT_COLOR_DARK_GRAY };
+            static const u8 sStageUpColors[] = { TEXT_COLOR_TRANSPARENT, 6, 8 };
+            static const u8 sStageDownColors[] = { TEXT_COLOR_TRANSPARENT, 7, 8 };
             s8 stage = gBattleMons[battler].statStages[sStagePanelStats[i]] - DEFAULT_STAT_STAGE;
             const u8 *stageColors = stage > 0 ? sStageUpColors : (stage < 0 ? sStageDownColors : sPanelColors);
 
