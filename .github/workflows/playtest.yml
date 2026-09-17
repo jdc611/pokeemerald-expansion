@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Status Details Battle Fix v4"
+  PLAYTEST_TRIGGER: "Status Details Battle Fix v4 trigger"
 
 jobs:
   build:
