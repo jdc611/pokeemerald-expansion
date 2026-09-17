@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Debug-Aware Cap + Status Fix v10"
+  PLAYTEST_TRIGGER: "Native Status + Debug Cap Fix v11"
 
 jobs:
   build:
@@ -78,5 +78,5 @@ jobs:
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
         with:
-          name: Debug-Aware-Cap-Status-v10-${{ github.sha }}
+          name: Native-Status-Debug-Cap-v11-${{ github.sha }}
           path: pokeemerald.gba
