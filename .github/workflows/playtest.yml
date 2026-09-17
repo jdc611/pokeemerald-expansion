@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Definitive Battle Obedience + UI Fix"
+  PLAYTEST_TRIGGER: "Stat Colors + Level Cap EXP"
 
 jobs:
   build:
@@ -28,6 +28,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: master
+
+      - name: Apply stat colors and level-cap EXP
+        run: python3 .github/scripts/apply_stat_colors_levelcap_exp.py
 
       - name: Install build tools
         run: |
@@ -63,5 +66,5 @@ jobs:
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
         with:
-          name: Definitive-Battle-Obedience-UI-Fix-${{ github.sha }}
+          name: Stat-Colors-LevelCap-EXP-${{ github.sha }}
           path: pokeemerald.gba
