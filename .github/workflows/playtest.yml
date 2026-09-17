@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Native Source Status + EXP Fix v9"
+  PLAYTEST_TRIGGER: "Debug-Aware Cap + Status Fix v10"
 
 jobs:
   build:
@@ -40,7 +40,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add src/battle_controller_player.c src/battle_script_commands.c src/debug.c
-            git commit -m "Implement battle status UI and level-cap EXP fixes"
+            git commit -m "Implement remaining status UI and EXP fixes"
             git push origin HEAD:master
           fi
 
@@ -78,5 +78,5 @@ jobs:
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
         with:
-          name: Native-Source-Status-EXP-v9-${{ github.sha }}
+          name: Debug-Aware-Cap-Status-v10-${{ github.sha }}
           path: pokeemerald.gba
