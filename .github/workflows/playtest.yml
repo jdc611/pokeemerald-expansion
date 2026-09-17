@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Corrective Obedience + Vivid Stats + 1 EXP Cap"
+  PLAYTEST_TRIGGER: "Runtime Battle Fix v2"
 
 jobs:
   build:
@@ -29,7 +29,7 @@ jobs:
         with:
           ref: master
 
-      - name: Apply corrective battle patch
+      - name: Apply runtime battle patch
         run: python3 .github/scripts/apply_stat_colors_levelcap_exp.py
 
       - name: Install build tools
@@ -66,5 +66,5 @@ jobs:
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
         with:
-          name: Corrective-Obedience-Vivid-Stats-1EXP-${{ github.sha }}
+          name: Runtime-Battle-Fix-v2-${{ github.sha }}
           path: pokeemerald.gba
