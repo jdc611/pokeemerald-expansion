@@ -55,7 +55,8 @@ u32 GetSoftLevelCapExpValue(u32 level, u32 expValue)
     }
     else if (B_EXP_CAP_TYPE == EXP_CAP_HARD)
     {
-        return 0;
+        // Keep the normal EXP event/animation alive, but cap the reward itself.
+        return 1;
     }
     else if (B_EXP_CAP_TYPE == EXP_CAP_SOFT)
     {
