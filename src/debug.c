@@ -2721,12 +2721,12 @@ static void Debug_PrepareImportantBattleParty(u16 trainerId)
 {
     static const u16 sEarlyParty[] =
     {
-        SPECIES_TREECKO,
-        SPECIES_TORCHIC,
-        SPECIES_MUDKIP,
-        SPECIES_TAILLOW,
-        SPECIES_RALTS,
         SPECIES_SHROOMISH,
+        SPECIES_LOTAD,
+        SPECIES_MANKEY,
+        SPECIES_TREECKO,
+        SPECIES_MUDKIP,
+        SPECIES_MARILL,
     };
     static const u16 sMidParty[] =
     {
@@ -2779,6 +2779,12 @@ static void Debug_PrepareImportantBattleParty(u16 trainerId)
         {
             u8 metLevel = testLevel;
             SetMonData(&gPlayerParty[i], MON_DATA_MET_LEVEL, &metLevel);
+        }
+        if (i == 0 && cap <= 19)
+        {
+            u16 growth = MOVE_GROWTH;
+            SetMonData(&gPlayerParty[i], MON_DATA_MOVE1, &growth);
+            SetMonData(&gPlayerParty[i], MON_DATA_PP1, &gMovesInfo[MOVE_GROWTH].pp);
         }
     }
     HealPlayerParty();

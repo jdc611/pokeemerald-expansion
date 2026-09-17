@@ -2304,7 +2304,7 @@ static void Cmd_getexp(void)
                         u32 levelCap = GetCurrentLevelCap();
 
                         if (GetMonData(&gParties[B_TRAINER_PLAYER][*expMonId], MON_DATA_LEVEL) >= levelCap)
-                            gBattleStruct->battlerExpReward = 0;
+                            gBattleStruct->battlerExpReward = 1;
                         else if (gExperienceTables[growthRate][levelCap] < currentExp + gBattleStruct->battlerExpReward)
                             gBattleStruct->battlerExpReward = gExperienceTables[growthRate][levelCap] - currentExp;
                     }

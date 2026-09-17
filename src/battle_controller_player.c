@@ -255,6 +255,15 @@ static void RestoreBattleStagePanelUnderlay(void)
     CopyBgTilemapBufferToVram(0);
 }
 
+static void ShowStatusDetailsPrompt(void)
+{
+    static const u8 sStatusHint[] = _("L:STATUS");
+    static const u8 sStatusHintColors[] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY };
+
+    AddTextPrinterParameterized3(B_WIN_ACTION_PROMPT, FONT_SMALL, 0, 24, sStatusHintColors, 0, sStatusHint);
+    CopyWindowToVram(B_WIN_ACTION_PROMPT, COPYWIN_GFX);
+}
+
 // Temporary battle stages, not the Pokémon's permanent Summary stats.
 static const enum Stat sStagePanelStats[] =
 {
@@ -326,7 +335,7 @@ static void DrawBattleStagePanel(void)
         {
             u8 line[16] = { EOS };
 
-            static const u8 sStageUpColors[] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_GREEN, TEXT_COLOR_DARK_GRAY };
+            static const u8 sStageUpColors[] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_LIGHT_GREEN, TEXT_COLOR_DARK_GRAY };
             static const u8 sStageDownColors[] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_RED, TEXT_COLOR_DARK_GRAY };
             s8 stage = gBattleMons[battler].statStages[sStagePanelStats[i]] - DEFAULT_STAT_STAGE;
             const u8 *stageColors = stage > 0 ? sStageUpColors : (stage < 0 ? sStageDownColors : sPanelColors);
@@ -371,6 +380,7 @@ static void HandleInputChooseAction(enum BattlerId battler)
                 BattlePutTextOnWindow(gStringVar1, B_WIN_ACTION_PROMPT);
             else
                 BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
+            ShowStatusDetailsPrompt();
             ActionSelectionCreateCursorAt(gActionSelectionCursor[battler], 0);
         }
         return;
@@ -2210,6 +2220,7 @@ static void PlayerHandleChooseAction(enum BattlerId battler)
     {
         BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
     }
+    ShowStatusDetailsPrompt();
 }
 
 static void PlayerHandleYesNoBox(enum BattlerId battler)
@@ -2354,6 +2365,8 @@ void PlayerHandleExpUpdate(enum BattlerId battler)
     {
         LoadBattleBarGfx(1);
         expPointsToGive = T1_READ_32(&gBattleResources->bufferA[battler][2]);
+        if (GetMonData(&gParties[B_TRAINER_PLAYER][monId], MON_DATA_LEVEL) >= GetCurrentLevelCap())
+            expPointsToGive = 1;
         taskId = CreateTask(Task_GiveExpToMon, 10);
         gTasks[taskId].tExpTask_monId = monId;
         gTasks[taskId].tExpTask_gainedExp_1 = expPointsToGive;
