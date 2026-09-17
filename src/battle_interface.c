@@ -776,17 +776,24 @@ u8 CreateBattlerHealthboxSprites(enum BattlerId battler)
     gBattleStruct->ballSpriteIds[1] = MAX_SPRITES;
     gBattleStruct->moveInfoSpriteId = MAX_SPRITES;
 
-    if (GetSpriteTileStartByTag(TAG_STAGE_MARKER_GFX) == 0xFFFF)
+    // Healthbox stat-stage arrows are intentionally disabled. Stage changes are
+    // shown in the L:STAT details panel instead. Keep the assets compiled for
+    // now, but never instantiate their sprite so menu/healthbox rebuilds cannot
+    // make the arrows reappear.
+    if (FALSE)
     {
-        LoadSpriteSheet(&sStatStageMarkerSheet);
-        LoadSpritePalette(&sStatStageMarkerPal);
-    }
-    u8 stageMarkerId = CreateSprite(&sStatStageMarkerTemplate, DISPLAY_WIDTH, DISPLAY_HEIGHT, 0);
-    if (stageMarkerId != MAX_SPRITES)
-    {
-        gSprites[stageMarkerId].data[0] = healthboxLeftSpriteId;
-        gSprites[stageMarkerId].data[1] = battler;
-        gSprites[stageMarkerId].invisible = TRUE;
+        if (GetSpriteTileStartByTag(TAG_STAGE_MARKER_GFX) == 0xFFFF)
+        {
+            LoadSpriteSheet(&sStatStageMarkerSheet);
+            LoadSpritePalette(&sStatStageMarkerPal);
+        }
+        u8 stageMarkerId = CreateSprite(&sStatStageMarkerTemplate, DISPLAY_WIDTH, DISPLAY_HEIGHT, 0);
+        if (stageMarkerId != MAX_SPRITES)
+        {
+            gSprites[stageMarkerId].data[0] = healthboxLeftSpriteId;
+            gSprites[stageMarkerId].data[1] = battler;
+            gSprites[stageMarkerId].invisible = TRUE;
+        }
     }
 
     // This is recreated when the battle screen is restored after opening the Bag/party.
