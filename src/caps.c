@@ -1,11 +1,21 @@
 #include "global.h"
 #include "battle.h"
 #include "event_data.h"
-#include "debug.h"
 #include "caps.h"
 #include "pokemon.h"
 #include "constants/pokemon.h"
 
+static EWRAM_DATA u32 sDebugImportantBattleLevelCap = 0;
+
+void SetDebugImportantBattleLevelCap(u32 cap)
+{
+    sDebugImportantBattleLevelCap = cap;
+}
+
+void ClearDebugImportantBattleLevelCap(void)
+{
+    sDebugImportantBattleLevelCap = 0;
+}
 
 u32 GetCurrentLevelCap(void)
 {
@@ -23,22 +33,11 @@ u32 GetCurrentLevelCap(void)
     };
     u32 i;
 
-    // Debug trainer battles deliberately manipulate progression flags for
-    // obedience/testing, so badge flags are not a reliable cap source there.
-    // The important-battle helper normalizes the test party to that battle's
-    // intended cap. Use the party's highest level whenever the debug battle
-    // system is active; this is the same runtime state the battle actually uses.
-    if (gIsDebugBattle)
-    {
-        u32 debugCap = 1;
-        for (i = 0; i < gPartiesCount[B_TRAINER_PLAYER]; i++)
-        {
-            u32 level = GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_LEVEL);
-            if (level > debugCap)
-                debugCap = level;
-        }
-        return debugCap;
-    }
+    // Important-battle tests have their own cap override. Do not use the
+    // expansion's global debug-battle flag here; that flag also changes which
+    // trainer battle is launched.
+    if (sDebugImportantBattleLevelCap != 0)
+        return sDebugImportantBattleLevelCap;
 
     for (i = 0; i < ARRAY_COUNT(sLevelCapFlagMap); i++)
         if (!FlagGet(sLevelCapFlagMap[i][0]))
