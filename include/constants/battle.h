@@ -599,6 +599,7 @@ enum BattleEnvironments
 #define B_CATCH_OR_NOT           26
 #define B_WIN_STAGE_PANEL        27 // Full-width temporary battle stat view
 #define B_WIN_STAGE_TAB          28 // Attached YOU/FOE heading
+#define B_WIN_STATUS_PROMPT      29 // Tiny L prompt shown only on main action menu
 
 // The following are duplicate id values for windows that Battle Arena uses differently.
 #define ARENA_WIN_PLAYER_NAME      15
