@@ -2674,9 +2674,6 @@ static void DebugAction_Trainers_TryBattle(u8 taskId)
         trainer1Id = gRematchTable[rematchId].trainerIds[lastMatch];
     }
     gBattleTypeFlags = BATTLE_TYPE_TRAINER;
-    // Trainer battles launched from the debug menu must be marked as debug
-    // battles. Important-battle cap logic depends on this runtime state.
-    gIsDebugBattle = TRUE;
     TRAINER_BATTLE_PARAM.opponentA = trainer1Id;
     TRAINER_BATTLE_PARAM.opponentB = 0xFFFF;
     CreateNPCTrainerPartyFromTrainer(gParties[B_TRAINER_OPPONENT_A], GetTrainerStructFromId(trainer1Id));
@@ -2753,6 +2750,10 @@ static void Debug_PrepareImportantBattleParty(u16 trainerId)
     const u16 *species;
     u8 cap = Debug_GetImportantBattleCap(trainerId);
     u8 testLevel = cap;
+
+    // Scope the level-cap override to the Important Battle harness without
+    // enabling the expansion's Trainer Debugger battle mode.
+    SetDebugImportantBattleLevelCap(cap);
     // Debug important-battle harness: guarantee obedience regardless of the
     // expansion obedience generation/config. These are test battles, not story progression.
     FlagSet(FLAG_BADGE01_GET);
