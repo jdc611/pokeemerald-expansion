@@ -21,6 +21,23 @@ u32 GetCurrentLevelCap(void)
         {FLAG_IS_CHAMPION, 58},
     };
     u32 i;
+
+    // Important-battle debug mode deliberately sets every badge for obedience.
+    // Using badge flags here would therefore report 58 even for Roxanne.
+    // The debug party is normalized to the selected battle's cap, so use its
+    // highest current level as the active cap while that debug flag is set.
+    if (FlagGet(FLAG_TEMP_2))
+    {
+        u32 debugCap = 1;
+        for (i = 0; i < gPartiesCount[B_TRAINER_PLAYER]; i++)
+        {
+            u32 level = GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_LEVEL);
+            if (level > debugCap)
+                debugCap = level;
+        }
+        return debugCap;
+    }
+
     for (i = 0; i < ARRAY_COUNT(sLevelCapFlagMap); i++)
         if (!FlagGet(sLevelCapFlagMap[i][0]))
             return sLevelCapFlagMap[i][1];
@@ -55,7 +72,6 @@ u32 GetSoftLevelCapExpValue(u32 level, u32 expValue)
     }
     else if (B_EXP_CAP_TYPE == EXP_CAP_HARD)
     {
-        // Keep the normal EXP event/animation alive, but cap the reward itself.
         return 1;
     }
     else if (B_EXP_CAP_TYPE == EXP_CAP_SOFT)
@@ -75,7 +91,6 @@ u32 GetSoftLevelCapExpValue(u32 level, u32 expValue)
 u32 GetCurrentEVCap(void)
 {
     static const u16 sEvCapFlagMap[][2] = {
-        // Define EV caps for each milestone
         {FLAG_BADGE01_GET, MAX_TOTAL_EVS *  1 / 17},
         {FLAG_BADGE02_GET, MAX_TOTAL_EVS *  3 / 17},
         {FLAG_BADGE03_GET, MAX_TOTAL_EVS *  5 / 17},
@@ -107,7 +122,6 @@ u32 GetCurrentEVCap(void)
     return MAX_TOTAL_EVS;
 }
 
-
 bool32 IsMinimalGrindingMode(void)
 {
     return gSaveBlock3Ptr != NULL && gSaveBlock3Ptr->minimalGrindingMode;
@@ -116,7 +130,7 @@ bool32 IsMinimalGrindingMode(void)
 void ApplyMinimalGrindingModeToMon(struct Pokemon *mon)
 {
     u8 perfectIv = MAX_PER_STAT_IVS;
-    u8 neutralEv = 85; // 85 * 6 = 510, the legal total EV maximum.
+    u8 neutralEv = 85;
 
     if (mon == NULL || GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
         return;
