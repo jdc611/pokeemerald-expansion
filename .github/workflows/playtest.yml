@@ -17,11 +17,13 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Native Cap + Status UI Fix v8"
+  PLAYTEST_TRIGGER: "Native Source Status + EXP Fix v9"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout latest master
@@ -29,8 +31,18 @@ jobs:
         with:
           ref: master
 
-      - name: Apply runtime battle patch
+      - name: Apply source migration
         run: python3 .github/scripts/apply_stat_colors_levelcap_exp.py
+
+      - name: Commit migrated source changes
+        run: |
+          if ! git diff --quiet -- src/battle_controller_player.c src/battle_script_commands.c src/debug.c; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/battle_controller_player.c src/battle_script_commands.c src/debug.c
+            git commit -m "Implement battle status UI and level-cap EXP fixes"
+            git push origin HEAD:master
+          fi
 
       - name: Install build tools
         run: |
@@ -66,5 +78,5 @@ jobs:
       - name: Upload Playtest ROM
         uses: actions/upload-artifact@v4
         with:
-          name: Native-Cap-Status-UI-v8-${{ github.sha }}
+          name: Native-Source-Status-EXP-v9-${{ github.sha }}
           path: pokeemerald.gba
