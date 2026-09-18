@@ -638,23 +638,10 @@ static void DoAreaGlow(void)
 
 static const u8 *GetTimeOfDayTextWithButton(enum TimeOfDay timeOfDay)
 {
-    static const u8 gText_Morning[] = _("{DPAD_UPDOWN} MORNING");
     static const u8 gText_Day[] = _("{DPAD_UPDOWN} DAY");
-    static const u8 gText_Evening[] = _("{DPAD_UPDOWN} EVENING");
     static const u8 gText_Night[] = _("{DPAD_UPDOWN} NIGHT");
 
-    switch (gAreaTimeOfDay)
-    {
-    case TIME_MORNING:
-        return gText_Morning;
-    case TIME_EVENING:
-        return gText_Evening;
-    case TIME_NIGHT:
-        return gText_Night;
-    case TIME_DAY:
-    default:
-        return gText_Day;
-    }
+    return gAreaTimeOfDay == TIME_NIGHT ? gText_Night : gText_Day;
 }
 
 static void AddTimeOfDayLabels(void)
@@ -720,7 +707,9 @@ void DisplayPokedexAreaScreen(enum Species species, u8 *screenSwitchState, enum 
     sPokedexAreaScreen->species = species;
     sPokedexAreaScreen->screenSwitchState = screenSwitchState;
     sPokedexAreaScreen->areaState = areaState;
-    gAreaTimeOfDay = timeOfDay;
+    // The hack intentionally uses only two encounter tables: Day and Night.
+    // Morning/Evening are presentation periods and share the Day encounter table.
+    gAreaTimeOfDay = timeOfDay == TIME_NIGHT ? TIME_NIGHT : TIME_DAY;
     screenSwitchState[0] = 0;
 
     if (sPokedexAreaScreen->areaState == DEX_UPDATE_AREA_SCREEN)
@@ -892,14 +881,14 @@ static void Task_HandlePokedexAreaScreenInput(u8 taskId)
         else if (JOY_NEW(DPAD_UP) && OW_TIME_OF_DAY_ENCOUNTERS == TRUE)
         {
             gTasks[taskId].data[1] = 3;
-            gAreaTimeOfDay = TryDecrementTimeOfDay(gAreaTimeOfDay);
+            gAreaTimeOfDay = gAreaTimeOfDay == TIME_NIGHT ? TIME_DAY : TIME_NIGHT;
             sPokedexAreaScreen->areaState = DEX_UPDATE_AREA_SCREEN;
             PlaySE(SE_DEX_PAGE);
         }
         else if (JOY_NEW(DPAD_DOWN) && OW_TIME_OF_DAY_ENCOUNTERS == TRUE)
         {
             gTasks[taskId].data[1] = 3;
-            gAreaTimeOfDay = TryIncrementTimeOfDay(gAreaTimeOfDay);
+            gAreaTimeOfDay = gAreaTimeOfDay == TIME_NIGHT ? TIME_DAY : TIME_NIGHT;
             sPokedexAreaScreen->areaState = DEX_UPDATE_AREA_SCREEN;
             PlaySE(SE_DEX_PAGE);
         }
