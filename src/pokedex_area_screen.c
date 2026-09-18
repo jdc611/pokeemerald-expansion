@@ -121,8 +121,8 @@ static void BuildAreaGlowTilemap(void);
 static void SetAreaHasMon(u16, u16);
 static void SetSpecialMapHasMon(u16, u16);
 static mapsec_u16_t GetRegionMapSectionId(u8, u8);
-static bool8 MapHasSpecies(const struct WildEncounterTypes *, u32, enum Species);
-static bool8 MonListHasSpecies(const struct WildPokemonInfo *, enum Species, u16);
+static bool8 MapHasSpecies(const struct WildEncounterTypes *, u32, enum Species, u8, u8, enum TimeOfDay);
+static bool8 MonListHasSpecies(const struct WildPokemonInfo *, enum Species, u16, enum WildPokemonArea, u8, u8, enum TimeOfDay);
 static void DoAreaGlow(void);
 static void Task_ShowPokedexAreaScreen(u8 taskId);
 static void Task_UpdatePokedexAreaScreen(u8 taskId);
@@ -340,7 +340,8 @@ static void FindMapsWithMon(enum Species species)
         if (GetRegionMapType(headerSectionId) != currentRegionMapType)
             continue;
 
-        if (MapHasSpecies(&gWildMonHeaders[i].encounterTypes[gAreaTimeOfDay], headerSectionId, species))
+        if (MapHasSpecies(&gWildMonHeaders[i].encounterTypes[gAreaTimeOfDay], headerSectionId, species,
+                          gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum, gAreaTimeOfDay))
         {
             switch (gWildMonHeaders[i].mapGroup)
             {
@@ -429,7 +430,7 @@ static mapsec_u16_t GetRegionMapSectionId(u8 mapGroup, u8 mapNum)
     return Overworld_GetMapHeaderByGroupAndId(mapGroup, mapNum)->regionMapSectionId;
 }
 
-static bool8 MapHasSpecies(const struct WildEncounterTypes *info, u32 headerSectionId, enum Species species)
+static bool8 MapHasSpecies(const struct WildEncounterTypes *info, u32 headerSectionId, enum Species species, u8 mapGroup, u8 mapNum, enum TimeOfDay timeOfDay)
 {
     // If this is a header for Altering Cave, skip it if it's not the current Altering Cave encounter set
     if (headerSectionId == MAPSEC_ALTERING_CAVE)
@@ -439,31 +440,34 @@ static bool8 MapHasSpecies(const struct WildEncounterTypes *info, u32 headerSect
             return FALSE;
     }
 
-    if (MonListHasSpecies(info->landMonsInfo, species, NUM_LAND_MONS_ENCOUNTER_SLOTS))
+    if (MonListHasSpecies(info->landMonsInfo, species, NUM_LAND_MONS_ENCOUNTER_SLOTS, WILD_AREA_LAND, mapGroup, mapNum, timeOfDay))
         return TRUE;
-    if (MonListHasSpecies(info->waterMonsInfo, species, NUM_WATER_MONS_ENCOUNTER_SLOTS))
+    if (MonListHasSpecies(info->waterMonsInfo, species, NUM_WATER_MONS_ENCOUNTER_SLOTS, WILD_AREA_WATER, mapGroup, mapNum, timeOfDay))
         return TRUE;
-// When searching the fishing encounters, this incorrectly uses the size of the land encounters.
-// As a result it's reading out of bounds of the fishing encounters tables.
 #ifdef BUGFIX
-    if (MonListHasSpecies(info->fishingMonsInfo, species, NUM_FISHING_MONS_ENCOUNTER_SLOTS))
+    if (MonListHasSpecies(info->fishingMonsInfo, species, NUM_FISHING_MONS_ENCOUNTER_SLOTS, WILD_AREA_FISHING, mapGroup, mapNum, timeOfDay))
 #else
-    if (MonListHasSpecies(info->fishingMonsInfo, species, NUM_LAND_MONS_ENCOUNTER_SLOTS))
+    if (MonListHasSpecies(info->fishingMonsInfo, species, NUM_LAND_MONS_ENCOUNTER_SLOTS, WILD_AREA_FISHING, mapGroup, mapNum, timeOfDay))
 #endif
         return TRUE;
-    if (MonListHasSpecies(info->rockSmashMonsInfo, species, NUM_ROCK_SMASH_MONS_ENCOUNTER_SLOTS))
+    if (MonListHasSpecies(info->rockSmashMonsInfo, species, NUM_ROCK_SMASH_MONS_ENCOUNTER_SLOTS, WILD_AREA_ROCKS, mapGroup, mapNum, timeOfDay))
         return TRUE;
     return FALSE;
 }
 
-static bool8 MonListHasSpecies(const struct WildPokemonInfo *info, enum Species species, u16 size)
+static bool8 MonListHasSpecies(const struct WildPokemonInfo *info, enum Species species, u16 size, enum WildPokemonArea area, u8 mapGroup, u8 mapNum, enum TimeOfDay timeOfDay)
 {
     u16 i;
+
     if (info != NULL)
     {
         for (i = 0; i < size; i++)
         {
-            if (info->wildPokemon[i].species == species)
+            enum Species slotSpecies = gSaveBlock3Ptr->randomizerEnabled
+                ? GetRandomizedWildSpeciesForMap(info, area, i, mapGroup, mapNum, timeOfDay)
+                : info->wildPokemon[i].species;
+
+            if (slotSpecies == species)
                 return TRUE;
         }
     }
