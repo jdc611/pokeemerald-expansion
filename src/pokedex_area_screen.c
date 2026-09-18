@@ -848,18 +848,23 @@ static void Task_UpdatePokedexAreaScreen(u8 taskId)
 
 static void Task_RefreshPokedexAreaTime(u8 taskId)
 {
-    // Keep the area screen visible while recalculating the encounter data.
-    // Do not restart the glow animation or recreate the label windows here;
-    // both operations cause visible flashing on hardware/emulators.
-    DestroyAreaScreenSprites();
+    // Recalculate the encounter data first while leaving the currently
+    // displayed overlay untouched. The old marker sprites must remain alive
+    // until the replacement data is ready; destroying them before the new
+    // overlay exists is what makes the area display glitch after toggling.
     FindMapsWithMon(sPokedexAreaScreen->species);
     BuildAreaGlowTilemap();
+
+    // Replace the BG2 area tilemap without hiding or resetting the background.
     LoadBgTilemap(2, sPokedexAreaScreen->areaGlowTilemap, sizeof(sPokedexAreaScreen->areaGlowTilemap), 0);
     CopyBgTilemapBufferToVram(2);
+
+    // Swap only the special-area marker sprites after the new encounter data
+    // and tilemap have been prepared.
+    DestroyAreaScreenSprites();
     CreateAreaMarkerSprites();
 
-    // Preserve the current blend state and update only the text inside the
-    // existing windows so DAY/NIGHT changes without blanking the labels.
+    // Keep the existing windows and blend/glow state intact.
     ShowEncounterInfoLabel();
     if (ShouldShowAreaUnknownLabel())
         ShowAreaUnknownLabel();
