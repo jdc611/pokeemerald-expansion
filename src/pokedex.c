@@ -2618,7 +2618,7 @@ static bool8 TryDoInfoScreenScroll(void)
     if (sPokedexView->sEvoScreenData.fromEvoPage)
         return FALSE;
 
-    if (JOY_NEW(DPAD_UP) && selectedPokemon)
+    if (JOY_REPEAT(DPAD_UP) && selectedPokemon)
     {
         nextPokemon = selectedPokemon;
         while (nextPokemon != 0)
@@ -2643,7 +2643,7 @@ static bool8 TryDoInfoScreenScroll(void)
             return TRUE;
         }
     }
-    else if (JOY_NEW(DPAD_DOWN) && selectedPokemon < sPokedexView->pokemonListCount - 1)
+    else if (JOY_REPEAT(DPAD_DOWN) && selectedPokemon < sPokedexView->pokemonListCount - 1)
     {
         nextPokemon = selectedPokemon;
         while (nextPokemon < sPokedexView->pokemonListCount - 1)
