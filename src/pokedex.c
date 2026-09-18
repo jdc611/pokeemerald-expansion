@@ -2535,7 +2535,7 @@ static u16 TryDoPokedexScroll(u16 selectedMon, u16 ignored)
     u16 startingPos;
     u8 scrollDir = 0;
 
-    if (JOY_HELD(DPAD_UP) && (selectedMon > 0))
+    if (JOY_NEW(DPAD_UP) && (selectedMon > 0))
     {
         scrollDir = 1;
         selectedMon = GetNextPosition(1, selectedMon, 0, sPokedexView->pokemonListCount - 1);
@@ -2544,7 +2544,7 @@ static u16 TryDoPokedexScroll(u16 selectedMon, u16 ignored)
         sPokedexView->justScrolled = TRUE;
         PlaySE(SE_DEX_SCROLL);
     }
-    else if (JOY_HELD(DPAD_DOWN) && (selectedMon < sPokedexView->pokemonListCount - 1))
+    else if (JOY_NEW(DPAD_DOWN) && (selectedMon < sPokedexView->pokemonListCount - 1))
     {
         scrollDir = 2;
         selectedMon = GetNextPosition(0, selectedMon, 0, sPokedexView->pokemonListCount - 1);
