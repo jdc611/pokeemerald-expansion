@@ -848,36 +848,25 @@ static void Task_UpdatePokedexAreaScreen(u8 taskId)
 
 static void Task_RefreshPokedexAreaTime(u8 taskId)
 {
-    switch (gTasks[taskId].tState)
-    {
-    case 0:
-        // Recalculate only the encounter-dependent pieces. Keep the region map,
-        // player icon, backgrounds and screen allocation alive to avoid a full reload.
-        DestroyAreaScreenSprites();
-        ClearAreaWindowLabel(DEX_AREA_LABEL_TIME_OF_DAY);
-        ClearAreaWindowLabel(DEX_AREA_LABEL_AREA_UNKNOWN);
-        FindMapsWithMon(sPokedexAreaScreen->species);
-        break;
-    case 1:
-        BuildAreaGlowTilemap();
-        LoadBgTilemap(2, sPokedexAreaScreen->areaGlowTilemap, sizeof(sPokedexAreaScreen->areaGlowTilemap), 0);
-        CopyBgTilemapBufferToVram(2);
-        break;
-    case 2:
-        CreateAreaMarkerSprites();
-        StartAreaGlow();
-        AddTimeOfDayLabels();
-        ShowEncounterInfoLabel();
-        if (ShouldShowAreaUnknownLabel())
-            ShowAreaUnknownLabel();
-        break;
-    case 3:
-        gTasks[taskId].func = Task_HandlePokedexAreaScreenInput;
-        gTasks[taskId].tState = 0;
-        return;
-    }
+    // Rebuild the encounter overlay completely before the next frame is drawn.
+    // Splitting this across task states made the old overlay disappear for
+    // several frames, which looked like a full area-screen reload.
+    DestroyAreaScreenSprites();
+    FindMapsWithMon(sPokedexAreaScreen->species);
+    BuildAreaGlowTilemap();
+    LoadBgTilemap(2, sPokedexAreaScreen->areaGlowTilemap, sizeof(sPokedexAreaScreen->areaGlowTilemap), 0);
+    CopyBgTilemapBufferToVram(2);
+    CreateAreaMarkerSprites();
+    StartAreaGlow();
 
-    gTasks[taskId].tState++;
+    ClearAreaWindowLabel(DEX_AREA_LABEL_TIME_OF_DAY);
+    ClearAreaWindowLabel(DEX_AREA_LABEL_AREA_UNKNOWN);
+    ShowEncounterInfoLabel();
+    if (ShouldShowAreaUnknownLabel())
+        ShowAreaUnknownLabel();
+
+    gTasks[taskId].func = Task_HandlePokedexAreaScreenInput;
+    gTasks[taskId].tState = 0;
 }
 
 static void Task_HandlePokedexAreaScreenInput(u8 taskId)
