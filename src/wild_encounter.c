@@ -573,7 +573,7 @@ static u32 GetScaledWildTier(const struct WildPokemonInfo *wildMonInfo, enum Wil
     return tier;
 }
 
-enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo, enum WildPokemonArea area, u8 wildMonIndex)
+static enum Species GenerateRandomizedWildSpeciesForMap(const struct WildPokemonInfo *wildMonInfo, enum WildPokemonArea area, u8 wildMonIndex, u8 mapGroup, u8 mapNum, enum TimeOfDay timeOfDay)
 {
     rng_value_t oldRngState = gRngValue;
     enum Species species;
@@ -588,8 +588,8 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
 
     u32 seed = gSaveBlock3Ptr->worldSeed;
 
-    seed ^= ((u32)gSaveBlock1Ptr->location.mapGroup << 24);
-    seed ^= ((u32)gSaveBlock1Ptr->location.mapNum << 16);
+    seed ^= ((u32)mapGroup << 24);
+    seed ^= ((u32)mapNum << 16);
     seed ^= ((u32)area << 8);
     if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE)
     {
@@ -623,13 +623,9 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
     // Only the four rare land slots rotate with an area's Night table.
     // This keeps most of a randomized route stable between Day and Night.
     if (gSaveBlock3Ptr->filterMode == RUN_FILTER_NONE
-     && area == WILD_AREA_LAND && wildMonIndex >= 8)
-    {
-        u32 headerId = GetCurrentMapWildMonHeaderId();
-
-        if (headerId != HEADER_NONE && GetTimeOfDayForEncounters(headerId, area) == TIME_NIGHT)
-            seed ^= 0x4E494748; // "NIGH"
-    }
+     && area == WILD_AREA_LAND && wildMonIndex >= 8
+     && timeOfDay == TIME_NIGHT)
+        seed ^= 0x4E494748; // "NIGH"
 
     if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE
      || gSaveBlock3Ptr->filterMode == RUN_FILTER_ABILITY
@@ -680,6 +676,22 @@ enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo,
     gRngValue = oldRngState;
 
     return species;
+}
+
+enum Species GetRandomizedWildSpeciesForMap(const struct WildPokemonInfo *wildMonInfo, enum WildPokemonArea area, u8 wildMonIndex, u8 mapGroup, u8 mapNum, enum TimeOfDay timeOfDay)
+{
+    return GenerateRandomizedWildSpeciesForMap(wildMonInfo, area, wildMonIndex, mapGroup, mapNum, timeOfDay);
+}
+
+enum Species GetRandomizedWildSpecies(const struct WildPokemonInfo *wildMonInfo, enum WildPokemonArea area, u8 wildMonIndex)
+{
+    u32 headerId = GetCurrentMapWildMonHeaderId();
+    enum TimeOfDay timeOfDay = headerId == HEADER_NONE ? TIME_OF_DAY_DEFAULT : GetTimeOfDayForEncounters(headerId, area);
+
+    return GenerateRandomizedWildSpeciesForMap(wildMonInfo, area, wildMonIndex,
+                                                gSaveBlock1Ptr->location.mapGroup,
+                                                gSaveBlock1Ptr->location.mapNum,
+                                                timeOfDay);
 }
 bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, enum WildPokemonArea area, u8 flags)
 {
