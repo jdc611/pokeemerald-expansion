@@ -848,14 +848,13 @@ static void Task_UpdatePokedexAreaScreen(u8 taskId)
 
 static void Task_RefreshPokedexAreaTime(u8 taskId)
 {
-    // The area screen itself is stable. Only recompute and replace the BG2
-    // encounter highlight when DAY/NIGHT changes. Recreating area sprites
-    // during this live screen is unsafe because DestroyAreaScreenSprites also
-    // tears down region-map sprites that the active screen still owns.
+    // Recalculate the encounter data, then update BG2 through its existing
+    // tilemap buffer. Loading a new tilemap into a live background can disturb
+    // the active area screen; the buffer is already owned by BG2.
     FindMapsWithMon(sPokedexAreaScreen->species);
     BuildAreaGlowTilemap();
-    LoadBgTilemap(2, sPokedexAreaScreen->areaGlowTilemap, sizeof(sPokedexAreaScreen->areaGlowTilemap), 0);
-    CopyBgTilemapBufferToVram(2);
+    CpuCopy16(sPokedexAreaScreen->areaGlowTilemap, GetBgTilemapBuffer(2), sizeof(sPokedexAreaScreen->areaGlowTilemap));
+    ScheduleBgCopyTilemapToVram(2);
 
     ShowEncounterInfoLabel();
     if (ShouldShowAreaUnknownLabel())
