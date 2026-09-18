@@ -1587,7 +1587,14 @@ static void Task_WaitForScroll(u8 taskId)
 {
     HandleDestroyStatBars_HGSS();
     if (UpdateDexListScroll(sPokedexView->scrollDirection, sPokedexView->scrollMonIncrement, sPokedexView->maxScrollTimer))
+    {
+        if ((sPokedexView->scrollDirection == 1 && JOY_HELD(DPAD_UP))
+         || (sPokedexView->scrollDirection == 2 && JOY_HELD(DPAD_DOWN)))
+            return;
+
+        sPokedexView->scrollSpeed = 0;
         gTasks[taskId].func = Task_HandlePokedexInput;
+    }
 }
 
 static void Task_HandlePokedexStartMenuInput(u8 taskId)
