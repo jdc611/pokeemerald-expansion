@@ -848,22 +848,23 @@ static void Task_UpdatePokedexAreaScreen(u8 taskId)
 
 static void Task_RefreshPokedexAreaTime(u8 taskId)
 {
-    // Rebuild the encounter overlay completely before the next frame is drawn.
-    // Splitting this across task states made the old overlay disappear for
-    // several frames, which looked like a full area-screen reload.
+    // Keep the area screen visible while recalculating the encounter data.
+    // Do not restart the glow animation or recreate the label windows here;
+    // both operations cause visible flashing on hardware/emulators.
     DestroyAreaScreenSprites();
     FindMapsWithMon(sPokedexAreaScreen->species);
     BuildAreaGlowTilemap();
     LoadBgTilemap(2, sPokedexAreaScreen->areaGlowTilemap, sizeof(sPokedexAreaScreen->areaGlowTilemap), 0);
     CopyBgTilemapBufferToVram(2);
     CreateAreaMarkerSprites();
-    StartAreaGlow();
 
-    ClearAreaWindowLabel(DEX_AREA_LABEL_TIME_OF_DAY);
-    ClearAreaWindowLabel(DEX_AREA_LABEL_AREA_UNKNOWN);
+    // Preserve the current blend state and update only the text inside the
+    // existing windows so DAY/NIGHT changes without blanking the labels.
     ShowEncounterInfoLabel();
     if (ShouldShowAreaUnknownLabel())
         ShowAreaUnknownLabel();
+    else
+        ClearAreaWindowLabel(DEX_AREA_LABEL_AREA_UNKNOWN);
 
     gTasks[taskId].func = Task_HandlePokedexAreaScreenInput;
     gTasks[taskId].tState = 0;
