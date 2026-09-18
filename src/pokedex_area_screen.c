@@ -126,6 +126,7 @@ static bool8 MonListHasSpecies(const struct WildPokemonInfo *, enum Species, u16
 static void DoAreaGlow(void);
 static void Task_ShowPokedexAreaScreen(u8 taskId);
 static void Task_UpdatePokedexAreaScreen(u8 taskId);
+static void Task_RefreshPokedexAreaTime(u8 taskId);
 static void CreateAreaMarkerSprites(void);
 static void LoadAreaUnknownGraphics(void);
 static void CreateAreaUnknownSprites(void);
@@ -845,6 +846,40 @@ static void Task_UpdatePokedexAreaScreen(u8 taskId)
     gTasks[taskId].tState++;
 }
 
+static void Task_RefreshPokedexAreaTime(u8 taskId)
+{
+    switch (gTasks[taskId].tState)
+    {
+    case 0:
+        // Recalculate only the encounter-dependent pieces. Keep the region map,
+        // player icon, backgrounds and screen allocation alive to avoid a full reload.
+        DestroyAreaScreenSprites();
+        ClearAreaWindowLabel(DEX_AREA_LABEL_TIME_OF_DAY);
+        ClearAreaWindowLabel(DEX_AREA_LABEL_AREA_UNKNOWN);
+        FindMapsWithMon(sPokedexAreaScreen->species);
+        break;
+    case 1:
+        BuildAreaGlowTilemap();
+        LoadBgTilemap(2, sPokedexAreaScreen->areaGlowTilemap, sizeof(sPokedexAreaScreen->areaGlowTilemap), 0);
+        CopyBgTilemapBufferToVram(2);
+        break;
+    case 2:
+        CreateAreaMarkerSprites();
+        StartAreaGlow();
+        AddTimeOfDayLabels();
+        ShowEncounterInfoLabel();
+        if (ShouldShowAreaUnknownLabel())
+            ShowAreaUnknownLabel();
+        break;
+    case 3:
+        gTasks[taskId].func = Task_HandlePokedexAreaScreenInput;
+        gTasks[taskId].tState = 0;
+        return;
+    }
+
+    gTasks[taskId].tState++;
+}
+
 static void Task_HandlePokedexAreaScreenInput(u8 taskId)
 {
     DoAreaGlow();
@@ -878,19 +913,13 @@ static void Task_HandlePokedexAreaScreenInput(u8 taskId)
             gTasks[taskId].data[1] = 2;
             PlaySE(SE_DEX_PAGE);
         }
-        else if (JOY_NEW(DPAD_UP) && OW_TIME_OF_DAY_ENCOUNTERS == TRUE)
+        else if ((JOY_NEW(DPAD_UP) || JOY_NEW(DPAD_DOWN)) && OW_TIME_OF_DAY_ENCOUNTERS == TRUE)
         {
-            gTasks[taskId].data[1] = 3;
             gAreaTimeOfDay = gAreaTimeOfDay == TIME_NIGHT ? TIME_DAY : TIME_NIGHT;
-            sPokedexAreaScreen->areaState = DEX_UPDATE_AREA_SCREEN;
             PlaySE(SE_DEX_PAGE);
-        }
-        else if (JOY_NEW(DPAD_DOWN) && OW_TIME_OF_DAY_ENCOUNTERS == TRUE)
-        {
-            gTasks[taskId].data[1] = 3;
-            gAreaTimeOfDay = gAreaTimeOfDay == TIME_NIGHT ? TIME_DAY : TIME_NIGHT;
-            sPokedexAreaScreen->areaState = DEX_UPDATE_AREA_SCREEN;
-            PlaySE(SE_DEX_PAGE);
+            gTasks[taskId].func = Task_RefreshPokedexAreaTime;
+            gTasks[taskId].tState = 0;
+            return;
         }
         else
         {
