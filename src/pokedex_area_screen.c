@@ -848,19 +848,37 @@ static void Task_UpdatePokedexAreaScreen(u8 taskId)
 
 static void Task_RefreshPokedexAreaTime(u8 taskId)
 {
-    // Recalculate the encounter data, then update BG2 through its existing
-    // tilemap buffer. Loading a new tilemap into a live background can disturb
-    // the active area screen; the buffer is already owned by BG2.
+    bool8 wasShowingMarkers = sPokedexAreaScreen->showingMarkers;
+
     FindMapsWithMon(sPokedexAreaScreen->species);
     BuildAreaGlowTilemap();
     CpuCopy16(sPokedexAreaScreen->areaGlowTilemap, GetBgTilemapBuffer(2), sizeof(sPokedexAreaScreen->areaGlowTilemap));
     ScheduleBgCopyTilemapToVram(2);
 
+    // Keep the glow animation valid for the newly calculated area set.
+    // If the previous time period was using special-area markers but the new
+    // one has normal route highlights, continuing marker mode leaves BG2
+    // effectively flashing/blank.
+    if (sPokedexAreaScreen->numOverworldAreas != 0)
+        sPokedexAreaScreen->showingMarkers = FALSE;
+    else if (sPokedexAreaScreen->numSpecialAreas != 0)
+        sPokedexAreaScreen->showingMarkers = TRUE;
+    else
+        sPokedexAreaScreen->showingMarkers = wasShowingMarkers;
+
+    sPokedexAreaScreen->markerTimer = 0;
+    sPokedexAreaScreen->glowTimer = 0;
+    sPokedexAreaScreen->markerFlashCounter = 1;
+
     ShowEncounterInfoLabel();
     if (ShouldShowAreaUnknownLabel())
         ShowAreaUnknownLabel();
     else
-        ClearAreaWindowLabel(DEX_AREA_LABEL_AREA_UNKNOWN);
+    {
+        FillWindowPixelBuffer(sPokedexAreaScreen->areaScreenLabelIds[DEX_AREA_LABEL_AREA_UNKNOWN], PIXEL_FILL(0));
+        PutWindowTilemap(sPokedexAreaScreen->areaScreenLabelIds[DEX_AREA_LABEL_AREA_UNKNOWN]);
+        CopyWindowToVram(sPokedexAreaScreen->areaScreenLabelIds[DEX_AREA_LABEL_AREA_UNKNOWN], COPYWIN_FULL);
+    }
 
     gTasks[taskId].func = Task_HandlePokedexAreaScreenInput;
     gTasks[taskId].tState = 0;
