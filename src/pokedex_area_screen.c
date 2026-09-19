@@ -341,49 +341,30 @@ static void FindMapsWithMon(enum Species species)
         if (GetRegionMapType(headerSectionId) != currentRegionMapType)
             continue;
 
-        // The hack exposes DAY/NIGHT in the Dex, but many maps still use a
-        // shared encounter table for both periods. If the selected period has
-        // no encounter data for this map, fall back to the opposite table
-        // rather than incorrectly reporting AREA UNKNOWN.
+        // The Dex toggle is an explicit DAY/NIGHT preview. Read only that
+        // exact encounter table here. Runtime fallback is for the live clock;
+        // borrowing another period in the Dex makes day-only/night-only
+        // species leak into the wrong view.
         {
             enum TimeOfDay areaTime = gAreaTimeOfDay;
             const struct WildEncounterTypes *encounters = &gWildMonHeaders[i].encounterTypes[areaTime];
 
-            // Only fall back for maps that genuinely have no table for the
-            // selected period. A populated DAY table must never borrow NIGHT
-            // species (and vice versa), or night-only species appear in both.
-            if (encounters->landMonsInfo == NULL
-             && encounters->waterMonsInfo == NULL
-             && encounters->rockSmashMonsInfo == NULL
-             && encounters->fishingMonsInfo == NULL
-             && encounters->hiddenMonsInfo == NULL)
-            {
-                enum TimeOfDay fallbackTime = areaTime == TIME_NIGHT ? TIME_DAY : TIME_NIGHT;
-                const struct WildEncounterTypes *fallback = &gWildMonHeaders[i].encounterTypes[fallbackTime];
-
-                // Treat the opposite period as shared only when the selected
-                // period is completely absent, not merely when this species
-                // is absent from a valid selected-period table.
-                encounters = fallback;
-                areaTime = fallbackTime;
-            }
-
             if (MapHasSpecies(encounters, headerSectionId, species,
                               gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum, areaTime))
-        {
-            switch (gWildMonHeaders[i].mapGroup)
             {
-            case MAP_GROUP_TOWNS_AND_ROUTES:
-            case MAP_GROUP_TOWNS_AND_ROUTES_FRLG:
-                SetAreaHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
-                break;
-            case MAP_GROUP_DUNGEONS:
-            case MAP_GROUP_DUNGEONS_FRLG:
-            case MAP_GROUP_SPECIAL_AREA:
-            case MAP_GROUP_SPECIAL_AREA_FRLG:
-                SetSpecialMapHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
-                break;
-            }
+                switch (gWildMonHeaders[i].mapGroup)
+                {
+                case MAP_GROUP_TOWNS_AND_ROUTES:
+                case MAP_GROUP_TOWNS_AND_ROUTES_FRLG:
+                    SetAreaHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
+                    break;
+                case MAP_GROUP_DUNGEONS:
+                case MAP_GROUP_DUNGEONS_FRLG:
+                case MAP_GROUP_SPECIAL_AREA:
+                case MAP_GROUP_SPECIAL_AREA_FRLG:
+                    SetSpecialMapHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
+                    break;
+                }
             }
         }
     }
