@@ -442,7 +442,7 @@ static mapsec_u16_t GetRegionMapSectionId(u8 mapGroup, u8 mapNum)
 
 static bool8 MapHasSpecies(const struct WildEncounterTypes *info, u32 headerSectionId, enum Species species, u8 mapGroup, u8 mapNum, enum TimeOfDay timeOfDay)
 {
-    const struct WildEncounterTypes *fallback = &gWildMonHeaders[0].encounterTypes[0];
+    const struct WildEncounterTypes *fallback = NULL;
     u16 headerId;
 
     // If this is a header for Altering Cave, skip it if it's not the current Altering Cave encounter set
@@ -466,8 +466,8 @@ static bool8 MapHasSpecies(const struct WildEncounterTypes *info, u32 headerSect
         }
     }
 
-#define DEX_ENCOUNTER_INFO(field) ((info->field != NULL || OW_TIME_OF_DAY_DISABLE_FALLBACK) ? info->field : fallback->field)
-#define DEX_ENCOUNTER_TIME(field) ((info->field != NULL || OW_TIME_OF_DAY_DISABLE_FALLBACK) ? timeOfDay : OW_TIME_OF_DAY_FALLBACK)
+#define DEX_ENCOUNTER_INFO(field) ((info->field != NULL || OW_TIME_OF_DAY_DISABLE_FALLBACK || fallback == NULL) ? info->field : fallback->field)
+#define DEX_ENCOUNTER_TIME(field) ((info->field != NULL || OW_TIME_OF_DAY_DISABLE_FALLBACK || fallback == NULL) ? timeOfDay : OW_TIME_OF_DAY_FALLBACK)
 
     if (MonListHasSpecies(DEX_ENCOUNTER_INFO(landMonsInfo), species, NUM_LAND_MONS_ENCOUNTER_SLOTS, WILD_AREA_LAND, mapGroup, mapNum, DEX_ENCOUNTER_TIME(landMonsInfo)))
         return TRUE;
