@@ -349,13 +349,23 @@ static void FindMapsWithMon(enum Species species)
             enum TimeOfDay areaTime = gAreaTimeOfDay;
             const struct WildEncounterTypes *encounters = &gWildMonHeaders[i].encounterTypes[areaTime];
 
+            // Only fall back for maps that genuinely have no table for the
+            // selected period. A populated DAY table must never borrow NIGHT
+            // species (and vice versa), or night-only species appear in both.
             if (encounters->landMonsInfo == NULL
              && encounters->waterMonsInfo == NULL
              && encounters->rockSmashMonsInfo == NULL
-             && encounters->fishingMonsInfo == NULL)
+             && encounters->fishingMonsInfo == NULL
+             && encounters->hiddenMonsInfo == NULL)
             {
-                areaTime = areaTime == TIME_NIGHT ? TIME_DAY : TIME_NIGHT;
-                encounters = &gWildMonHeaders[i].encounterTypes[areaTime];
+                enum TimeOfDay fallbackTime = areaTime == TIME_NIGHT ? TIME_DAY : TIME_NIGHT;
+                const struct WildEncounterTypes *fallback = &gWildMonHeaders[i].encounterTypes[fallbackTime];
+
+                // Treat the opposite period as shared only when the selected
+                // period is completely absent, not merely when this species
+                // is absent from a valid selected-period table.
+                encounters = fallback;
+                areaTime = fallbackTime;
             }
 
             if (MapHasSpecies(encounters, headerSectionId, species,
