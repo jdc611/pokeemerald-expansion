@@ -32,4 +32,43 @@ enum RunFilterMode
     RUN_FILTER_GENERATION,
 };
 
+enum RunDifficulty
+{
+    RUN_DIFFICULTY_EASY,
+    RUN_DIFFICULTY_NORMAL,
+    RUN_DIFFICULTY_HARD,
+    RUN_DIFFICULTY_NUZLOCKE,
+};
+
+enum RunToggle
+{
+    RUN_TOGGLE_OFF,
+    RUN_TOGGLE_ON,
+};
+
+enum RunMovesetMode
+{
+    RUN_MOVESETS_NORMAL,
+    RUN_MOVESETS_RANDOM,
+};
+
+enum RunEvolutionMode
+{
+    RUN_EVOLUTIONS_NORMAL,
+    RUN_EVOLUTIONS_RANDOM,
+};
+
+enum RunBstMode
+{
+    RUN_BST_OFF,
+    RUN_BST_SHUFFLE,
+    RUN_BST_RANDOM,
+};
+
+#define RUN_SETUP_PAGE_PLAY_STYLE  0
+#define RUN_SETUP_PAGE_RANDOMIZER  1
+#define RUN_SETUP_PAGE_FILTERS     2
+#define RUN_SETUP_PAGE_CONFIRM     3
+#define RUN_SETUP_PAGE_COUNT       4
+
 #endif // GUARD_RUN_SETTINGS_H
