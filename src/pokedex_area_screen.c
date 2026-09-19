@@ -464,53 +464,7 @@ static mapsec_u16_t GetRegionMapSectionId(u8 mapGroup, u8 mapNum)
     return Overworld_GetMapHeaderByGroupAndId(mapGroup, mapNum)->regionMapSectionId;
 }
 
-static bool8 MapHasSpecies(const struct WildEncounterTypes *info, u32 headerSectionId, enum Species species, u8 mapGroup, u8 mapNum, enum TimeOfDay timeOfDay)
-{
-    const struct WildEncounterTypes *fallback = NULL;
-    u16 headerId;
 
-    // If this is a header for Altering Cave, skip it if it's not the current Altering Cave encounter set
-    if (headerSectionId == MAPSEC_ALTERING_CAVE)
-    {
-        sPokedexAreaScreen->alteringCaveCounter++;
-        if (sPokedexAreaScreen->alteringCaveCounter != sPokedexAreaScreen->alteringCaveId + 1)
-            return FALSE;
-    }
-
-    // Match the live encounter system: fallback is resolved independently for
-    // land/water/fishing/rocks. Shared encounters live in the configured
-    // fallback table (TIME_MORNING here), while explicit DAY/NIGHT tables
-    // override only the encounter types they actually define.
-    for (headerId = 0; gWildMonHeaders[headerId].mapGroup != MAP_GROUP(MAP_UNDEFINED); headerId++)
-    {
-        if (gWildMonHeaders[headerId].mapGroup == mapGroup && gWildMonHeaders[headerId].mapNum == mapNum)
-        {
-            fallback = &gWildMonHeaders[headerId].encounterTypes[OW_TIME_OF_DAY_FALLBACK];
-            break;
-        }
-    }
-
-#define DEX_ENCOUNTER_INFO(field) ((info->field != NULL || OW_TIME_OF_DAY_DISABLE_FALLBACK || fallback == NULL) ? info->field : fallback->field)
-#define DEX_ENCOUNTER_TIME(field) ((info->field != NULL || OW_TIME_OF_DAY_DISABLE_FALLBACK || fallback == NULL) ? timeOfDay : OW_TIME_OF_DAY_FALLBACK)
-
-    if (MonListHasSpecies(DEX_ENCOUNTER_INFO(landMonsInfo), species, NUM_LAND_MONS_ENCOUNTER_SLOTS, WILD_AREA_LAND, mapGroup, mapNum, DEX_ENCOUNTER_TIME(landMonsInfo)))
-        return TRUE;
-    if (MonListHasSpecies(DEX_ENCOUNTER_INFO(waterMonsInfo), species, NUM_WATER_MONS_ENCOUNTER_SLOTS, WILD_AREA_WATER, mapGroup, mapNum, DEX_ENCOUNTER_TIME(waterMonsInfo)))
-        return TRUE;
-#ifdef BUGFIX
-    if (MonListHasSpecies(DEX_ENCOUNTER_INFO(fishingMonsInfo), species, NUM_FISHING_MONS_ENCOUNTER_SLOTS, WILD_AREA_FISHING, mapGroup, mapNum, DEX_ENCOUNTER_TIME(fishingMonsInfo)))
-#else
-    if (MonListHasSpecies(DEX_ENCOUNTER_INFO(fishingMonsInfo), species, NUM_LAND_MONS_ENCOUNTER_SLOTS, WILD_AREA_FISHING, mapGroup, mapNum, DEX_ENCOUNTER_TIME(fishingMonsInfo)))
-#endif
-        return TRUE;
-    if (MonListHasSpecies(DEX_ENCOUNTER_INFO(rockSmashMonsInfo), species, NUM_ROCK_SMASH_MONS_ENCOUNTER_SLOTS, WILD_AREA_ROCKS, mapGroup, mapNum, DEX_ENCOUNTER_TIME(rockSmashMonsInfo)))
-        return TRUE;
-
-#undef DEX_ENCOUNTER_INFO
-#undef DEX_ENCOUNTER_TIME
-
-    return FALSE;
-}
 
 static bool8 MonListHasSpecies(const struct WildPokemonInfo *info, enum Species species, u16 size, enum WildPokemonArea area, u8 mapGroup, u8 mapNum, enum TimeOfDay timeOfDay)
 {
