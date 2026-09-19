@@ -341,8 +341,25 @@ static void FindMapsWithMon(enum Species species)
         if (GetRegionMapType(headerSectionId) != currentRegionMapType)
             continue;
 
-        if (MapHasSpecies(&gWildMonHeaders[i].encounterTypes[gAreaTimeOfDay], headerSectionId, species,
-                          gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum, gAreaTimeOfDay))
+        // The hack exposes DAY/NIGHT in the Dex, but many maps still use a
+        // shared encounter table for both periods. If the selected period has
+        // no encounter data for this map, fall back to the opposite table
+        // rather than incorrectly reporting AREA UNKNOWN.
+        {
+            enum TimeOfDay areaTime = gAreaTimeOfDay;
+            const struct WildEncounterTypes *encounters = &gWildMonHeaders[i].encounterTypes[areaTime];
+
+            if (encounters->landMonsInfo == NULL
+             && encounters->waterMonsInfo == NULL
+             && encounters->rockSmashMonsInfo == NULL
+             && encounters->fishingMonsInfo == NULL)
+            {
+                areaTime = areaTime == TIME_NIGHT ? TIME_DAY : TIME_NIGHT;
+                encounters = &gWildMonHeaders[i].encounterTypes[areaTime];
+            }
+
+            if (MapHasSpecies(encounters, headerSectionId, species,
+                              gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum, areaTime))
         {
             switch (gWildMonHeaders[i].mapGroup)
             {
@@ -356,6 +373,7 @@ static void FindMapsWithMon(enum Species species)
             case MAP_GROUP_SPECIAL_AREA_FRLG:
                 SetSpecialMapHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
                 break;
+            }
             }
         }
     }
