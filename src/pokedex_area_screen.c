@@ -848,46 +848,28 @@ static void Task_UpdatePokedexAreaScreen(u8 taskId)
 
 static void Task_RefreshPokedexAreaTime(u8 taskId)
 {
-    bool8 wasShowingMarkers = sPokedexAreaScreen->showingMarkers;
-
+    // Re-run the same area-map construction used when the screen is first
+    // opened. This keeps the day/night lookup and the rendered BG2 state in
+    // sync instead of trying to patch a live glow buffer in place.
+    ResetDrawAreaGlowState();
     FindMapsWithMon(sPokedexAreaScreen->species);
     BuildAreaGlowTilemap();
     CpuCopy16(sPokedexAreaScreen->areaGlowTilemap, GetBgTilemapBuffer(2), sizeof(sPokedexAreaScreen->areaGlowTilemap));
     ScheduleBgCopyTilemapToVram(2);
 
-    // Keep the glow animation valid for the newly calculated area set.
-    // If the previous time period was using special-area markers but the new
-    // one has normal route highlights, continuing marker mode leaves BG2
-    // effectively flashing/blank.
-    if (sPokedexAreaScreen->numOverworldAreas != 0)
-        sPokedexAreaScreen->showingMarkers = FALSE;
-    else if (sPokedexAreaScreen->numSpecialAreas != 0)
-        sPokedexAreaScreen->showingMarkers = TRUE;
-    else
-        sPokedexAreaScreen->showingMarkers = wasShowingMarkers;
+    // Restore full-strength glow blending for the newly built area.
+    StartAreaGlow();
 
-    sPokedexAreaScreen->markerTimer = 0;
-    sPokedexAreaScreen->glowTimer = 0;
-    sPokedexAreaScreen->markerFlashCounter = 1;
-
-    // AREA UNKNOWN is only meaningful when there are genuinely no locations.
-    // If there are no route highlights, make BG2 fully transparent so stale
-    // tiles from the previous time period cannot continue flashing.
+    // Refresh the existing labels without recreating their windows.
+    ShowEncounterInfoLabel();
     if (ShouldShowAreaUnknownLabel())
-    {
-        CpuFill16(0, GetBgTilemapBuffer(2), sizeof(sPokedexAreaScreen->areaGlowTilemap));
-        ScheduleBgCopyTilemapToVram(2);
-        sPokedexAreaScreen->showingMarkers = TRUE;
         ShowAreaUnknownLabel();
-    }
     else
     {
         FillWindowPixelBuffer(sPokedexAreaScreen->areaScreenLabelIds[DEX_AREA_LABEL_AREA_UNKNOWN], PIXEL_FILL(0));
         PutWindowTilemap(sPokedexAreaScreen->areaScreenLabelIds[DEX_AREA_LABEL_AREA_UNKNOWN]);
         CopyWindowToVram(sPokedexAreaScreen->areaScreenLabelIds[DEX_AREA_LABEL_AREA_UNKNOWN], COPYWIN_FULL);
     }
-
-    ShowEncounterInfoLabel();
 
     gTasks[taskId].func = Task_HandlePokedexAreaScreenInput;
     gTasks[taskId].tState = 0;
