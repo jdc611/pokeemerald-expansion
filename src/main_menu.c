@@ -194,6 +194,8 @@ static EWRAM_DATA bool8 sRunSetupReturnToBirch;
 static EWRAM_DATA bool8 sRunSetupEmptySeed;
 static EWRAM_DATA u32 sRunSetupSeed;
 static EWRAM_DATA u8 sRunSetupPage;
+static EWRAM_DATA u8 sRunSetupDifficulty;
+static EWRAM_DATA bool8 sRunSetupMinimalGrinding;
 static EWRAM_DATA u8 sRunSetupFilter;
 static EWRAM_DATA u8 sRunSetupType;
 static EWRAM_DATA u16 sRunSetupAbility;
@@ -352,6 +354,13 @@ static const u8 sText_RunSetupScrollDown[] = {CHAR_DOWN_ARROW, EOS};
 static const u8 sText_RunSetupOff[] = _("OFF");
 static const u8 sText_RunSetupTypeFilter[] = _("TYPE");
 static const u8 sText_RunSetupRestricted[] = _("1-3 SPECIES PER AREA");
+static const u8 sText_RunSetupPlayStyle[] = _("1/4  PLAY STYLE");
+static const u8 sText_RunSetupDifficulty[] = _("DIFFICULTY");
+static const u8 sText_RunSetupMinimalGrinding[] = _("MIN. GRINDING");
+static const u8 sText_RunSetupEasy[] = _("EASY");
+static const u8 sText_RunSetupHard[] = _("HARD");
+static const u8 sText_RunSetupNuzlocke[] = _("NUZLOCKE");
+static const u8 sText_RunSetupOn[] = _("ON");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -1825,7 +1834,9 @@ static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId)
         sRunSetupCustom = FALSE;
         sRunSetupConfirm = FALSE;
         sRunSetupEmptySeed = FALSE;
-        sRunSetupPage = 0;
+        sRunSetupPage = RUN_SETUP_PAGE_PLAY_STYLE;
+        sRunSetupDifficulty = RUN_DIFFICULTY_NORMAL;
+        sRunSetupMinimalGrinding = FALSE;
         sRunSetupFilter = RUN_FILTER_NONE;
         sRunSetupType = TYPE_NONE;
         sRunSetupAbility = ABILITY_NONE;
@@ -2236,6 +2247,28 @@ static void RunSetup_Draw(u8 cursor)
     AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, title);
     FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_3), 48, 25, 112, 1);
 
+    if (sRunSetupPage == RUN_SETUP_PAGE_PLAY_STYLE && !sRunSetupConfirm)
+    {
+        const u8 *difficulty = sRunSetupDifficulty == RUN_DIFFICULTY_EASY ? sText_RunSetupEasy
+                               : sRunSetupDifficulty == RUN_DIFFICULTY_HARD ? sText_RunSetupHard
+                               : sRunSetupDifficulty == RUN_DIFFICULTY_NUZLOCKE ? sText_RunSetupNuzlocke
+                               : sText_RunSetupNormal;
+        FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
+        titleX = GetStringCenterAlignXOffset(FONT_NORMAL, sText_RunSetupPlayStyle, 208);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupPlayStyle);
+        FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_3), 48, 25, 112, 1);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 12, 42, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupDifficulty);
+        RunSetup_DrawWideChoice(difficulty, 105, 39, 93, cursor == 0);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 12, 69, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupMinimalGrinding);
+        RunSetup_DrawWideChoice(sRunSetupMinimalGrinding ? sText_RunSetupOn : sText_RunSetupOff, 135, 66, 63, cursor == 1);
+        RunSetup_DrawWideChoice(sText_RunSetupNext, 72, 106, 64, cursor == 2);
+        if (cursor < 2)
+            AddTextPrinterParameterized3(0, FONT_NORMAL, 2, 42 + 27 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
+        PutWindowTilemap(0);
+        CopyWindowToVram(0, COPYWIN_FULL);
+        return;
+    }
+
     if (sRunSetupConfirm)
     {
         AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 34, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupWild);
@@ -2446,6 +2479,32 @@ static void Task_RunSetup_Input(u8 taskId)
         return;
     }
 
+    if (sRunSetupPage == RUN_SETUP_PAGE_PLAY_STYLE && !sRunSetupConfirm)
+    {
+        if (JOY_NEW(DPAD_UP))
+            *cursor = (*cursor + 2) % 3;
+        else if (JOY_NEW(DPAD_DOWN))
+            *cursor = (*cursor + 1) % 3;
+        else if (JOY_NEW(DPAD_LEFT) && *cursor == 0)
+            sRunSetupDifficulty = sRunSetupDifficulty == RUN_DIFFICULTY_EASY ? RUN_DIFFICULTY_NUZLOCKE : sRunSetupDifficulty - 1;
+        else if (JOY_NEW(DPAD_RIGHT) && *cursor == 0)
+            sRunSetupDifficulty = sRunSetupDifficulty == RUN_DIFFICULTY_NUZLOCKE ? RUN_DIFFICULTY_EASY : sRunSetupDifficulty + 1;
+        else if (JOY_NEW(A_BUTTON) && *cursor == 0)
+            sRunSetupDifficulty = sRunSetupDifficulty == RUN_DIFFICULTY_NUZLOCKE ? RUN_DIFFICULTY_EASY : sRunSetupDifficulty + 1;
+        else if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON) && *cursor == 1)
+            sRunSetupMinimalGrinding ^= 1;
+        else if (JOY_NEW(A_BUTTON) && *cursor == 2)
+        {
+            sRunSetupPage = 2;
+            *cursor = 0;
+        }
+        else
+            return;
+        PlaySE(SE_SELECT);
+        RunSetup_Draw(*cursor);
+        return;
+    }
+
     if (sRunSetupConfirm)
     {
         if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | DPAD_UP | DPAD_DOWN))
@@ -2480,7 +2539,7 @@ static void Task_RunSetup_Input(u8 taskId)
         return;
     }
 
-    if (sRunSetupPage == 1)
+    if (sRunSetupPage == 3)
     {
         u32 eligible;
         if (JOY_NEW(DPAD_UP))
@@ -2508,7 +2567,7 @@ static void Task_RunSetup_Input(u8 taskId)
         }
         else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 2))
         {
-            sRunSetupPage = 0;
+            sRunSetupPage = 2;
             *cursor = 3;
         }
         else if (JOY_NEW(A_BUTTON) && *cursor == 3)
@@ -2526,6 +2585,15 @@ static void Task_RunSetup_Input(u8 taskId)
         else
             return;
 
+        PlaySE(SE_SELECT);
+        RunSetup_Draw(*cursor);
+        return;
+    }
+
+    if (sRunSetupPage == 2 && JOY_NEW(B_BUTTON))
+    {
+        sRunSetupPage = RUN_SETUP_PAGE_PLAY_STYLE;
+        *cursor = 2;
         PlaySE(SE_SELECT);
         RunSetup_Draw(*cursor);
         return;
@@ -2587,7 +2655,7 @@ static void Task_RunSetup_Input(u8 taskId)
         }
         else
         {
-            sRunSetupPage = 1;
+            sRunSetupPage = 3;
             *cursor = 0;
             RunSetup_Draw(*cursor);
         }
