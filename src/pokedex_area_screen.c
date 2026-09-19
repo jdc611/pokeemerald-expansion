@@ -870,15 +870,24 @@ static void Task_RefreshPokedexAreaTime(u8 taskId)
     sPokedexAreaScreen->glowTimer = 0;
     sPokedexAreaScreen->markerFlashCounter = 1;
 
-    ShowEncounterInfoLabel();
+    // AREA UNKNOWN is only meaningful when there are genuinely no locations.
+    // If there are no route highlights, make BG2 fully transparent so stale
+    // tiles from the previous time period cannot continue flashing.
     if (ShouldShowAreaUnknownLabel())
+    {
+        CpuFill16(0, GetBgTilemapBuffer(2), sizeof(sPokedexAreaScreen->areaGlowTilemap));
+        ScheduleBgCopyTilemapToVram(2);
+        sPokedexAreaScreen->showingMarkers = TRUE;
         ShowAreaUnknownLabel();
+    }
     else
     {
         FillWindowPixelBuffer(sPokedexAreaScreen->areaScreenLabelIds[DEX_AREA_LABEL_AREA_UNKNOWN], PIXEL_FILL(0));
         PutWindowTilemap(sPokedexAreaScreen->areaScreenLabelIds[DEX_AREA_LABEL_AREA_UNKNOWN]);
         CopyWindowToVram(sPokedexAreaScreen->areaScreenLabelIds[DEX_AREA_LABEL_AREA_UNKNOWN], COPYWIN_FULL);
     }
+
+    ShowEncounterInfoLabel();
 
     gTasks[taskId].func = Task_HandlePokedexAreaScreenInput;
     gTasks[taskId].tState = 0;
