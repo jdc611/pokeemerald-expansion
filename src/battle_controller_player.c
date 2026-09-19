@@ -374,8 +374,8 @@ static void DrawBattleStagePanel(void)
         {
             u8 line[16] = { EOS };
 
-            static const u8 sStageUpColors[] = { TEXT_COLOR_TRANSPARENT, 6, 8 };
-            static const u8 sStageDownColors[] = { TEXT_COLOR_TRANSPARENT, 7, 8 };
+            static const u8 sStageUpColors[] = { TEXT_COLOR_TRANSPARENT, 6, 6 };
+            static const u8 sStageDownColors[] = { TEXT_COLOR_TRANSPARENT, 7, 7 };
             s8 stage = gBattleMons[battler].statStages[sStagePanelStats[i]] - DEFAULT_STAT_STAGE;
             const u8 *stageColors = stage > 0 ? sStageUpColors : (stage < 0 ? sStageDownColors : sPanelColors);
 
