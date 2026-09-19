@@ -876,30 +876,11 @@ static void Task_UpdatePokedexAreaScreen(u8 taskId)
 
 static void Task_RefreshPokedexAreaTime(u8 taskId)
 {
-    // Re-run the same area-map construction used when the screen is first
-    // opened. This keeps the day/night lookup and the rendered BG2 state in
-    // sync instead of trying to patch a live glow buffer in place.
-    ResetDrawAreaGlowState();
-    FindMapsWithMon(sPokedexAreaScreen->species);
-    BuildAreaGlowTilemap();
-    CpuCopy16(sPokedexAreaScreen->areaGlowTilemap, GetBgTilemapBuffer(2), sizeof(sPokedexAreaScreen->areaGlowTilemap));
-    ScheduleBgCopyTilemapToVram(2);
-
-    // Restore full-strength glow blending for the newly built area.
-    StartAreaGlow();
-
-    // Refresh the existing labels without recreating their windows.
-    ShowEncounterInfoLabel();
-    if (ShouldShowAreaUnknownLabel())
-        ShowAreaUnknownLabel();
-    else
-    {
-        FillWindowPixelBuffer(sPokedexAreaScreen->areaScreenLabelIds[DEX_AREA_LABEL_AREA_UNKNOWN], PIXEL_FILL(0));
-        PutWindowTilemap(sPokedexAreaScreen->areaScreenLabelIds[DEX_AREA_LABEL_AREA_UNKNOWN]);
-        CopyWindowToVram(sPokedexAreaScreen->areaScreenLabelIds[DEX_AREA_LABEL_AREA_UNKNOWN], COPYWIN_FULL);
-    }
-
-    gTasks[taskId].func = Task_HandlePokedexAreaScreenInput;
+    // Rebuild the area page through the normal update path. The previous
+    // in-place refresh left state from the first time-of-day selection alive,
+    // causing the first DAY/NIGHT table opened to "win" after toggling.
+    sPokedexAreaScreen->areaState = DEX_UPDATE_AREA_SCREEN;
+    gTasks[taskId].func = Task_UpdatePokedexAreaScreen;
     gTasks[taskId].tState = 0;
 }
 
