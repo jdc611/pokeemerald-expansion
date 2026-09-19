@@ -2278,9 +2278,9 @@ static void RunSetup_Draw(u8 cursor)
         RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 88, 34, sRunSetupRandomizer == RUN_WILD_NORMAL);
         RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 127, 34, sRunSetupRandomizer == RUN_WILD_RANDOM);
         RunSetup_DrawNarrowChoice(sText_RunSetupScaled, 166, 34, sRunSetupRandomizer == RUN_WILD_SCALED);
-        RunSetup_DrawNarrowChoice(sText_RunSetupHoenn, 82, 56, sRunSetupStarter == RUN_STARTER_NORMAL);
-        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 128, 56, sRunSetupStarter == RUN_STARTER_RANDOM);
-        RunSetup_DrawNarrowChoice(sText_RunSetupCustom, 174, 56, sRunSetupStarter == RUN_STARTER_CHOOSE);
+        RunSetup_DrawNarrowChoice(sText_RunSetupHoenn, 78, 56, sRunSetupStarter == RUN_STARTER_NORMAL);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 120, 56, sRunSetupStarter == RUN_STARTER_RANDOM);
+        RunSetup_DrawNarrowChoice(sText_RunSetupCustom, 162, 56, sRunSetupStarter == RUN_STARTER_CHOOSE);
         RunSetup_DrawChoice(sText_RunSetupRandom, 98, 78, !sRunSetupCustom);
         RunSetup_DrawChoice(sText_RunSetupCustom, 151, 78, sRunSetupCustom);
 
