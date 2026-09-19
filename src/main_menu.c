@@ -371,6 +371,7 @@ static const u8 sText_RunSetupScrollDown[] = {CHAR_DOWN_ARROW, EOS};
 static const u8 sText_RunSetupOff[] = _("OFF");
 static const u8 sText_RunSetupTypeFilter[] = _("TYPE");
 static const u8 sText_RunSetupRestricted[] = _("1-3 SPECIES PER AREA");
+static const u8 sText_RunSetupPageHint[] = _("L/R PAGE");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -2302,7 +2303,7 @@ static void RunSetup_Draw(u8 cursor)
         AddTextPrinterParameterized3(0, FONT_SMALL, 112, 82, sTextColor_Headers, TEXT_SKIP_DRAW, starters);
         RunSetup_DrawWideChoice(sText_RunSetupConfirmButton, 72, 106, 76, cursor == 0);
     }
-    AddTextPrinterParameterized3(0, FONT_SMALL, 4, 119, sTextColor_Headers, TEXT_SKIP_DRAW, _("L/R PAGE"));
+    AddTextPrinterParameterized3(0, FONT_SMALL, 4, 119, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupPageHint);
     PutWindowTilemap(0);
     CopyWindowToVram(0, COPYWIN_FULL);
 }
