@@ -446,9 +446,6 @@ static mapsec_u16_t GetRegionMapSectionId(u8 mapGroup, u8 mapNum)
 
 static bool8 MapHasSpecies(const struct WildEncounterTypes *info, const struct WildEncounterTypes *fallback, u32 headerSectionId, enum Species species, u8 mapGroup, u8 mapNum, enum TimeOfDay timeOfDay)
 {
-    const struct WildPokemonInfo *monInfo;
-    enum TimeOfDay monTime;
-
     if (headerSectionId == MAPSEC_ALTERING_CAVE)
     {
         sPokedexAreaScreen->alteringCaveCounter++;
@@ -456,27 +453,44 @@ static bool8 MapHasSpecies(const struct WildEncounterTypes *info, const struct W
             return FALSE;
     }
 
-#define CHECK_DEX_AREA(field, slots, area) \
-    monInfo = info->field; \
-    monTime = timeOfDay; \
-    if (monInfo == NULL && !OW_TIME_OF_DAY_DISABLE_FALLBACK) \
-    { \
-        monInfo = fallback->field; \
-        monTime = OW_TIME_OF_DAY_FALLBACK; \
-    } \
-    if (MonListHasSpecies(monInfo, species, slots, area, mapGroup, mapNum, monTime)) \
-        return TRUE
-
-    CHECK_DEX_AREA(landMonsInfo, NUM_LAND_MONS_ENCOUNTER_SLOTS, WILD_AREA_LAND);
-    CHECK_DEX_AREA(waterMonsInfo, NUM_WATER_MONS_ENCOUNTER_SLOTS, WILD_AREA_WATER);
+    // Check the selected DAY/NIGHT table first.
+    if (MonListHasSpecies(info->landMonsInfo, species, NUM_LAND_MONS_ENCOUNTER_SLOTS, WILD_AREA_LAND, mapGroup, mapNum, timeOfDay))
+        return TRUE;
+    if (MonListHasSpecies(info->waterMonsInfo, species, NUM_WATER_MONS_ENCOUNTER_SLOTS, WILD_AREA_WATER, mapGroup, mapNum, timeOfDay))
+        return TRUE;
 #ifdef BUGFIX
-    CHECK_DEX_AREA(fishingMonsInfo, NUM_FISHING_MONS_ENCOUNTER_SLOTS, WILD_AREA_FISHING);
+    if (MonListHasSpecies(info->fishingMonsInfo, species, NUM_FISHING_MONS_ENCOUNTER_SLOTS, WILD_AREA_FISHING, mapGroup, mapNum, timeOfDay))
 #else
-    CHECK_DEX_AREA(fishingMonsInfo, NUM_LAND_MONS_ENCOUNTER_SLOTS, WILD_AREA_FISHING);
+    if (MonListHasSpecies(info->fishingMonsInfo, species, NUM_LAND_MONS_ENCOUNTER_SLOTS, WILD_AREA_FISHING, mapGroup, mapNum, timeOfDay))
 #endif
-    CHECK_DEX_AREA(rockSmashMonsInfo, NUM_ROCK_SMASH_MONS_ENCOUNTER_SLOTS, WILD_AREA_ROCKS);
+        return TRUE;
+    if (MonListHasSpecies(info->rockSmashMonsInfo, species, NUM_ROCK_SMASH_MONS_ENCOUNTER_SLOTS, WILD_AREA_ROCKS, mapGroup, mapNum, timeOfDay))
+        return TRUE;
 
-#undef CHECK_DEX_AREA
+    // Only a missing encounter TYPE borrows the configured shared table.
+    // Never replace an explicit DAY/NIGHT type merely because this species
+    // was absent from it.
+    if (!OW_TIME_OF_DAY_DISABLE_FALLBACK && timeOfDay != OW_TIME_OF_DAY_FALLBACK)
+    {
+        if (info->landMonsInfo == NULL
+         && MonListHasSpecies(fallback->landMonsInfo, species, NUM_LAND_MONS_ENCOUNTER_SLOTS, WILD_AREA_LAND, mapGroup, mapNum, OW_TIME_OF_DAY_FALLBACK))
+            return TRUE;
+        if (info->waterMonsInfo == NULL
+         && MonListHasSpecies(fallback->waterMonsInfo, species, NUM_WATER_MONS_ENCOUNTER_SLOTS, WILD_AREA_WATER, mapGroup, mapNum, OW_TIME_OF_DAY_FALLBACK))
+            return TRUE;
+#ifdef BUGFIX
+        if (info->fishingMonsInfo == NULL
+         && MonListHasSpecies(fallback->fishingMonsInfo, species, NUM_FISHING_MONS_ENCOUNTER_SLOTS, WILD_AREA_FISHING, mapGroup, mapNum, OW_TIME_OF_DAY_FALLBACK))
+#else
+        if (info->fishingMonsInfo == NULL
+         && MonListHasSpecies(fallback->fishingMonsInfo, species, NUM_LAND_MONS_ENCOUNTER_SLOTS, WILD_AREA_FISHING, mapGroup, mapNum, OW_TIME_OF_DAY_FALLBACK))
+#endif
+            return TRUE;
+        if (info->rockSmashMonsInfo == NULL
+         && MonListHasSpecies(fallback->rockSmashMonsInfo, species, NUM_ROCK_SMASH_MONS_ENCOUNTER_SLOTS, WILD_AREA_ROCKS, mapGroup, mapNum, OW_TIME_OF_DAY_FALLBACK))
+            return TRUE;
+    }
+
     return FALSE;
 }
 
