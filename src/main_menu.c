@@ -2291,6 +2291,13 @@ static void RunSetup_Draw(u8 cursor)
         if (cursor < 3)
             AddTextPrinterParameterized3(0, FONT_NORMAL, 2, 35 + 22 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
     }
+    if (!sRunSetupConfirm)
+    {
+        static const u8 sPageOne[] = _("1/4");
+        static const u8 sPageTwo[] = _("2/4");
+        const u8 *page = sRunSetupPage == 1 ? sPageTwo : sPageOne;
+        AddTextPrinterParameterized3(0, FONT_SMALL, 184, 3, sTextColor_Headers, TEXT_SKIP_DRAW, page);
+    }
     PutWindowTilemap(0);
     CopyWindowToVram(0, COPYWIN_FULL);
 }
