@@ -2563,7 +2563,15 @@ static void Task_RunSetup_Input(u8 taskId)
         else if (JOY_NEW(DPAD_LEFT) && *cursor < 5)
         {
             if (*cursor == 0) sRunSetupRandomizer = sRunSetupRandomizer == RUN_WILD_NORMAL ? RUN_WILD_SCALED : sRunSetupRandomizer - 1;
-            else if (*cursor == 1) sRunSetupStarter = sRunSetupStarter == RUN_STARTER_NORMAL ? RUN_STARTER_CHOOSE : sRunSetupStarter - 1;
+            else if (*cursor == 1)
+            {
+                if (sRunSetupStarter == RUN_STARTER_NORMAL)
+                    sRunSetupStarter = RUN_STARTER_CHOOSE;
+                else if (sRunSetupStarter == RUN_STARTER_CHOOSE)
+                    sRunSetupStarter = RUN_STARTER_RANDOM;
+                else
+                    sRunSetupStarter = RUN_STARTER_NORMAL;
+            }
             else if (*cursor == 2) sRunSetupMovesets ^= 1;
             else if (*cursor == 3) sRunSetupEvolutions ^= 1;
             else sRunSetupBstMode = sRunSetupBstMode == RUN_BST_OFF ? RUN_BST_RANDOM : sRunSetupBstMode - 1;
@@ -2571,7 +2579,15 @@ static void Task_RunSetup_Input(u8 taskId)
         else if (JOY_NEW(DPAD_RIGHT) && *cursor < 5)
         {
             if (*cursor == 0) sRunSetupRandomizer = sRunSetupRandomizer == RUN_WILD_SCALED ? RUN_WILD_NORMAL : sRunSetupRandomizer + 1;
-            else if (*cursor == 1) sRunSetupStarter = sRunSetupStarter == RUN_STARTER_CHOOSE ? RUN_STARTER_NORMAL : sRunSetupStarter + 1;
+            else if (*cursor == 1)
+            {
+                if (sRunSetupStarter == RUN_STARTER_NORMAL)
+                    sRunSetupStarter = RUN_STARTER_RANDOM;
+                else if (sRunSetupStarter == RUN_STARTER_RANDOM)
+                    sRunSetupStarter = RUN_STARTER_CHOOSE;
+                else
+                    sRunSetupStarter = RUN_STARTER_NORMAL;
+            }
             else if (*cursor == 2) sRunSetupMovesets ^= 1;
             else if (*cursor == 3) sRunSetupEvolutions ^= 1;
             else sRunSetupBstMode = sRunSetupBstMode == RUN_BST_RANDOM ? RUN_BST_OFF : sRunSetupBstMode + 1;
@@ -2579,7 +2595,15 @@ static void Task_RunSetup_Input(u8 taskId)
         else if (JOY_NEW(A_BUTTON) && *cursor < 5)
         {
             if (*cursor == 0) sRunSetupRandomizer = (sRunSetupRandomizer + 1) % 3;
-            else if (*cursor == 1) sRunSetupStarter = sRunSetupStarter == RUN_STARTER_CHOOSE ? RUN_STARTER_NORMAL : sRunSetupStarter + 1;
+            else if (*cursor == 1)
+            {
+                if (sRunSetupStarter == RUN_STARTER_NORMAL)
+                    sRunSetupStarter = RUN_STARTER_RANDOM;
+                else if (sRunSetupStarter == RUN_STARTER_RANDOM)
+                    sRunSetupStarter = RUN_STARTER_CHOOSE;
+                else
+                    sRunSetupStarter = RUN_STARTER_NORMAL;
+            }
             else if (*cursor == 2) sRunSetupMovesets ^= 1;
             else if (*cursor == 3) sRunSetupEvolutions ^= 1;
             else sRunSetupBstMode = sRunSetupBstMode == RUN_BST_RANDOM ? RUN_BST_OFF : sRunSetupBstMode + 1;
