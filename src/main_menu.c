@@ -2574,6 +2574,10 @@ static void Task_RunSetup_Input(u8 taskId)
             else if (*cursor == 3) sRunSetupEvolutions ^= 1;
             else sRunSetupBstMode = sRunSetupBstMode == RUN_BST_RANDOM ? RUN_BST_OFF : sRunSetupBstMode + 1;
         }
+        else if (JOY_NEW(DPAD_LEFT) && *cursor == 6)
+            *cursor = 5;
+        else if (JOY_NEW(DPAD_RIGHT) && *cursor == 5)
+            *cursor = 6;
         else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 5))
         {
             sRunSetupPage = RUN_SETUP_PAGE_PLAY_STYLE;
@@ -2602,6 +2606,7 @@ static void Task_RunSetup_Input(u8 taskId)
         else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 1))
         {
             sRunSetupConfirm = FALSE;
+            sRunSetupPage = RUN_SETUP_PAGE_FILTERS;
             *cursor = 3;
             RunSetup_Draw(*cursor);
         }
@@ -2625,7 +2630,7 @@ static void Task_RunSetup_Input(u8 taskId)
         return;
     }
 
-    if (sRunSetupPage == 3)
+    if (sRunSetupPage == RUN_SETUP_PAGE_FILTERS)
     {
         u32 eligible;
         if (JOY_NEW(DPAD_UP))
