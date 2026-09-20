@@ -319,19 +319,27 @@ static const u8 gText_ContinueMenuTime[] = _("TIME");
 static const u8 gText_ContinueMenuPokedex[] = _("POKéDEX");
 static const u8 gText_ContinueMenuBadges[] = _("BADGES");
 static const u8 sText_RunSetupTitle[] = _("RUN SETUP");
+static const u8 sText_RunSetupConfirm[] = _("CONFIRM RUN");
+static const u8 sText_RunSetupFilterTitle[] = _("RUN FILTER");
+static const u8 sText_RunSetupFilterSettings[] = _("FILTER SETTINGS");
 static const u8 sText_RunSetupSelectType[] = _("SELECT TYPE");
 static const u8 sText_RunSetupSelectAbility[] = _("SELECT ABILITY");
 static const u8 sText_RunSetupAbilityDetails[] = _("ABILITY DETAILS");
 static const u8 sText_RunSetupChooseAbility[] = _("SELECT");
+static const u8 sText_RunSetupWild[] = _("WILD POKéMON");
 static const u8 sText_RunSetupWildMode[] = _("WILD MODE");
 static const u8 sText_RunSetupStarters[] = _("STARTERS");
 static const u8 sText_RunSetupSeed[] = _("SEED");
+static const u8 sText_RunSetupYes[] = _("YES");
+static const u8 sText_RunSetupNo[] = _("NO");
 static const u8 sText_RunSetupRandom[] = _("RANDOM");
 static const u8 sText_RunSetupNormal[] = _("NORMAL");
 static const u8 sText_RunSetupHoenn[] = _("HOENN");
 static const u8 sText_RunSetupScaled[] = _("SCALED");
 static const u8 sText_RunSetupCustom[] = _("CUSTOM");
 static const u8 sText_RunSetupNeedSeed[] = _("ENTER AT LEAST ONE DIGIT");
+static const u8 sText_RunSetupSeedNumber[] = _("VALUE: {STR_VAR_1}");
+static const u8 sText_RunSetupConfirmButton[] = _("CONFIRM");
 static const u8 sText_RunSetupNext[] = _("NEXT");
 static const u8 sText_RunSetupBack[] = _("BACK");
 static const u8 sText_RunSetupFilter[] = _("FILTER");
@@ -339,6 +347,7 @@ static const u8 sText_RunSetupType[] = _("TYPE");
 static const u8 sText_RunSetupAbility[] = _("ABILITY");
 static const u8 sText_RunSetupBoth[] = _("BOTH");
 static const u8 sText_RunSetupLimitedPool[] = _("WARNING: VERY LIMITED POOL");
+static const u8 sText_RunSetupNoMatches[] = _("NO MATCHING POKéMON - CHANGE FILTER");
 static const u8 sText_RunSetupNeedThree[] = _("AT LEAST 3 POKéMON ARE REQUIRED");
 static const u8 sText_RunSetupAll[] = _("ALL");
 static const u8 sText_RunSetupAbilityRule[] = _("ONLY ABILITIES WITH AT LEAST 3 VALID STARTER POKéMON ARE SHOWN.");
@@ -346,6 +355,8 @@ static const u8 sText_RunSetupContinue[] = _("CONTINUE");
 static const u8 sText_RunSetupScrollUp[] = {CHAR_UP_ARROW, EOS};
 static const u8 sText_RunSetupScrollDown[] = {CHAR_DOWN_ARROW, EOS};
 static const u8 sText_RunSetupOff[] = _("OFF");
+static const u8 sText_RunSetupTypeFilter[] = _("TYPE");
+static const u8 sText_RunSetupRestricted[] = _("1-3 SPECIES PER AREA");
 static const u8 sText_RunSetupPlayStyle[] = _("1/4  PLAY STYLE");
 static const u8 sText_RunSetupDifficulty[] = _("DIFFICULTY");
 static const u8 sText_RunSetupMinimalGrinding[] = _("MIN. GRINDING");
@@ -358,10 +369,6 @@ static const u8 sText_RunSetupMovesets[] = _("MOVESETS");
 static const u8 sText_RunSetupEvolutions[] = _("EVOLUTIONS");
 static const u8 sText_RunSetupBst[] = _("BST");
 static const u8 sText_RunSetupShuffle[] = _("SHUFFLE");
-static const u8 sText_RunSetupFiltersPage[] = _("3/4  FILTERS");
-static const u8 sText_RunSetupConfirmPage[] = _("4/4  CONFIRM");
-static const u8 sText_RunSetupStartGame[] = _("START GAME");
-static const u8 sText_RunSetupMgm[] = _("MGM");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -2306,26 +2313,18 @@ static void RunSetup_Draw(u8 cursor)
 
     if (sRunSetupConfirm)
     {
-        const u8 *difficulty = sRunSetupDifficulty == RUN_DIFFICULTY_EASY ? sText_RunSetupEasy
-                               : sRunSetupDifficulty == RUN_DIFFICULTY_HARD ? sText_RunSetupHard
-                               : sRunSetupDifficulty == RUN_DIFFICULTY_NUZLOCKE ? sText_RunSetupNuzlocke
-                               : sText_RunSetupNormal;
-        FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
-        titleX = GetStringCenterAlignXOffset(FONT_NORMAL, sText_RunSetupConfirmPage, 208);
-        AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupConfirmPage);
-        FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_3), 48, 25, 112, 1);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 8, 34, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupDifficulty);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 92, 34, sTextColor_Headers, TEXT_SKIP_DRAW, difficulty);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 8, 48, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupMgm);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 92, 48, sTextColor_Headers, TEXT_SKIP_DRAW, sRunSetupMinimalGrinding ? sText_RunSetupOn : sText_RunSetupOff);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 8, 62, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupWildMode);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 92, 62, sTextColor_Headers, TEXT_SKIP_DRAW, wild);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 8, 76, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupStarters);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 92, 76, sTextColor_Headers, TEXT_SKIP_DRAW, starters);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 8, 90, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupFilter);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 92, 90, sTextColor_Headers, TEXT_SKIP_DRAW, filter);
-        RunSetup_DrawChoice(sText_RunSetupBack, 40, 112, cursor == 1);
-        RunSetup_DrawWideChoice(sText_RunSetupStartGame, 104, 112, 92, cursor == 0);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 34, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupWild);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 120, 34, sTextColor_Headers, TEXT_SKIP_DRAW, wild);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 52, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupStarters);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 120, 52, sTextColor_Headers, TEXT_SKIP_DRAW, starters);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 70, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupSeed);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 120, 70, sTextColor_Headers, TEXT_SKIP_DRAW, seed);
+        ConvertIntToDecimalStringN(gStringVar1, sRunSetupSeed, STR_CONV_MODE_LEFT_ALIGN, 8);
+        StringExpandPlaceholders(gStringVar4, sText_RunSetupSeedNumber);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 8, 88, sTextColor_Headers, TEXT_SKIP_DRAW, gStringVar4);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, 120, 88, sTextColor_Headers, TEXT_SKIP_DRAW, filter);
+        RunSetup_DrawChoice(sText_RunSetupYes, 104, 106, cursor == 0);
+        RunSetup_DrawChoice(sText_RunSetupNo, 157, 106, cursor == 1);
     }
     else if (sRunSetupPage == RUN_SETUP_PAGE_FILTERS)
     {
@@ -2333,10 +2332,6 @@ static void RunSetup_Draw(u8 cursor)
         const u8 *type = sRunSetupType == TYPE_NONE ? sText_RunSetupAll : gTypesInfo[sRunSetupType].name;
         const u8 *ability = sRunSetupAbility == ABILITY_NONE ? sText_RunSetupAll : gAbilitiesInfo[sRunSetupAbility].name;
 
-        FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
-        titleX = GetStringCenterAlignXOffset(FONT_NORMAL, sText_RunSetupFiltersPage, 208);
-        AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupFiltersPage);
-        FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_3), 48, 25, 112, 1);
         AddTextPrinterParameterized3(0, FONT_NORMAL, 12, 42, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupType);
         AddTextPrinterParameterized3(0, FONT_NORMAL, 12, 67, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupAbility);
         RunSetup_DrawWideChoice(type, 82, 39, 116, cursor == 0);
@@ -2346,7 +2341,7 @@ static void RunSetup_Draw(u8 cursor)
         else if (eligible <= 5 && sRunSetupFilter != RUN_FILTER_NONE)
             AddTextPrinterParameterized3(0, FONT_SMALL, 25, 91, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupLimitedPool);
         RunSetup_DrawChoice(sText_RunSetupBack, 52, 110, cursor == 2);
-        RunSetup_DrawWideChoice(sText_RunSetupNext, 108, 110, 76, cursor == 3);
+        RunSetup_DrawWideChoice(sText_RunSetupConfirmButton, 108, 110, 76, cursor == 3);
         if (cursor < 2)
             AddTextPrinterParameterized3(0, FONT_NORMAL, 2, 42 + 25 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
     }
