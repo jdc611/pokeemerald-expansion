@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Correct Page 2 Input Map v13"
+  PLAYTEST_TRIGGER: "Page 2 Draw Input Repair v14"
 
 jobs:
   build:
