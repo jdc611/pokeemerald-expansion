@@ -17,7 +17,7 @@ env:
   COMPARE: 0
   UNUSED_ERROR: 1
   DEPRECATED_ERROR: 1
-  PLAYTEST_TRIGGER: "Native Status + Debug Cap Fix v11"
+  PLAYTEST_TRIGGER: "Page 2 Navigation Fix v12"
 
 jobs:
   build:
