@@ -2301,17 +2301,14 @@ static void RunSetup_Draw(u8 cursor)
         AddTextPrinterParameterized3(0, FONT_SMALL, 12, 79, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupEvolutions);
         RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 99, 77, !sRunSetupEvolutions);
         RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 141, 77, sRunSetupEvolutions);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 91, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupBst);
-        RunSetup_DrawNarrowChoice(sText_RunSetupOff, 78, 89, sRunSetupBstMode == RUN_BST_OFF);
-        RunSetup_DrawNarrowChoice(sText_RunSetupShuffle, 120, 89, sRunSetupBstMode == RUN_BST_SHUFFLE);
-        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 162, 89, sRunSetupBstMode == RUN_BST_RANDOM);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 107, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupSeed);
-        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 99, 105, !sRunSetupCustom);
-        RunSetup_DrawNarrowChoice(sText_RunSetupCustom, 141, 105, sRunSetupCustom);
-        if (cursor < 6)
+        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 95, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupBst);
+        RunSetup_DrawNarrowChoice(sText_RunSetupOff, 72, 93, sRunSetupBstMode == RUN_BST_OFF);
+        RunSetup_DrawWideChoice(sText_RunSetupShuffle, 112, 93, 52, sRunSetupBstMode == RUN_BST_SHUFFLE);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 166, 93, sRunSetupBstMode == RUN_BST_RANDOM);
+        if (cursor < 5)
             AddTextPrinterParameterized3(0, FONT_SMALL, 3, 31 + 16 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
-        RunSetup_DrawWideChoice(sText_RunSetupBack, 18, 122, 78, cursor == 6);
-        RunSetup_DrawWideChoice(sText_RunSetupNext, 112, 122, 78, cursor == 7);
+        RunSetup_DrawWideChoice(sText_RunSetupBack, 18, 112, 78, cursor == 5);
+        RunSetup_DrawWideChoice(sText_RunSetupNext, 112, 112, 78, cursor == 6);
         PutWindowTilemap(0);
         CopyWindowToVram(0, COPYWIN_FULL);
         return;
@@ -2593,7 +2590,7 @@ static void Task_RunSetup_Input(u8 taskId)
         else if (JOY_NEW(DPAD_LEFT) && *cursor == 7)
             *cursor = 6;
         else if (JOY_NEW(DPAD_RIGHT) && *cursor == 6)
-            *cursor = 7;
+            *cursor = 6;
         else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 6))
         {
             sRunSetupPage = RUN_SETUP_PAGE_PLAY_STYLE;
