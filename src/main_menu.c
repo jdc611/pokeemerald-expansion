@@ -2283,12 +2283,6 @@ static void RunSetup_Draw(u8 cursor)
 
     if (sRunSetupPage == RUN_SETUP_PAGE_RANDOMIZER && !sRunSetupConfirm)
     {
-        const u8 *wildMode = sRunSetupRandomizer == RUN_WILD_SCALED ? sText_RunSetupScaled
-                             : sRunSetupRandomizer == RUN_WILD_RANDOM ? sText_RunSetupRandom : sText_RunSetupNormal;
-        const u8 *starterMode = sRunSetupStarter == RUN_STARTER_RANDOM ? sText_RunSetupRandom
-                                : sRunSetupStarter == RUN_STARTER_CHOOSE ? sText_RunSetupCustom : sText_RunSetupHoenn;
-        const u8 *bstMode = sRunSetupBstMode == RUN_BST_RANDOM ? sText_RunSetupRandom
-                            : sRunSetupBstMode == RUN_BST_SHUFFLE ? sText_RunSetupShuffle : sText_RunSetupOff;
         FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
         titleX = GetStringCenterAlignXOffset(FONT_NORMAL, sText_RunSetupRandomizerPage, 208);
         AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupRandomizerPage);
