@@ -2557,61 +2557,48 @@ static void Task_RunSetup_Input(u8 taskId)
     if (sRunSetupPage == RUN_SETUP_PAGE_RANDOMIZER && !sRunSetupConfirm)
     {
         if (JOY_NEW(DPAD_UP))
-            *cursor = *cursor == 0 ? 7 : *cursor - 1;
+            *cursor = *cursor == 0 ? 6 : *cursor - 1;
         else if (JOY_NEW(DPAD_DOWN))
-            *cursor = *cursor == 7 ? 0 : *cursor + 1;
-        else if (JOY_NEW(DPAD_LEFT) && *cursor < 6)
+            *cursor = *cursor == 6 ? 0 : *cursor + 1;
+        else if (JOY_NEW(DPAD_LEFT) && *cursor < 5)
         {
             if (*cursor == 0) sRunSetupRandomizer = sRunSetupRandomizer == RUN_WILD_NORMAL ? RUN_WILD_SCALED : sRunSetupRandomizer - 1;
             else if (*cursor == 1) sRunSetupStarter = sRunSetupStarter == RUN_STARTER_NORMAL ? RUN_STARTER_CHOOSE : sRunSetupStarter - 1;
             else if (*cursor == 2) sRunSetupMovesets ^= 1;
             else if (*cursor == 3) sRunSetupEvolutions ^= 1;
-            else if (*cursor == 4) sRunSetupBstMode = sRunSetupBstMode == RUN_BST_OFF ? RUN_BST_RANDOM : sRunSetupBstMode - 1;
-            else sRunSetupCustom = FALSE;
+            else sRunSetupBstMode = sRunSetupBstMode == RUN_BST_OFF ? RUN_BST_RANDOM : sRunSetupBstMode - 1;
         }
-        else if (JOY_NEW(DPAD_RIGHT) && *cursor < 6)
+        else if (JOY_NEW(DPAD_RIGHT) && *cursor < 5)
         {
             if (*cursor == 0) sRunSetupRandomizer = sRunSetupRandomizer == RUN_WILD_SCALED ? RUN_WILD_NORMAL : sRunSetupRandomizer + 1;
             else if (*cursor == 1) sRunSetupStarter = sRunSetupStarter == RUN_STARTER_CHOOSE ? RUN_STARTER_NORMAL : sRunSetupStarter + 1;
             else if (*cursor == 2) sRunSetupMovesets ^= 1;
             else if (*cursor == 3) sRunSetupEvolutions ^= 1;
-            else if (*cursor == 4) sRunSetupBstMode = sRunSetupBstMode == RUN_BST_RANDOM ? RUN_BST_OFF : sRunSetupBstMode + 1;
-            else sRunSetupCustom = TRUE;
+            else sRunSetupBstMode = sRunSetupBstMode == RUN_BST_RANDOM ? RUN_BST_OFF : sRunSetupBstMode + 1;
         }
-        else if (JOY_NEW(A_BUTTON) && *cursor < 6)
+        else if (JOY_NEW(A_BUTTON) && *cursor < 5)
         {
             if (*cursor == 0) sRunSetupRandomizer = (sRunSetupRandomizer + 1) % 3;
             else if (*cursor == 1) sRunSetupStarter = sRunSetupStarter == RUN_STARTER_CHOOSE ? RUN_STARTER_NORMAL : sRunSetupStarter + 1;
             else if (*cursor == 2) sRunSetupMovesets ^= 1;
             else if (*cursor == 3) sRunSetupEvolutions ^= 1;
-            else if (*cursor == 4) sRunSetupBstMode = sRunSetupBstMode == RUN_BST_RANDOM ? RUN_BST_OFF : sRunSetupBstMode + 1;
-            else sRunSetupCustom ^= 1;
+            else sRunSetupBstMode = sRunSetupBstMode == RUN_BST_RANDOM ? RUN_BST_OFF : sRunSetupBstMode + 1;
         }
-        else if (JOY_NEW(DPAD_LEFT) && *cursor == 7)
+        else if (JOY_NEW(DPAD_LEFT) && *cursor == 6)
+            *cursor = 5;
+        else if (JOY_NEW(DPAD_RIGHT) && *cursor == 5)
             *cursor = 6;
-        else if (JOY_NEW(DPAD_RIGHT) && *cursor == 6)
-            *cursor = 6;
-        else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 6))
+        else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 5))
         {
             sRunSetupPage = RUN_SETUP_PAGE_PLAY_STYLE;
             *cursor = 2;
         }
-        else if (JOY_NEW(A_BUTTON) && *cursor == 7)
+        else if (JOY_NEW(A_BUTTON) && *cursor == 6)
         {
-            if (sRunSetupCustom)
-            {
-                gStringVar2[0] = EOS;
-                RunSetup_DestroyIcons();
-                FreeAllWindowBuffers();
-                DestroyTask(taskId);
-                DoNamingScreen(NAMING_SCREEN_SEED, gStringVar2, 0, 0, 0, CB2_RunSetup_ReturnFromSeed);
-                return;
-            }
             sRunSetupPage = RUN_SETUP_PAGE_FILTERS;
             *cursor = 0;
         }
-        else
-            return;
+        else return;
         PlaySE(SE_SELECT);
         RunSetup_Draw(*cursor);
         return;
