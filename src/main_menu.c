@@ -2304,6 +2304,8 @@ static void RunSetup_Draw(u8 cursor)
         AddTextPrinterParameterized3(0, FONT_SMALL, 112, 98, sTextColor_Headers, TEXT_SKIP_DRAW, bstMode);
         if (cursor < 5)
             AddTextPrinterParameterized3(0, FONT_SMALL, 2, 34 + 16 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
+        RunSetup_DrawChoice(sText_RunSetupBack, 44, 114, cursor == 5);
+        RunSetup_DrawChoice(sText_RunSetupNext, 132, 114, cursor == 6);
         PutWindowTilemap(0);
         CopyWindowToVram(0, COPYWIN_FULL);
         return;
@@ -2324,7 +2326,7 @@ static void RunSetup_Draw(u8 cursor)
         RunSetup_DrawChoice(sText_RunSetupYes, 104, 106, cursor == 0);
         RunSetup_DrawChoice(sText_RunSetupNo, 157, 106, cursor == 1);
     }
-    else if (sRunSetupPage == 1)
+    else if (sRunSetupPage == RUN_SETUP_PAGE_FILTERS)
     {
         u32 eligible = RunSetup_CountEligibleFilterMons();
         const u8 *type = sRunSetupType == TYPE_NONE ? sText_RunSetupAll : gTypesInfo[sRunSetupType].name;
@@ -2548,10 +2550,10 @@ static void Task_RunSetup_Input(u8 taskId)
     if (sRunSetupPage == RUN_SETUP_PAGE_RANDOMIZER && !sRunSetupConfirm)
     {
         if (JOY_NEW(DPAD_UP))
-            *cursor = (*cursor + 4) % 5;
+            *cursor = *cursor == 0 ? 6 : *cursor - 1;
         else if (JOY_NEW(DPAD_DOWN))
-            *cursor = (*cursor + 1) % 5;
-        else if (JOY_NEW(DPAD_LEFT))
+            *cursor = *cursor == 6 ? 0 : *cursor + 1;
+        else if (JOY_NEW(DPAD_LEFT) && *cursor < 5)
         {
             if (*cursor == 0) sRunSetupRandomizer = sRunSetupRandomizer == RUN_WILD_NORMAL ? RUN_WILD_SCALED : sRunSetupRandomizer - 1;
             else if (*cursor == 1) sRunSetupStarter = sRunSetupStarter == RUN_STARTER_NORMAL ? RUN_STARTER_CHOOSE : sRunSetupStarter - 1;
@@ -2559,7 +2561,7 @@ static void Task_RunSetup_Input(u8 taskId)
             else if (*cursor == 3) sRunSetupEvolutions ^= 1;
             else sRunSetupBstMode = sRunSetupBstMode == RUN_BST_OFF ? RUN_BST_RANDOM : sRunSetupBstMode - 1;
         }
-        else if (JOY_NEW(DPAD_RIGHT | A_BUTTON))
+        else if (JOY_NEW(DPAD_RIGHT | A_BUTTON) && *cursor < 5)
         {
             if (*cursor == 0) sRunSetupRandomizer = sRunSetupRandomizer == RUN_WILD_SCALED ? RUN_WILD_NORMAL : sRunSetupRandomizer + 1;
             else if (*cursor == 1) sRunSetupStarter = sRunSetupStarter == RUN_STARTER_CHOOSE ? RUN_STARTER_NORMAL : sRunSetupStarter + 1;
@@ -2567,15 +2569,15 @@ static void Task_RunSetup_Input(u8 taskId)
             else if (*cursor == 3) sRunSetupEvolutions ^= 1;
             else sRunSetupBstMode = sRunSetupBstMode == RUN_BST_RANDOM ? RUN_BST_OFF : sRunSetupBstMode + 1;
         }
-        else if (JOY_NEW(R_BUTTON))
-        {
-            sRunSetupPage = 3;
-            *cursor = 0;
-        }
-        else if (JOY_NEW(B_BUTTON))
+        else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 5))
         {
             sRunSetupPage = RUN_SETUP_PAGE_PLAY_STYLE;
             *cursor = 2;
+        }
+        else if (JOY_NEW(A_BUTTON) && *cursor == 6)
+        {
+            sRunSetupPage = RUN_SETUP_PAGE_FILTERS;
+            *cursor = 0;
         }
         else
             return;
@@ -2646,8 +2648,8 @@ static void Task_RunSetup_Input(u8 taskId)
         }
         else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 2))
         {
-            sRunSetupPage = 2;
-            *cursor = 3;
+            sRunSetupPage = RUN_SETUP_PAGE_RANDOMIZER;
+            *cursor = 6;
         }
         else if (JOY_NEW(A_BUTTON) && *cursor == 3)
         {
