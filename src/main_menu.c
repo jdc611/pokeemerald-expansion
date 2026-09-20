@@ -2283,30 +2283,35 @@ static void RunSetup_Draw(u8 cursor)
 
     if (sRunSetupPage == RUN_SETUP_PAGE_RANDOMIZER && !sRunSetupConfirm)
     {
-        const u8 *wildMode = sRunSetupRandomizer == RUN_WILD_SCALED ? sText_RunSetupScaled
-                             : sRunSetupRandomizer == RUN_WILD_RANDOM ? sText_RunSetupRandom : sText_RunSetupNormal;
-        const u8 *starterMode = sRunSetupStarter == RUN_STARTER_RANDOM ? sText_RunSetupRandom
-                                : sRunSetupStarter == RUN_STARTER_CHOOSE ? sText_RunSetupCustom : sText_RunSetupHoenn;
-        const u8 *bstMode = sRunSetupBstMode == RUN_BST_RANDOM ? sText_RunSetupRandom
-                            : sRunSetupBstMode == RUN_BST_SHUFFLE ? sText_RunSetupShuffle : sText_RunSetupOff;
         FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
         titleX = GetStringCenterAlignXOffset(FONT_NORMAL, sText_RunSetupRandomizerPage, 208);
         AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupRandomizerPage);
         FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_3), 48, 25, 112, 1);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 34, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupWildMode);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 112, 34, sTextColor_Headers, TEXT_SKIP_DRAW, wildMode);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 50, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupStarters);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 112, 50, sTextColor_Headers, TEXT_SKIP_DRAW, starterMode);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 66, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupMovesets);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 112, 66, sTextColor_Headers, TEXT_SKIP_DRAW, sRunSetupMovesets ? sText_RunSetupRandom : sText_RunSetupNormal);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 82, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupEvolutions);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 112, 82, sTextColor_Headers, TEXT_SKIP_DRAW, sRunSetupEvolutions ? sText_RunSetupRandom : sText_RunSetupNormal);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 98, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupBst);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 112, 98, sTextColor_Headers, TEXT_SKIP_DRAW, bstMode);
-        if (cursor < 5)
-            AddTextPrinterParameterized3(0, FONT_SMALL, 2, 34 + 16 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
-        RunSetup_DrawChoice(sText_RunSetupBack, 44, 114, cursor == 5);
-        RunSetup_DrawChoice(sText_RunSetupNext, 132, 114, cursor == 6);
+        AddTextPrinterParameterized3(0, FONT_SMALL, 8, 30, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupWildMode);
+        RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 78, 28, sRunSetupRandomizer == RUN_WILD_NORMAL);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 120, 28, sRunSetupRandomizer == RUN_WILD_RANDOM);
+        RunSetup_DrawNarrowChoice(sText_RunSetupScaled, 162, 28, sRunSetupRandomizer == RUN_WILD_SCALED);
+        AddTextPrinterParameterized3(0, FONT_SMALL, 8, 44, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupStarters);
+        RunSetup_DrawNarrowChoice(sText_RunSetupHoenn, 78, 42, sRunSetupStarter == RUN_STARTER_NORMAL);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 120, 42, sRunSetupStarter == RUN_STARTER_RANDOM);
+        RunSetup_DrawNarrowChoice(sText_RunSetupCustom, 162, 42, sRunSetupStarter == RUN_STARTER_CHOOSE);
+        AddTextPrinterParameterized3(0, FONT_SMALL, 8, 58, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupMovesets);
+        RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 99, 56, !sRunSetupMovesets);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 151, 56, sRunSetupMovesets);
+        AddTextPrinterParameterized3(0, FONT_SMALL, 8, 72, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupEvolutions);
+        RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 99, 70, !sRunSetupEvolutions);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 151, 70, sRunSetupEvolutions);
+        AddTextPrinterParameterized3(0, FONT_SMALL, 8, 86, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupBst);
+        RunSetup_DrawNarrowChoice(sText_RunSetupOff, 78, 84, sRunSetupBstMode == RUN_BST_OFF);
+        RunSetup_DrawNarrowChoice(sText_RunSetupShuffle, 120, 84, sRunSetupBstMode == RUN_BST_SHUFFLE);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 162, 84, sRunSetupBstMode == RUN_BST_RANDOM);
+        AddTextPrinterParameterized3(0, FONT_SMALL, 8, 100, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupSeed);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 112, 98, !sRunSetupCustom);
+        RunSetup_DrawNarrowChoice(sText_RunSetupCustom, 162, 98, sRunSetupCustom);
+        if (cursor < 6)
+            AddTextPrinterParameterized3(0, FONT_SMALL, 1, 30 + 14 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
+        RunSetup_DrawWideChoice(sText_RunSetupBack, 18, 112, 78, cursor == 6);
+        RunSetup_DrawWideChoice(sText_RunSetupNext, 112, 112, 78, cursor == 7);
         PutWindowTilemap(0);
         CopyWindowToVram(0, COPYWIN_FULL);
         return;
