@@ -369,6 +369,7 @@ static const u8 sText_RunSetupMovesets[] = _("MOVESETS");
 static const u8 sText_RunSetupEvolutions[] = _("EVOLUTIONS");
 static const u8 sText_RunSetupBst[] = _("BST");
 static const u8 sText_RunSetupShuffle[] = _("SHUFFLE");
+static const u8 sText_RunSetupFiltersPage[] = _("3/4  FILTERS");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -2332,6 +2333,10 @@ static void RunSetup_Draw(u8 cursor)
         const u8 *type = sRunSetupType == TYPE_NONE ? sText_RunSetupAll : gTypesInfo[sRunSetupType].name;
         const u8 *ability = sRunSetupAbility == ABILITY_NONE ? sText_RunSetupAll : gAbilitiesInfo[sRunSetupAbility].name;
 
+        FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
+        titleX = GetStringCenterAlignXOffset(FONT_NORMAL, sText_RunSetupFiltersPage, 208);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupFiltersPage);
+        FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_3), 48, 25, 112, 1);
         AddTextPrinterParameterized3(0, FONT_NORMAL, 12, 42, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupType);
         AddTextPrinterParameterized3(0, FONT_NORMAL, 12, 67, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupAbility);
         RunSetup_DrawWideChoice(type, 82, 39, 116, cursor == 0);
@@ -2341,7 +2346,7 @@ static void RunSetup_Draw(u8 cursor)
         else if (eligible <= 5 && sRunSetupFilter != RUN_FILTER_NONE)
             AddTextPrinterParameterized3(0, FONT_SMALL, 25, 91, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupLimitedPool);
         RunSetup_DrawChoice(sText_RunSetupBack, 52, 110, cursor == 2);
-        RunSetup_DrawWideChoice(sText_RunSetupConfirmButton, 108, 110, 76, cursor == 3);
+        RunSetup_DrawWideChoice(sText_RunSetupNext, 108, 110, 76, cursor == 3);
         if (cursor < 2)
             AddTextPrinterParameterized3(0, FONT_NORMAL, 2, 42 + 25 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
     }
