@@ -2283,67 +2283,34 @@ static void RunSetup_Draw(u8 cursor)
 
     if (sRunSetupPage == RUN_SETUP_PAGE_RANDOMIZER && !sRunSetupConfirm)
     {
-        if (JOY_NEW(DPAD_UP))
-            *cursor = *cursor == 0 ? 6 : *cursor - 1;
-        else if (JOY_NEW(DPAD_DOWN))
-            *cursor = *cursor == 6 ? 0 : *cursor + 1;
-        else if (JOY_NEW(DPAD_LEFT) && *cursor < 5)
-        {
-            if (*cursor == 0)
-                sRunSetupRandomizer = sRunSetupRandomizer == RUN_WILD_NORMAL ? RUN_WILD_SCALED : sRunSetupRandomizer - 1;
-            else if (*cursor == 1)
-                sRunSetupStarter = sRunSetupStarter == RUN_STARTER_NORMAL ? RUN_STARTER_CHOOSE : sRunSetupStarter - 1;
-            else if (*cursor == 2)
-                sRunSetupMovesets ^= 1;
-            else if (*cursor == 3)
-                sRunSetupEvolutions ^= 1;
-            else
-                sRunSetupBstMode = sRunSetupBstMode == RUN_BST_OFF ? RUN_BST_RANDOM : sRunSetupBstMode - 1;
-        }
-        else if (JOY_NEW(DPAD_RIGHT) && *cursor < 5)
-        {
-            if (*cursor == 0)
-                sRunSetupRandomizer = sRunSetupRandomizer == RUN_WILD_SCALED ? RUN_WILD_NORMAL : sRunSetupRandomizer + 1;
-            else if (*cursor == 1)
-                sRunSetupStarter = sRunSetupStarter == RUN_STARTER_CHOOSE ? RUN_STARTER_NORMAL : sRunSetupStarter + 1;
-            else if (*cursor == 2)
-                sRunSetupMovesets ^= 1;
-            else if (*cursor == 3)
-                sRunSetupEvolutions ^= 1;
-            else
-                sRunSetupBstMode = sRunSetupBstMode == RUN_BST_RANDOM ? RUN_BST_OFF : sRunSetupBstMode + 1;
-        }
-        else if (JOY_NEW(A_BUTTON) && *cursor < 5)
-        {
-            if (*cursor == 0)
-                sRunSetupRandomizer = (sRunSetupRandomizer + 1) % 3;
-            else if (*cursor == 1)
-                sRunSetupStarter = sRunSetupStarter == RUN_STARTER_CHOOSE ? RUN_STARTER_NORMAL : sRunSetupStarter + 1;
-            else if (*cursor == 2)
-                sRunSetupMovesets ^= 1;
-            else if (*cursor == 3)
-                sRunSetupEvolutions ^= 1;
-            else
-                sRunSetupBstMode = sRunSetupBstMode == RUN_BST_RANDOM ? RUN_BST_OFF : sRunSetupBstMode + 1;
-        }
-        else if (JOY_NEW(DPAD_LEFT) && *cursor == 6)
-            *cursor = 5;
-        else if (JOY_NEW(DPAD_RIGHT) && *cursor == 5)
-            *cursor = 6;
-        else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 5))
-        {
-            sRunSetupPage = RUN_SETUP_PAGE_PLAY_STYLE;
-            *cursor = 2;
-        }
-        else if (JOY_NEW(A_BUTTON) && *cursor == 6)
-        {
-            sRunSetupPage = RUN_SETUP_PAGE_FILTERS;
-            *cursor = 0;
-        }
-        else
-            return;
-        PlaySE(SE_SELECT);
-        RunSetup_Draw(*cursor);
+        FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
+        titleX = GetStringCenterAlignXOffset(FONT_NORMAL, sText_RunSetupRandomizerPage, 208);
+        AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupRandomizerPage);
+        FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_3), 48, 25, 112, 1);
+        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 31, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupWildMode);
+        RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 78, 29, sRunSetupRandomizer == RUN_WILD_NORMAL);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 120, 29, sRunSetupRandomizer == RUN_WILD_RANDOM);
+        RunSetup_DrawNarrowChoice(sText_RunSetupScaled, 162, 29, sRunSetupRandomizer == RUN_WILD_SCALED);
+        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 47, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupStarters);
+        RunSetup_DrawNarrowChoice(sText_RunSetupHoenn, 78, 45, sRunSetupStarter == RUN_STARTER_NORMAL);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 120, 45, sRunSetupStarter == RUN_STARTER_RANDOM);
+        RunSetup_DrawNarrowChoice(sText_RunSetupCustom, 162, 45, sRunSetupStarter == RUN_STARTER_CHOOSE);
+        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 63, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupMovesets);
+        RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 99, 61, !sRunSetupMovesets);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 141, 61, sRunSetupMovesets);
+        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 79, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupEvolutions);
+        RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 99, 77, !sRunSetupEvolutions);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 141, 77, sRunSetupEvolutions);
+        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 95, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupBst);
+        RunSetup_DrawNarrowChoice(sText_RunSetupOff, 72, 93, sRunSetupBstMode == RUN_BST_OFF);
+        RunSetup_DrawWideChoice(sText_RunSetupShuffle, 112, 93, 52, sRunSetupBstMode == RUN_BST_SHUFFLE);
+        RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 166, 93, sRunSetupBstMode == RUN_BST_RANDOM);
+        if (cursor < 5)
+            AddTextPrinterParameterized3(0, FONT_SMALL, 3, 31 + 16 * cursor, sTextColor_Headers, TEXT_SKIP_DRAW, gText_SelectorArrow2);
+        RunSetup_DrawWideChoice(sText_RunSetupBack, 18, 112, 78, cursor == 5);
+        RunSetup_DrawWideChoice(sText_RunSetupNext, 112, 112, 78, cursor == 6);
+        PutWindowTilemap(0);
+        CopyWindowToVram(0, COPYWIN_FULL);
         return;
     }
 
