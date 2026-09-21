@@ -163,8 +163,9 @@ static bool32 IsTypeFilteredWildSpeciesFilterFunc(enum Species species, const st
 {
     struct FilterFuncArgs scaledArgs;
 
-    if (GetSpeciesType(species, 0) != filterFuncArgs->arg1
-     && GetSpeciesType(species, 1) != filterFuncArgs->arg1)
+    if (!DoesSpeciesOrReachableFormMatchRunFilterForSettings(species, RUN_FILTER_TYPE, filterFuncArgs->arg1,
+                                                              gSaveBlock3Ptr->abilityMode, gSaveBlock3Ptr->evolutionMode,
+                                                              gSaveBlock3Ptr->runDifficulty, gSaveBlock3Ptr->worldSeed))
         return FALSE;
 
     if (filterFuncArgs->arg2 == FILTER_FUNC_ARG_NONE)
@@ -180,9 +181,9 @@ static bool32 IsAbilityFilteredWildSpeciesFilterFunc(enum Species species, const
     struct FilterFuncArgs scaledArgs;
     enum Ability ability = filterFuncArgs->arg1;
 
-    if (GetSpeciesAbility(species, 0) != ability
-     && GetSpeciesAbility(species, 1) != ability
-     && GetSpeciesAbility(species, 2) != ability)
+    if (!DoesSpeciesOrReachableFormMatchRunFilterForSettings(species, RUN_FILTER_ABILITY, ability,
+                                                              gSaveBlock3Ptr->abilityMode, gSaveBlock3Ptr->evolutionMode,
+                                                              gSaveBlock3Ptr->runDifficulty, gSaveBlock3Ptr->worldSeed))
         return FALSE;
 
     if (filterFuncArgs->arg2 == FILTER_FUNC_ARG_NONE)
@@ -200,11 +201,9 @@ static bool32 IsTypeAbilityFilteredWildSpeciesFilterFunc(enum Species species, c
     enum Type type = packed & 31;
     enum Ability ability = packed >> 5;
 
-    if (GetSpeciesType(species, 0) != type && GetSpeciesType(species, 1) != type)
-        return FALSE;
-    if (GetSpeciesAbility(species, 0) != ability
-     && GetSpeciesAbility(species, 1) != ability
-     && GetSpeciesAbility(species, 2) != ability)
+    if (!DoesSpeciesOrReachableFormMatchRunFilterForSettings(species, RUN_FILTER_TYPE_ABILITY, packed,
+                                                              gSaveBlock3Ptr->abilityMode, gSaveBlock3Ptr->evolutionMode,
+                                                              gSaveBlock3Ptr->runDifficulty, gSaveBlock3Ptr->worldSeed))
         return FALSE;
 
     if (filterFuncArgs->arg2 == FILTER_FUNC_ARG_NONE)

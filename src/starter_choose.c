@@ -205,12 +205,16 @@ static void GenerateRandomStarters(void)
 
     for (u32 i = 0; i < STARTER_MON_COUNT; i++)
     {
+        u32 attempts = 0;
         do
         {
             sStarterMon[i] = GetRandomSpecies(generator, &filterArgs);
+            attempts++;
         }
-        while ((i > 0 && sStarterMon[i] == sStarterMon[0])
-            || (i > 1 && sStarterMon[i] == sStarterMon[1]));
+        while ((!DoesSpeciesMatchRunFilterForSettings(sStarterMon[i], gSaveBlock3Ptr->filterMode, gSaveBlock3Ptr->filterValue,
+                                                       gSaveBlock3Ptr->abilityMode, gSaveBlock3Ptr->worldSeed)
+             || (i > 0 && sStarterMon[i] == sStarterMon[0])
+             || (i > 1 && sStarterMon[i] == sStarterMon[1])) && attempts < 1000);
     }
 
     gRngValue = oldRngState;
@@ -765,6 +769,10 @@ static bool32 IsCustomStarterEligible(enum Species species)
     u16 i;
 
     if (!IsCustomStarterBaseEligible(species))
+        return FALSE;
+    if (gSaveBlock3Ptr->filterMode != RUN_FILTER_NONE
+     && !DoesSpeciesMatchRunFilterForSettings(species, gSaveBlock3Ptr->filterMode, gSaveBlock3Ptr->filterValue,
+                                              gSaveBlock3Ptr->abilityMode, gSaveBlock3Ptr->worldSeed))
         return FALSE;
 
     // Species data contains many internal alternate-form records with the same

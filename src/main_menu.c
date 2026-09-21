@@ -2027,37 +2027,30 @@ static u8 RunSetup_PickerIndexToType(u8 index)
 
 static u32 RunSetup_CountEligibleSelection(u8 type, u16 ability, u32 stopAt)
 {
-    struct FilterFuncArgs args =
-    {
-        .arg1 = FILTER_FUNC_ARG_NONE,
-        .arg2 = FILTER_FUNC_ARG_NONE,
-    };
-    bool32 scaled = sRunSetupRandomizer != RUN_WILD_RANDOM;
-    u32 generator;
+    struct FilterFuncArgs baseArgs = {.arg1 = sRunSetupRandomizer == RUN_WILD_RANDOM ? FILTER_FUNC_ARG_NONE : 0, .arg2 = FILTER_FUNC_ARG_NONE};
+    u32 baseGenerator = sRunSetupRandomizer == RUN_WILD_RANDOM ? SPECIES_GENERATOR_NO_SUPERMONS : SPECIES_GENERATOR_SCALED_WILD;
+    u8 filterMode = RUN_FILTER_NONE;
+    u16 filterValue = 0;
+    u32 count = 0;
+    u32 i;
 
-    if (type != TYPE_NONE && ability != ABILITY_NONE)
-    {
-        args.arg1 = (ability << 5) | type;
-        generator = scaled ? SPECIES_GENERATOR_SCALED_TYPE_ABILITY_FILTERED : SPECIES_GENERATOR_TYPE_ABILITY_FILTERED;
-    }
-    else if (type != TYPE_NONE)
-    {
-        args.arg1 = type;
-        generator = scaled ? SPECIES_GENERATOR_SCALED_TYPE_FILTERED : SPECIES_GENERATOR_TYPE_FILTERED;
-    }
-    else if (ability != ABILITY_NONE)
-    {
-        args.arg1 = ability;
-        generator = scaled ? SPECIES_GENERATOR_SCALED_ABILITY_FILTERED : SPECIES_GENERATOR_ABILITY_FILTERED;
-    }
-    else
-    {
-        generator = SPECIES_GENERATOR_NO_SUPERMONS;
-    }
+    if (type != TYPE_NONE && ability != ABILITY_NONE) { filterMode = RUN_FILTER_TYPE_ABILITY; filterValue = (ability << 5) | type; }
+    else if (type != TYPE_NONE) { filterMode = RUN_FILTER_TYPE; filterValue = type; }
+    else if (ability != ABILITY_NONE) { filterMode = RUN_FILTER_ABILITY; filterValue = ability; }
 
-    if (scaled && (type != TYPE_NONE || ability != ABILITY_NONE))
-        args.arg2 = 0;
-    return CountEligibleRandomSpecies(generator, &args, stopAt);
+    for (i = 1; i <= NATIONAL_DEX_COUNT; i++)
+    {
+        enum Species species = NationalPokedexNumToSpecies(i);
+        if (!IsSpeciesEligibleRandomSpecies(baseGenerator, species, &baseArgs))
+            continue;
+        if (!DoesSpeciesOrReachableFormMatchRunFilterForSettings(species, filterMode, filterValue,
+                                                                 sRunSetupAbilityMode, sRunSetupEvolutions,
+                                                                 sRunSetupDifficulty, sRunSetupSeed))
+            continue;
+        if (++count >= stopAt)
+            break;
+    }
+    return count;
 }
 
 static void RunSetup_BuildAbilityChoices(void)
@@ -2102,9 +2095,18 @@ static void RunSetup_BuildAbilityChoices(void)
         if (!IsSpeciesEligibleRandomSpecies(generator, species, &args))
             continue;
 
-        abilities[0] = GetSpeciesAbility(species, 0);
-        abilities[1] = GetSpeciesAbility(species, 1);
-        abilities[2] = GetSpeciesAbility(species, 2);
+        if (sRunSetupAbilityMode == RUN_ABILITIES_RANDOM)
+        {
+            abilities[0] = GetRandomizedAbilityForSeed(species, 0, sRunSetupSeed);
+            abilities[1] = GetRandomizedAbilityForSeed(species, 1, sRunSetupSeed);
+            abilities[2] = GetRandomizedAbilityForSeed(species, 2, sRunSetupSeed);
+        }
+        else
+        {
+            abilities[0] = gSpeciesInfo[species].abilities[0];
+            abilities[1] = gSpeciesInfo[species].abilities[1];
+            abilities[2] = gSpeciesInfo[species].abilities[2];
+        }
         for (slot = 0; slot < ARRAY_COUNT(abilities); slot++)
         {
             enum Ability ability = abilities[slot];

@@ -2952,6 +2952,9 @@ u8 GiveCapturedMonToPlayer(struct Pokemon *mon)
     SetMonData(mon, MON_DATA_OT_GENDER, &gSaveBlock2Ptr->playerGender);
     SetMonData(mon, MON_DATA_OT_ID, gSaveBlock2Ptr->playerTrainerId);
 
+    if (!CanSpeciesJoinActiveRunParty(GetMonData(mon, MON_DATA_SPECIES)))
+        return CopyMonToPC(mon);
+
     for (i = 0; i < PARTY_SIZE; i++)
     {
         if (GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_SPECIES) == SPECIES_NONE)
@@ -3251,6 +3254,277 @@ enum Ability GetSpeciesAbility(enum Species species, u8 slot)
         return GetRandomizedAbilityForSeed(species, slot, gSaveBlock3Ptr->worldSeed);
 
     return gSpeciesInfo[species].abilities[slot];
+}
+
+static bool32 SpeciesHasAbilityForSettings(enum Species species, enum Ability ability, u8 abilityMode, u32 seed)
+{
+    u32 slot;
+    species = SanitizeSpeciesId(species);
+    for (slot = 0; slot < NUM_ABILITY_SLOTS; slot++)
+    {
+        enum Ability candidate = abilityMode == RUN_ABILITIES_RANDOM
+                              ? GetRandomizedAbilityForSeed(species, slot, seed)
+                              : gSpeciesInfo[species].abilities[slot];
+        if (candidate == ability)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+bool32 DoesSpeciesMatchRunFilterForSettings(enum Species species, u8 filterMode, u16 filterValue, u8 abilityMode, u32 seed)
+{
+    enum Type type;
+    enum Ability ability;
+    species = SanitizeSpeciesId(species);
+    if (species == SPECIES_NONE || species == SPECIES_EGG)
+        return FALSE;
+
+    switch (filterMode)
+    {
+    case RUN_FILTER_NONE:
+        return TRUE;
+    case RUN_FILTER_TYPE:
+        type = filterValue;
+        return GetSpeciesType(species, 0) == type || GetSpeciesType(species, 1) == type;
+    case RUN_FILTER_ABILITY:
+        return SpeciesHasAbilityForSettings(species, filterValue, abilityMode, seed);
+    case RUN_FILTER_TYPE_ABILITY:
+        type = filterValue & 31;
+        ability = filterValue >> 5;
+        return (GetSpeciesType(species, 0) == type || GetSpeciesType(species, 1) == type)
+            && SpeciesHasAbilityForSettings(species, ability, abilityMode, seed);
+    case RUN_FILTER_GENERATION:
+    case RUN_FILTER_BST_LIMIT:
+    default:
+        return TRUE;
+    }
+}
+
+static u32 GetOriginalRunBst(enum Species species)
+{
+    const struct SpeciesInfo *info = &gSpeciesInfo[SanitizeSpeciesId(species)];
+    return info->baseHP + info->baseAttack + info->baseDefense + info->baseSpAttack + info->baseSpDefense + info->baseSpeed;
+}
+
+static bool32 IsRunSpecialLegendary(enum Species species)
+{
+    const struct SpeciesInfo *info = &gSpeciesInfo[SanitizeSpeciesId(species)];
+    return info->isRestrictedLegendary || info->isSubLegendary || info->isMythical || info->isUltraBeast || info->isParadox;
+}
+
+static u32 RunEvolutionHash(u32 value)
+{
+    value ^= value >> 16;
+    value *= 0x7FEB352D;
+    value ^= value >> 15;
+    value *= 0x846CA68B;
+    value ^= value >> 16;
+    return value;
+}
+
+static bool32 SpeciesHasFurtherEvolution(enum Species species)
+{
+    const struct Evolution *evolutions = GetSpeciesEvolutions(species);
+    u32 i;
+    if (evolutions == NULL)
+        return FALSE;
+    for (i = 0; evolutions[i].method != EVOLUTIONS_END; i++)
+        if (SanitizeSpeciesId(evolutions[i].targetSpecies) != SPECIES_NONE)
+            return TRUE;
+    return FALSE;
+}
+
+static bool32 SpeciesBeginsThreeStageLine(enum Species species)
+{
+    const struct Evolution *evolutions = GetSpeciesEvolutions(species);
+    u32 i;
+    if (evolutions == NULL || GetSpeciesPreEvolution(species) != SPECIES_NONE)
+        return FALSE;
+    for (i = 0; evolutions[i].method != EVOLUTIONS_END; i++)
+        if (SpeciesHasFurtherEvolution(evolutions[i].targetSpecies))
+            return TRUE;
+    return FALSE;
+}
+
+u8 GetRandomEvolutionLevelForSettings(enum Species species, u32 seed)
+{
+    u32 hash = RunEvolutionHash(seed ^ ((u32)species * 0x9E3779B9));
+    if (GetSpeciesPreEvolution(species) != SPECIES_NONE)
+        return 34 + (hash % 7);
+    if (SpeciesBeginsThreeStageLine(species))
+        return 18 + (hash % 7);
+    return 28 + (hash % 5);
+}
+
+static bool32 IsRandomEvolutionCandidate(enum Species candidate, bool32 wantMiddle, bool32 wantSpecial)
+{
+    u32 bst;
+    if (candidate <= SPECIES_NONE || candidate >= NUM_SPECIES || candidate == SPECIES_EGG)
+        return FALSE;
+    if (!IsSpeciesEnabled(candidate) || GET_BASE_SPECIES_ID(candidate) != candidate)
+        return FALSE;
+    if (gSpeciesInfo[candidate].isMegaEvolution || IsRunSpecialLegendary(candidate) != wantSpecial)
+        return FALSE;
+
+    bst = GetOriginalRunBst(candidate);
+    if (wantMiddle)
+        return GetSpeciesPreEvolution(candidate) != SPECIES_NONE && SpeciesHasFurtherEvolution(candidate) && bst >= 280 && bst <= 520;
+    return !SpeciesHasFurtherEvolution(candidate) && (wantSpecial || bst >= 400);
+}
+
+enum Species GetRandomEvolutionTargetForSettings(enum Species species, u8 difficulty, u32 seed)
+{
+    bool32 wantMiddle;
+    bool32 wantSpecial;
+    u32 hash;
+    u32 count = 0;
+    u32 pick;
+    enum Species candidate;
+
+    species = SanitizeSpeciesId(species);
+    if (!SpeciesHasFurtherEvolution(species))
+        return SPECIES_NONE;
+
+    wantMiddle = SpeciesBeginsThreeStageLine(species);
+    hash = RunEvolutionHash(seed ^ ((u32)species * 0xA24BAED5));
+    wantSpecial = !wantMiddle
+               && difficulty != RUN_DIFFICULTY_HARD
+               && difficulty != RUN_DIFFICULTY_NUZLOCKE
+               && (hash % 100) < 8;
+
+    for (candidate = SPECIES_BULBASAUR; candidate < NUM_SPECIES; candidate++)
+        if (candidate != species && IsRandomEvolutionCandidate(candidate, wantMiddle, wantSpecial))
+            count++;
+
+    if (count == 0 && wantSpecial)
+    {
+        wantSpecial = FALSE;
+        for (candidate = SPECIES_BULBASAUR; candidate < NUM_SPECIES; candidate++)
+            if (candidate != species && IsRandomEvolutionCandidate(candidate, wantMiddle, FALSE))
+                count++;
+    }
+    if (count == 0)
+        return SPECIES_NONE;
+
+    pick = RunEvolutionHash(hash ^ 0xC2B2AE35) % count;
+    for (candidate = SPECIES_BULBASAUR; candidate < NUM_SPECIES; candidate++)
+    {
+        if (candidate == species || !IsRandomEvolutionCandidate(candidate, wantMiddle, wantSpecial))
+            continue;
+        if (pick-- == 0)
+            return candidate;
+    }
+    return SPECIES_NONE;
+}
+
+static bool32 DoesSpeciesOrReachableFormMatchRunFilterInternal(enum Species species, u8 filterMode, u16 filterValue,
+                                                               u8 abilityMode, u8 evolutionMode, u8 difficulty, u32 seed, u8 depth)
+{
+    const struct Evolution *evolutions;
+    const u16 *forms;
+    u32 i;
+
+    if (DoesSpeciesMatchRunFilterForSettings(species, filterMode, filterValue, abilityMode, seed))
+        return TRUE;
+    if (depth >= 3)
+        return FALSE;
+
+    forms = GetSpeciesFormTable(species);
+    if (forms != NULL)
+    {
+        for (i = 0; forms[i] != FORM_SPECIES_END; i++)
+        {
+            enum Species form = forms[i];
+            if (form > SPECIES_NONE && form < NUM_SPECIES && gSpeciesInfo[form].isMegaEvolution
+             && DoesSpeciesMatchRunFilterForSettings(form, filterMode, filterValue, abilityMode, seed))
+                return TRUE;
+        }
+    }
+
+    if (evolutionMode == RUN_EVOLUTIONS_RANDOM)
+    {
+        enum Species target = GetRandomEvolutionTargetForSettings(species, difficulty, seed);
+        return target != SPECIES_NONE
+            && DoesSpeciesOrReachableFormMatchRunFilterInternal(target, filterMode, filterValue, abilityMode,
+                                                               evolutionMode, difficulty, seed, depth + 1);
+    }
+
+    evolutions = GetSpeciesEvolutions(species);
+    if (evolutions != NULL)
+    {
+        for (i = 0; evolutions[i].method != EVOLUTIONS_END; i++)
+        {
+            enum Species target = SanitizeSpeciesId(evolutions[i].targetSpecies);
+            if (target != SPECIES_NONE
+             && DoesSpeciesOrReachableFormMatchRunFilterInternal(target, filterMode, filterValue, abilityMode,
+                                                                evolutionMode, difficulty, seed, depth + 1))
+                return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+bool32 DoesSpeciesOrReachableFormMatchRunFilterForSettings(enum Species species, u8 filterMode, u16 filterValue,
+                                                           u8 abilityMode, u8 evolutionMode, u8 difficulty, u32 seed)
+{
+    return DoesSpeciesOrReachableFormMatchRunFilterInternal(species, filterMode, filterValue, abilityMode,
+                                                            evolutionMode, difficulty, seed, 0);
+}
+
+bool32 DoesSpeciesMatchActiveRunFilter(enum Species species)
+{
+    if (gSaveBlock3Ptr == NULL)
+        return TRUE;
+    return DoesSpeciesMatchRunFilterForSettings(species, gSaveBlock3Ptr->filterMode, gSaveBlock3Ptr->filterValue,
+                                                gSaveBlock3Ptr->abilityMode, gSaveBlock3Ptr->worldSeed);
+}
+
+bool32 PlayerPartyHasPermanentMega(void)
+{
+    u32 i;
+    for (i = 0; i < gPartiesCount[B_TRAINER_PLAYER]; i++)
+    {
+        enum Species species = GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_SPECIES);
+        if (species != SPECIES_NONE && gSpeciesInfo[SanitizeSpeciesId(species)].isMegaEvolution)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+bool32 CanSpeciesJoinActiveRunParty(enum Species species)
+{
+    species = SanitizeSpeciesId(species);
+    if (!DoesSpeciesMatchActiveRunFilter(species))
+        return FALSE;
+    if (gSpeciesInfo[species].isMegaEvolution && PlayerPartyHasPermanentMega())
+        return FALSE;
+    return TRUE;
+}
+
+bool32 IsPlayerPartyLegalForRun(u8 *badPartyIndex, u8 *reason)
+{
+    u32 i;
+    u32 megaCount = 0;
+    for (i = 0; i < gPartiesCount[B_TRAINER_PLAYER]; i++)
+    {
+        enum Species species = GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_SPECIES_OR_EGG);
+        if (species == SPECIES_NONE || species == SPECIES_EGG)
+            continue;
+        if (!DoesSpeciesMatchActiveRunFilter(species))
+        {
+            if (badPartyIndex != NULL) *badPartyIndex = i;
+            if (reason != NULL) *reason = RUN_PARTY_ILLEGAL_FILTER;
+            return FALSE;
+        }
+        if (gSpeciesInfo[SanitizeSpeciesId(species)].isMegaEvolution && ++megaCount > 1)
+        {
+            if (badPartyIndex != NULL) *badPartyIndex = i;
+            if (reason != NULL) *reason = RUN_PARTY_ILLEGAL_MEGA_LIMIT;
+            return FALSE;
+        }
+    }
+    if (reason != NULL) *reason = RUN_PARTY_LEGAL;
+    return TRUE;
 }
 
 static u32 GetRawSpeciesBaseStat(enum Species species, u32 statIndex)
@@ -4578,6 +4852,18 @@ enum Species GetEvolutionTargetSpecies(struct Pokemon *mon, enum EvolutionMode m
     u32 level = GetMonData(mon, MON_DATA_LEVEL, 0);
     enum HoldEffect holdEffect;
     const struct Evolution *evolutions = GetSpeciesEvolutions(species);
+
+    if (gSaveBlock3Ptr != NULL && gSaveBlock3Ptr->evolutionMode == RUN_EVOLUTIONS_RANDOM)
+    {
+        if (evolutions == NULL || (mode != EVO_MODE_NORMAL && mode != EVO_MODE_BATTLE_ONLY))
+            return SPECIES_NONE;
+        if (level < GetRandomEvolutionLevelForSettings(species, gSaveBlock3Ptr->worldSeed))
+            return SPECIES_NONE;
+        targetSpecies = GetRandomEvolutionTargetForSettings(species, gSaveBlock3Ptr->runDifficulty, gSaveBlock3Ptr->worldSeed);
+        if (targetSpecies != SPECIES_NONE && canStopEvo != NULL)
+            *canStopEvo = TRUE;
+        return targetSpecies;
+    }
 
     if (evolutions == NULL)
         return SPECIES_NONE;
