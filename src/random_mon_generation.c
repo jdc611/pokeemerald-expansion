@@ -122,6 +122,17 @@ static bool32 UNUSED IsInBstRangeFilterFunc(enum Species species, const struct F
     return bst >= minBst && bst <= maxBst;
 }
 
+static u32 GetOriginalSpeciesBst(enum Species species)
+{
+    const struct SpeciesInfo *info = &gSpeciesInfo[GET_BASE_SPECIES_ID(species)];
+    return info->baseHP
+         + info->baseAttack
+         + info->baseDefense
+         + info->baseSpeed
+         + info->baseSpAttack
+         + info->baseSpDefense;
+}
+
 static bool32 IsScaledWildSpeciesFilterFunc(enum Species species, const struct FilterFuncArgs *filterFuncArgs)
 {
     static const u16 sMinBst[] = {180, 250, 320, 380, 430};
@@ -135,7 +146,7 @@ static bool32 IsScaledWildSpeciesFilterFunc(enum Species species, const struct F
     if (tier >= ARRAY_COUNT(sMinBst))
         tier = ARRAY_COUNT(sMinBst) - 1;
 
-    bst = GetSpeciesBaseStatTotal(GET_BASE_SPECIES_ID(species));
+    bst = GetOriginalSpeciesBst(species);
     if (bst < sMinBst[tier] || bst > sMaxBst[tier])
         return FALSE;
 

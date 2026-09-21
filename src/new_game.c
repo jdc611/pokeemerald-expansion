@@ -53,6 +53,7 @@
 #include "difficulty.h"
 #include "follower_npc.h"
 #include "run_settings.h"
+#include "wild_encounter.h"
 
 extern EWRAM_DATA u8 gRunSetupRandomizerEnabled;
 extern EWRAM_DATA bool8 gRunSetupSeedIsCustom;
@@ -241,6 +242,7 @@ void NewGameInitData(void)
     SetCurrentDifficultyLevel(DIFFICULTY_NORMAL);
     ResetItemFlags();
     ResetDexNav();
+    ResetRandomizedWildCache();
     gSaveBlock3Ptr->worldSeed = gRunSetupWorldSeed;
     gSaveBlock3Ptr->randomizerEnabled = gRunSetupRandomizerEnabled;
     VarSet(VAR_RUN_SEED_SOURCE, gRunSetupSeedIsCustom ? 2 : 1);

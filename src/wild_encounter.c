@@ -83,6 +83,11 @@ struct RandomizedWildCacheEntry
 
 EWRAM_DATA static struct RandomizedWildCacheEntry sRandomizedWildCache[RANDOMIZED_WILD_CACHE_SIZE] = {0};
 
+void ResetRandomizedWildCache(void)
+{
+    memset(sRandomizedWildCache, 0, sizeof(sRandomizedWildCache));
+}
+
 #include "data/wild_encounters.h"
 
 const struct WildPokemon gWildFeebas = {20, 25, SPECIES_FEEBAS};
