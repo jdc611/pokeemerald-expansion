@@ -64,6 +64,9 @@ extern EWRAM_DATA u16 gRunSetupFilterValue;
 extern EWRAM_DATA u8 gRunSetupBstMode;
 extern EWRAM_DATA u8 gRunSetupAbilityMode;
 extern EWRAM_DATA bool8 gRunSetupMinimalGrindingMode;
+extern EWRAM_DATA u8 gRunSetupDifficulty;
+extern EWRAM_DATA u8 gRunSetupMovesetMode;
+extern EWRAM_DATA u8 gRunSetupEvolutionMode;
 extern const u8 EventScript_ResetAllMapFlags[];
 extern const u8 EventScript_ResetAllMapFlagsFrlg[];
 
@@ -257,6 +260,10 @@ gSaveBlock3Ptr->filterValue = gRunSetupFilterValue;
 gSaveBlock3Ptr->bstMode = gRunSetupBstMode;
 gSaveBlock3Ptr->abilityMode = gRunSetupAbilityMode;
 gSaveBlock3Ptr->minimalGrindingMode = gRunSetupMinimalGrindingMode;
+gSaveBlock3Ptr->runDifficulty = gRunSetupDifficulty;
+gSaveBlock3Ptr->movesetMode = gRunSetupMovesetMode;
+gSaveBlock3Ptr->evolutionMode = gRunSetupEvolutionMode;
+SetCurrentDifficultyLevel(gRunSetupDifficulty == RUN_DIFFICULTY_NUZLOCKE ? DIFFICULTY_HARD : gRunSetupDifficulty);
 gSaveBlock3Ptr->futureEvolutionEligible = FALSE;
     ClearFollowerNPCData();
 }

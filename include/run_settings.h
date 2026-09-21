@@ -30,6 +30,14 @@ enum RunFilterMode
     RUN_FILTER_ABILITY,
     RUN_FILTER_TYPE_ABILITY,
     RUN_FILTER_GENERATION,
+    RUN_FILTER_BST_LIMIT,
+};
+
+enum RunPartyLegalityReason
+{
+    RUN_PARTY_LEGAL,
+    RUN_PARTY_ILLEGAL_FILTER,
+    RUN_PARTY_ILLEGAL_MEGA_LIMIT,
 };
 
 enum RunDifficulty

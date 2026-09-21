@@ -284,6 +284,9 @@ struct SaveBlock3
     u8 minimalGrindingMode;
     u8 bstMode;
     u8 abilityMode;
+    u8 runDifficulty;
+    u8 movesetMode;
+    u8 evolutionMode;
 }; /* max size 1624 bytes */
 
 extern struct SaveBlock3 *gSaveBlock3Ptr;
