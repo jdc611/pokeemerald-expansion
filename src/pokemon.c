@@ -3356,65 +3356,153 @@ u8 GetRandomEvolutionLevelForSettings(enum Species species, u32 seed)
     return 28 + (hash % 5);
 }
 
-static bool32 IsRandomEvolutionCandidate(enum Species candidate, bool32 wantMiddle, bool32 wantSpecial)
-{
-    u32 bst;
-    if (candidate <= SPECIES_NONE || candidate >= NUM_SPECIES || candidate == SPECIES_EGG)
-        return FALSE;
-    if (!IsSpeciesEnabled(candidate) || GET_BASE_SPECIES_ID(candidate) != candidate)
-        return FALSE;
-    if (gSpeciesInfo[candidate].isMegaEvolution || IsRunSpecialLegendary(candidate) != wantSpecial)
-        return FALSE;
+#define RANDOM_EVO_CLASS_HAS_PREV    (1 << 0)
+#define RANDOM_EVO_CLASS_HAS_NEXT    (1 << 1)
+#define RANDOM_EVO_CLASS_THREE_START (1 << 2)
 
-    bst = GetOriginalRunBst(candidate);
-    if (wantMiddle)
-        return GetSpeciesPreEvolution(candidate) != SPECIES_NONE && SpeciesHasFurtherEvolution(candidate) && bst >= 280 && bst <= 520;
-    return !SpeciesHasFurtherEvolution(candidate) && (wantSpecial || bst >= 400);
+EWRAM_DATA static bool8 sRandomEvolutionPoolsBuilt = FALSE;
+EWRAM_DATA static u8 sRandomEvolutionClass[NUM_SPECIES] = {0};
+EWRAM_DATA static enum Species sRandomEvolutionMiddlePool[NUM_SPECIES] = {0};
+EWRAM_DATA static enum Species sRandomEvolutionFinalPool[NUM_SPECIES] = {0};
+EWRAM_DATA static enum Species sRandomEvolutionSpecialPool[NUM_SPECIES] = {0};
+EWRAM_DATA static u16 sRandomEvolutionMiddleCount = 0;
+EWRAM_DATA static u16 sRandomEvolutionFinalCount = 0;
+EWRAM_DATA static u16 sRandomEvolutionSpecialCount = 0;
+
+static void BuildRandomEvolutionPools(void)
+{
+    enum Species candidate;
+    u32 i;
+
+    if (sRandomEvolutionPoolsBuilt)
+        return;
+
+    // Build the evolution graph classification in O(species + evolutions).
+    // In particular, avoid GetSpeciesPreEvolution here: that helper scans the
+    // entire species table and was the main source of the setup-screen stall.
+    for (candidate = SPECIES_BULBASAUR; candidate < NUM_SPECIES; candidate++)
+    {
+        const struct Evolution *evolutions;
+
+        if (!IsSpeciesEnabled(candidate))
+            continue;
+        evolutions = GetSpeciesEvolutions(candidate);
+        if (evolutions == NULL)
+            continue;
+
+        for (i = 0; evolutions[i].method != EVOLUTIONS_END; i++)
+        {
+            enum Species target = SanitizeSpeciesId(evolutions[i].targetSpecies);
+            if (target <= SPECIES_NONE || target >= NUM_SPECIES)
+                continue;
+            sRandomEvolutionClass[candidate] |= RANDOM_EVO_CLASS_HAS_NEXT;
+            sRandomEvolutionClass[target] |= RANDOM_EVO_CLASS_HAS_PREV;
+        }
+    }
+
+    for (candidate = SPECIES_BULBASAUR; candidate < NUM_SPECIES; candidate++)
+    {
+        const struct Evolution *evolutions;
+
+        if (sRandomEvolutionClass[candidate] & RANDOM_EVO_CLASS_HAS_PREV)
+            continue;
+        evolutions = GetSpeciesEvolutions(candidate);
+        if (evolutions == NULL)
+            continue;
+
+        for (i = 0; evolutions[i].method != EVOLUTIONS_END; i++)
+        {
+            enum Species target = SanitizeSpeciesId(evolutions[i].targetSpecies);
+            if (target > SPECIES_NONE && target < NUM_SPECIES
+             && (sRandomEvolutionClass[target] & RANDOM_EVO_CLASS_HAS_NEXT))
+            {
+                sRandomEvolutionClass[candidate] |= RANDOM_EVO_CLASS_THREE_START;
+                break;
+            }
+        }
+    }
+
+    // Candidate membership never depends on seed, so cache these pools once.
+    for (candidate = SPECIES_BULBASAUR; candidate < NUM_SPECIES; candidate++)
+    {
+        u32 bst;
+        bool32 special;
+
+        if (!IsSpeciesEnabled(candidate) || GET_BASE_SPECIES_ID(candidate) != candidate
+         || gSpeciesInfo[candidate].isMegaEvolution)
+            continue;
+
+        bst = GetOriginalRunBst(candidate);
+        special = IsRunSpecialLegendary(candidate);
+
+        if (!special
+         && (sRandomEvolutionClass[candidate] & RANDOM_EVO_CLASS_HAS_PREV)
+         && (sRandomEvolutionClass[candidate] & RANDOM_EVO_CLASS_HAS_NEXT)
+         && bst >= 280 && bst <= 520)
+            sRandomEvolutionMiddlePool[sRandomEvolutionMiddleCount++] = candidate;
+
+        if (!(sRandomEvolutionClass[candidate] & RANDOM_EVO_CLASS_HAS_NEXT))
+        {
+            if (special)
+                sRandomEvolutionSpecialPool[sRandomEvolutionSpecialCount++] = candidate;
+            else if (bst >= 400)
+                sRandomEvolutionFinalPool[sRandomEvolutionFinalCount++] = candidate;
+        }
+    }
+
+    sRandomEvolutionPoolsBuilt = TRUE;
 }
 
 enum Species GetRandomEvolutionTargetForSettings(enum Species species, u8 difficulty, u32 seed)
 {
+    const enum Species *pool;
+    u32 count;
     bool32 wantMiddle;
     bool32 wantSpecial;
     u32 hash;
-    u32 count = 0;
     u32 pick;
-    enum Species candidate;
 
     species = SanitizeSpeciesId(species);
-    if (!SpeciesHasFurtherEvolution(species))
+    BuildRandomEvolutionPools();
+
+    if (species <= SPECIES_NONE || species >= NUM_SPECIES
+     || !(sRandomEvolutionClass[species] & RANDOM_EVO_CLASS_HAS_NEXT))
         return SPECIES_NONE;
 
-    wantMiddle = SpeciesBeginsThreeStageLine(species);
+    wantMiddle = (sRandomEvolutionClass[species] & RANDOM_EVO_CLASS_THREE_START) != 0;
     hash = RunEvolutionHash(seed ^ ((u32)species * 0xA24BAED5));
     wantSpecial = !wantMiddle
                && difficulty != RUN_DIFFICULTY_HARD
                && difficulty != RUN_DIFFICULTY_NUZLOCKE
                && (hash % 100) < 8;
 
-    for (candidate = SPECIES_BULBASAUR; candidate < NUM_SPECIES; candidate++)
-        if (candidate != species && IsRandomEvolutionCandidate(candidate, wantMiddle, wantSpecial))
-            count++;
-
-    if (count == 0 && wantSpecial)
+    if (wantMiddle)
     {
-        wantSpecial = FALSE;
-        for (candidate = SPECIES_BULBASAUR; candidate < NUM_SPECIES; candidate++)
-            if (candidate != species && IsRandomEvolutionCandidate(candidate, wantMiddle, FALSE))
-                count++;
+        pool = sRandomEvolutionMiddlePool;
+        count = sRandomEvolutionMiddleCount;
     }
+    else if (wantSpecial && sRandomEvolutionSpecialCount != 0)
+    {
+        pool = sRandomEvolutionSpecialPool;
+        count = sRandomEvolutionSpecialCount;
+    }
+    else
+    {
+        pool = sRandomEvolutionFinalPool;
+        count = sRandomEvolutionFinalCount;
+    }
+
     if (count == 0)
         return SPECIES_NONE;
 
     pick = RunEvolutionHash(hash ^ 0xC2B2AE35) % count;
-    for (candidate = SPECIES_BULBASAUR; candidate < NUM_SPECIES; candidate++)
+    if (pool[pick] == species)
     {
-        if (candidate == species || !IsRandomEvolutionCandidate(candidate, wantMiddle, wantSpecial))
-            continue;
-        if (pick-- == 0)
-            return candidate;
+        if (count == 1)
+            return SPECIES_NONE;
+        pick = (pick + 1) % count;
     }
-    return SPECIES_NONE;
+    return pool[pick];
 }
 
 static bool32 DoesSpeciesOrReachableFormMatchRunFilterInternal(enum Species species, u8 filterMode, u16 filterValue,
