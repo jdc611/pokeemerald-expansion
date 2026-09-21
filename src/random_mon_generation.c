@@ -4,6 +4,7 @@
 #include "pokemon.h"
 #include "random.h"
 #include "random_mon_generation.h"
+#include "run_settings.h"
 #include "script.h"
 #include "constants/hold_effects.h"
 #include "constants/items.h"
@@ -198,8 +199,6 @@ static bool32 IsTypeAbilityFilteredWildSpeciesFilterFunc(enum Species species, c
 {
     struct FilterFuncArgs scaledArgs;
     u32 packed = filterFuncArgs->arg1;
-    enum Type type = packed & 31;
-    enum Ability ability = packed >> 5;
 
     if (!DoesSpeciesOrReachableFormMatchRunFilterForSettings(species, RUN_FILTER_TYPE_ABILITY, packed,
                                                               gSaveBlock3Ptr->abilityMode, gSaveBlock3Ptr->evolutionMode,
