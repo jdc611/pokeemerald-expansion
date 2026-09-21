@@ -1470,6 +1470,8 @@ void BoxMonToMon(const struct BoxPokemon *src, struct Pokemon *dest)
     CalculateMonStats(dest);
     value = GetMonData(dest, MON_DATA_MAX_HP) - value;
     SetMonData(dest, MON_DATA_HP, &value);
+    if (IsMinimalGrindingMode())
+        ApplyMinimalGrindingModeToMon(dest);
 }
 
 u8 GetLevelFromMonExp(struct Pokemon *mon)
@@ -2943,6 +2945,9 @@ u8 GiveCapturedMonToPlayer(struct Pokemon *mon)
 {
     s32 i;
 
+    if (IsMinimalGrindingMode())
+        ApplyMinimalGrindingModeToMon(mon);
+
     SetMonData(mon, MON_DATA_OT_NAME, gSaveBlock2Ptr->playerName);
     SetMonData(mon, MON_DATA_OT_GENDER, &gSaveBlock2Ptr->playerGender);
     SetMonData(mon, MON_DATA_OT_ID, gSaveBlock2Ptr->playerTrainerId);
@@ -3216,9 +3221,36 @@ enum Type GetSpeciesType(enum Species species, u8 slot)
     return gSpeciesInfo[SanitizeSpeciesId(species)].types[slot];
 }
 
+static u32 RunAbilityHash(u32 value)
+{
+    value ^= value >> 16;
+    value *= 0x7FEB352D;
+    value ^= value >> 15;
+    value *= 0x846CA68B;
+    value ^= value >> 16;
+    return value;
+}
+
+enum Ability GetRandomizedAbilityForSeed(enum Species species, u8 slot, u32 seed)
+{
+    u32 hash;
+
+    species = SanitizeSpeciesId(species);
+    if (species == SPECIES_NONE || species == SPECIES_EGG || slot >= NUM_ABILITY_SLOTS)
+        return ABILITY_NONE;
+
+    hash = RunAbilityHash(seed ^ ((u32)species * 0x9E3779B9) ^ ((u32)slot * 0x85EBCA6B));
+    return 1 + (hash % (ABILITIES_COUNT - 1));
+}
+
 enum Ability GetSpeciesAbility(enum Species species, u8 slot)
 {
-    return gSpeciesInfo[SanitizeSpeciesId(species)].abilities[slot];
+    species = SanitizeSpeciesId(species);
+
+    if (gSaveBlock3Ptr != NULL && gSaveBlock3Ptr->abilityMode == RUN_ABILITIES_RANDOM)
+        return GetRandomizedAbilityForSeed(species, slot, gSaveBlock3Ptr->worldSeed);
+
+    return gSpeciesInfo[species].abilities[slot];
 }
 
 static u32 GetRawSpeciesBaseStat(enum Species species, u32 statIndex)
@@ -6810,6 +6842,9 @@ u32 GiveScriptedMonToPlayer(struct Pokemon *mon, u8 slot)
 {
     u32 sentToPc;
     u32 i = 0;
+
+    if (IsMinimalGrindingMode())
+        ApplyMinimalGrindingModeToMon(mon);
     if (slot < PARTY_SIZE)
     {
         CopyMon(&gParties[B_TRAINER_PLAYER][slot], mon, sizeof(struct Pokemon));

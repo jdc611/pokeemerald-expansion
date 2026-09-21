@@ -131,7 +131,9 @@ bool32 IsMinimalGrindingMode(void)
 void ApplyMinimalGrindingModeToMon(struct Pokemon *mon)
 {
     u8 perfectIv = MAX_PER_STAT_IVS;
-    u8 neutralEv = 85;
+    // 85 in all six stats uses the full legal 510 EV budget with no grinding
+    // and keeps MGM neutral rather than forcing one competitive EV spread.
+    u8 neutralEv = MAX_TOTAL_EVS / NUM_STATS;
 
     if (mon == NULL || GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
         return;

@@ -853,6 +853,7 @@ u32 GetSpeciesHeight(enum Species species);
 u32 GetSpeciesWeight(enum Species species);
 enum Type GetSpeciesType(enum Species species, u8 slot);
 enum Ability GetSpeciesAbility(enum Species species, u8 slot);
+enum Ability GetRandomizedAbilityForSeed(enum Species species, u8 slot, u32 seed);
 u32 GetSpeciesBaseHP(enum Species species);
 u32 GetSpeciesBaseAttack(enum Species species);
 u32 GetSpeciesBaseDefense(enum Species species);

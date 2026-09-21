@@ -65,6 +65,12 @@ enum RunBstMode
     RUN_BST_RANDOM,
 };
 
+enum RunAbilityMode
+{
+    RUN_ABILITIES_NORMAL,
+    RUN_ABILITIES_RANDOM,
+};
+
 #define RUN_SETUP_PAGE_PLAY_STYLE  0
 #define RUN_SETUP_PAGE_RANDOMIZER  1
 #define RUN_SETUP_PAGE_FILTERS     2

@@ -62,6 +62,8 @@ extern EWRAM_DATA u32 gRunSetupWorldSeed;
 extern EWRAM_DATA u8 gRunSetupFilterMode;
 extern EWRAM_DATA u16 gRunSetupFilterValue;
 extern EWRAM_DATA u8 gRunSetupBstMode;
+extern EWRAM_DATA u8 gRunSetupAbilityMode;
+extern EWRAM_DATA bool8 gRunSetupMinimalGrindingMode;
 extern const u8 EventScript_ResetAllMapFlags[];
 extern const u8 EventScript_ResetAllMapFlagsFrlg[];
 
@@ -253,6 +255,8 @@ gSaveBlock3Ptr->rivalMode = RUN_RIVAL_NORMAL;
 gSaveBlock3Ptr->filterMode = gRunSetupFilterMode;
 gSaveBlock3Ptr->filterValue = gRunSetupFilterValue;
 gSaveBlock3Ptr->bstMode = gRunSetupBstMode;
+gSaveBlock3Ptr->abilityMode = gRunSetupAbilityMode;
+gSaveBlock3Ptr->minimalGrindingMode = gRunSetupMinimalGrindingMode;
 gSaveBlock3Ptr->futureEvolutionEligible = FALSE;
     ClearFollowerNPCData();
 }
