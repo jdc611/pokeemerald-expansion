@@ -121,6 +121,7 @@ EWRAM_DATA static u8 (*sSaveDialogCallback)(void) = NULL;
 EWRAM_DATA static u8 sSaveDialogTimer = 0;
 EWRAM_DATA static bool8 sSavingComplete = FALSE;
 EWRAM_DATA static u8 sSaveInfoWindowId = 0;
+EWRAM_DATA static u8 sGameInfoScroll = 0;
 
 // Menu action callbacks
 static bool8 StartMenuPokedexCallback(void);
@@ -257,6 +258,16 @@ static const u8 sText_GameInfoUnknown[] = _("UNKNOWN");
 static const u8 sText_GameInfoCap[] = _("LEVEL CAP: {STR_VAR_1}");
 static const u8 sText_GameInfoMgmOn[] = _("MGM: ON");
 static const u8 sText_GameInfoMgmOff[] = _("MGM: OFF");
+static const u8 sText_GameInfoDifficulty[] = _("DIFFICULTY: ");
+static const u8 sText_GameInfoMovesets[] = _("MOVESETS: ");
+static const u8 sText_GameInfoEvolutions[] = _("EVOLUTIONS: ");
+static const u8 sText_GameInfoAbilities[] = _("ABILITIES: ");
+static const u8 sText_GameInfoTypeFilter[] = _("TYPE FILTER: ");
+static const u8 sText_GameInfoAbilityFilter[] = _("ABILITY FILTER: ");
+static const u8 sText_GameInfoEasy[] = _("EASY");
+static const u8 sText_GameInfoHard[] = _("HARD");
+static const u8 sText_GameInfoNuzlocke[] = _("NUZLOCKE");
+static const u8 sText_GameInfoAll[] = _("ALL");
 static const u8 sText_MgmOn[] = _("MGM: ON");
 static const u8 sText_MgmOff[] = _("MGM: OFF");
 
@@ -1779,71 +1790,134 @@ static void PrintGameInfoLine(const u8 *text, u8 y)
     AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_NORMAL, text, 8, y, TEXT_SKIP_DRAW, NULL);
 }
 
+static void BuildGameInfoLine(u8 row)
+{
+    u8 type = TYPE_NONE;
+    u16 ability = ABILITY_NONE;
+
+    if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE)
+        type = gSaveBlock3Ptr->filterValue;
+    else if (gSaveBlock3Ptr->filterMode == RUN_FILTER_ABILITY)
+        ability = gSaveBlock3Ptr->filterValue;
+    else if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE_ABILITY)
+    {
+        type = gSaveBlock3Ptr->filterValue & 31;
+        ability = gSaveBlock3Ptr->filterValue >> 5;
+    }
+
+    switch (row)
+    {
+    case 0:
+        StringCopy(gStringVar4, sText_GameInfoDifficulty);
+        StringAppend(gStringVar4, gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_EASY ? sText_GameInfoEasy
+                                : gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_HARD ? sText_GameInfoHard
+                                : gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE ? sText_GameInfoNuzlocke
+                                : sText_GameInfoNormal);
+        break;
+    case 1:
+        StringCopy(gStringVar4, sText_GameInfoWild);
+        StringAppend(gStringVar4, gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED ? sText_GameInfoScaled
+                                : gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_RANDOM ? sText_GameInfoRandom
+                                : sText_GameInfoNormal);
+        break;
+    case 2:
+        StringCopy(gStringVar4, sText_GameInfoStarters);
+        StringAppend(gStringVar4, gSaveBlock3Ptr->starterMode == RUN_STARTER_RANDOM ? sText_GameInfoRandom
+                                : gSaveBlock3Ptr->starterMode == RUN_STARTER_CHOOSE ? sText_GameInfoCustom
+                                : sText_GameInfoHoenn);
+        break;
+    case 3:
+        StringCopy(gStringVar4, sText_GameInfoMovesets);
+        StringAppend(gStringVar4, gSaveBlock3Ptr->movesetMode == RUN_MOVESETS_RANDOM ? sText_GameInfoRandom : sText_GameInfoNormal);
+        break;
+    case 4:
+        StringCopy(gStringVar4, sText_GameInfoEvolutions);
+        StringAppend(gStringVar4, gSaveBlock3Ptr->evolutionMode == RUN_EVOLUTIONS_RANDOM ? sText_GameInfoRandom : sText_GameInfoNormal);
+        break;
+    case 5:
+        StringCopy(gStringVar4, sText_GameInfoBst);
+        StringAppend(gStringVar4, gSaveBlock3Ptr->bstMode == RUN_BST_SHUFFLE ? sText_GameInfoBstShuffle
+                                : gSaveBlock3Ptr->bstMode == RUN_BST_RANDOM ? sText_GameInfoRandom
+                                : sText_GameInfoBstOff);
+        break;
+    case 6:
+        StringCopy(gStringVar4, sText_GameInfoAbilities);
+        StringAppend(gStringVar4, gSaveBlock3Ptr->abilityMode == RUN_ABILITIES_RANDOM ? sText_GameInfoRandom : sText_GameInfoNormal);
+        break;
+    case 7:
+        StringCopy(gStringVar4, sText_GameInfoTypeFilter);
+        StringAppend(gStringVar4, type == TYPE_NONE ? sText_GameInfoAll : gTypesInfo[type].name);
+        break;
+    case 8:
+        StringCopy(gStringVar4, sText_GameInfoAbilityFilter);
+        StringAppend(gStringVar4, ability == ABILITY_NONE ? sText_GameInfoAll : gAbilitiesInfo[ability].name);
+        break;
+    case 9:
+        ConvertIntToDecimalStringN(gStringVar1, gSaveBlock3Ptr->worldSeed, STR_CONV_MODE_LEFT_ALIGN, 8);
+        StringExpandPlaceholders(gStringVar4, sText_GameInfoSeedValue);
+        StringAppend(gStringVar4, VarGet(VAR_RUN_SEED_SOURCE) == 2 ? sText_GameInfoCustom
+                                : VarGet(VAR_RUN_SEED_SOURCE) == 1 ? sText_GameInfoRandom
+                                : sText_GameInfoUnknown);
+        break;
+    case 10:
+        StringCopy(gStringVar4, IsMinimalGrindingMode() ? sText_GameInfoMgmOn : sText_GameInfoMgmOff);
+        break;
+    default:
+        ConvertIntToDecimalStringN(gStringVar1, GetCurrentLevelCap(), STR_CONV_MODE_LEFT_ALIGN, 3);
+        StringExpandPlaceholders(gStringVar4, sText_GameInfoCap);
+        break;
+    }
+}
+
+static void DrawGameInfo(void)
+{
+    u8 row;
+    FillWindowPixelBuffer(GetStartMenuWindowId(), PIXEL_FILL(1));
+    PrintGameInfoLine(sText_GameInfoTitle, 9);
+    PrintGameInfoLine(sText_GameInfoVersion, 25);
+    for (row = 0; row < 6; row++)
+    {
+        BuildGameInfoLine(sGameInfoScroll + row);
+        PrintGameInfoLine(gStringVar4, 41 + row * 16);
+    }
+    if (sGameInfoScroll > 0 || sGameInfoScroll < 6)
+        PrintGameInfoLine(COMPOUND_STRING("▲/▼ SCROLL   A/B BACK"), 137);
+    else
+        PrintGameInfoLine(sText_GameInfoBack, 137);
+    PutWindowTilemap(GetStartMenuWindowId());
+    CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_FULL);
+}
+
 static bool8 StartMenuGameInfo(void)
 {
     u8 windowId;
-
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();
     windowId = AddGameOptionsWindow(9);
     DrawStdWindowFrame(windowId, FALSE);
-    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
-
-    PrintGameInfoLine(sText_GameInfoTitle, 9);
-    PrintGameInfoLine(sText_GameInfoVersion, 25);
-
-    StringCopy(gStringVar4, sText_GameInfoWild);
-    if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_SCALED)
-        StringAppend(gStringVar4, sText_GameInfoScaled);
-    else if (gSaveBlock3Ptr->randomizerEnabled == RUN_WILD_RANDOM)
-        StringAppend(gStringVar4, sText_GameInfoRandom);
-    else
-        StringAppend(gStringVar4, sText_GameInfoNormal);
-    PrintGameInfoLine(gStringVar4, 41);
-
-    StringCopy(gStringVar4, sText_GameInfoStarters);
-    if (gSaveBlock3Ptr->starterMode == RUN_STARTER_RANDOM)
-        StringAppend(gStringVar4, sText_GameInfoRandom);
-    else if (gSaveBlock3Ptr->starterMode == RUN_STARTER_CHOOSE)
-        StringAppend(gStringVar4, sText_GameInfoCustom);
-    else
-        StringAppend(gStringVar4, sText_GameInfoHoenn);
-    PrintGameInfoLine(gStringVar4, 57);
-
-    ConvertIntToDecimalStringN(gStringVar1, gSaveBlock3Ptr->worldSeed, STR_CONV_MODE_LEFT_ALIGN, 8);
-    StringExpandPlaceholders(gStringVar4, sText_GameInfoSeedValue);
-    if (VarGet(VAR_RUN_SEED_SOURCE) == 2)
-        StringAppend(gStringVar4, sText_GameInfoCustom);
-    else if (VarGet(VAR_RUN_SEED_SOURCE) == 1)
-        StringAppend(gStringVar4, sText_GameInfoRandom);
-    else
-        StringAppend(gStringVar4, sText_GameInfoUnknown);
-    PrintGameInfoLine(gStringVar4, 73);
-
-    StringCopy(gStringVar4, sText_GameInfoBst);
-    if (gSaveBlock3Ptr->bstMode == RUN_BST_SHUFFLE)
-        StringAppend(gStringVar4, sText_GameInfoBstShuffle);
-    else if (gSaveBlock3Ptr->bstMode == RUN_BST_RANDOM)
-        StringAppend(gStringVar4, sText_GameInfoRandom);
-    else
-        StringAppend(gStringVar4, sText_GameInfoBstOff);
-    PrintGameInfoLine(gStringVar4, 89);
-
-    ConvertIntToDecimalStringN(gStringVar1, GetCurrentLevelCap(), STR_CONV_MODE_LEFT_ALIGN, 3);
-    StringExpandPlaceholders(gStringVar4, sText_GameInfoCap);
-    PrintGameInfoLine(gStringVar4, 105);
-    PrintGameInfoLine(IsMinimalGrindingMode() ? sText_GameInfoMgmOn : sText_GameInfoMgmOff, 121);
-    PrintGameInfoLine(sText_GameInfoBack, 137);
-
-    PutWindowTilemap(windowId);
-    CopyWindowToVram(windowId, COPYWIN_FULL);
+    sGameInfoScroll = 0;
+    DrawGameInfo();
     gMenuCallback = HandleGameInfoInput;
     return FALSE;
 }
 
 static bool8 HandleGameInfoInput(void)
 {
-    if (JOY_NEW(A_BUTTON | B_BUTTON))
+    if (JOY_NEW(DPAD_UP))
+    {
+        if (sGameInfoScroll > 0)
+            sGameInfoScroll--;
+        PlaySE(SE_SELECT);
+        DrawGameInfo();
+    }
+    else if (JOY_NEW(DPAD_DOWN))
+    {
+        if (sGameInfoScroll < 6)
+            sGameInfoScroll++;
+        PlaySE(SE_SELECT);
+        DrawGameInfo();
+    }
+    else if (JOY_NEW(A_BUTTON | B_BUTTON))
     {
         PlaySE(SE_SELECT);
         ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);

@@ -109,6 +109,8 @@ enum {
     MSG_ITEM_IS_HELD,
     MSG_CHANGED_TO_ITEM,
     MSG_CANT_STORE_MAIL,
+    MSG_RUN_FILTER_BLOCKED,
+    MSG_MEGA_LIMIT,
 };
 
 // IDs for how to resolve variables in the above messages
@@ -1079,6 +1081,8 @@ static const struct StorageMessage sMessages[] =
     [MSG_ITEM_IS_HELD]         = {COMPOUND_STRING("{DYNAMIC 0} is now held."),   MSG_VAR_ITEM_NAME},
     [MSG_CHANGED_TO_ITEM]      = {COMPOUND_STRING("Changed to {DYNAMIC 0}."),    MSG_VAR_ITEM_NAME},
     [MSG_CANT_STORE_MAIL]      = {COMPOUND_STRING("MAIL can't be stored!"),      MSG_VAR_NONE},
+    [MSG_RUN_FILTER_BLOCKED]   = {COMPOUND_STRING("That POKéMON doesn't currently meet\nyour active run filter."), MSG_VAR_NONE},
+    [MSG_MEGA_LIMIT]           = {COMPOUND_STRING("Only one permanent MEGA may be\nin your party."), MSG_VAR_NONE},
 };
 
 static const struct WindowTemplate sYesNoWindowTemplate =
@@ -2793,9 +2797,21 @@ static void Task_WithdrawMon(u8 taskId)
     switch (sStorage->state)
     {
     case 0:
+    {
+        enum Species species = GetCurrentBoxMonData(sCursorPosition, MON_DATA_SPECIES);
         if (CalculatePlayerPartyCount() == PARTY_SIZE)
         {
             PrintMessage(MSG_PARTY_FULL);
+            sStorage->state = 1;
+        }
+        else if (!DoesSpeciesMatchActiveRunFilter(species))
+        {
+            PrintMessage(MSG_RUN_FILTER_BLOCKED);
+            sStorage->state = 1;
+        }
+        else if (gSpeciesInfo[SanitizeSpeciesId(species)].isMegaEvolution && PlayerPartyHasPermanentMega())
+        {
+            PrintMessage(MSG_MEGA_LIMIT);
             sStorage->state = 1;
         }
         else
@@ -2805,6 +2821,7 @@ static void Task_WithdrawMon(u8 taskId)
             sStorage->state = 2;
         }
         break;
+    }
     case 1:
         if (JOY_NEW(A_BUTTON | B_BUTTON | DPAD_ANY))
         {

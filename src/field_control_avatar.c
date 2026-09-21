@@ -32,6 +32,7 @@
 #include "secret_base.h"
 #include "sound.h"
 #include "start_menu.h"
+#include "string_util.h"
 #include "trainer_see.h"
 #include "trainer_hill.h"
 #include "vs_seeker.h"
@@ -47,6 +48,9 @@
 
 static EWRAM_DATA u8 sWildEncounterImmunitySteps = 0;
 static EWRAM_DATA u16 sPrevMetatileBehavior = 0;
+
+static const u8 sText_RunFilterPartyBlocked[] = _("{STR_VAR_1} doesn't currently meet\nthe active run filter.\pDeposit it in the PC before\ncontinuing.");
+static const u8 sText_RunMegaPartyBlocked[] = _("Only one permanent MEGA may be\nin your party.\pDeposit one before continuing.");
 
 COMMON_DATA u8 gSelectedObjectEvent = 0;
 
@@ -171,6 +175,29 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     gSelectedObjectEvent = 0;
 
     gMsgIsSignPost = FALSE;
+
+    if (input->heldDirection)
+    {
+        u8 badPartyIndex;
+        u8 reason;
+        if (!IsPlayerPartyLegalForRun(&badPartyIndex, &reason))
+        {
+            if (IsFieldMessageBoxHidden())
+            {
+                if (reason == RUN_PARTY_ILLEGAL_FILTER)
+                {
+                    GetMonData(&gParties[B_TRAINER_PLAYER][badPartyIndex], MON_DATA_NICKNAME, gStringVar1);
+                    StringGet_Nickname(gStringVar1);
+                    StringExpandPlaceholders(gStringVar4, sText_RunFilterPartyBlocked);
+                    ShowFieldMessage(gStringVar4);
+                }
+                else
+                    ShowFieldMessage(sText_RunMegaPartyBlocked);
+            }
+            return TRUE;
+        }
+    }
+
     playerDirection = GetPlayerFacingDirection();
     GetPlayerPosition(&position);
     metatileBehavior = MapGridGetMetatileBehaviorAt(position.x, position.y);
