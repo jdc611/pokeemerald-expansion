@@ -288,6 +288,7 @@ static void MainMenu_FormatSavegameTime(void);
 static void MainMenu_FormatSavegameBadges(void);
 static void Task_NewGameBirchSpeech_AskRandomizer(u8 taskId);
 static u32 ParseCustomSeed(const u8 *str);
+extern EWRAM_DATA bool8 gSeedNamingCancelled;
 
 // .rodata
 
@@ -2392,7 +2393,14 @@ static void RunSetup_Draw(u8 cursor)
 
 static void CB2_RunSetup_ReturnFromSeed(void)
 {
-    if (gStringVar2[0] == EOS)
+    if (gSeedNamingCancelled)
+    {
+        gSeedNamingCancelled = FALSE;
+        sRunSetupPage = RUN_SETUP_PAGE_CONFIRM;
+        sRunSetupConfirm = FALSE;
+        sRunSetupEmptySeed = FALSE;
+    }
+    else if (gStringVar2[0] == EOS)
     {
         sRunSetupConfirm = FALSE;
         sRunSetupEmptySeed = TRUE;
@@ -2759,6 +2767,7 @@ static void Task_RunSetup_Input(u8 taskId)
             {
                 PlaySE(SE_SELECT);
                 gStringVar2[0] = EOS;
+                gSeedNamingCancelled = FALSE;
                 RunSetup_DestroyIcons();
                 FreeAllWindowBuffers();
                 DestroyTask(taskId);

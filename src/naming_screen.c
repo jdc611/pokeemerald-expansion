@@ -184,6 +184,7 @@ struct NamingScreenData
 };
 
 EWRAM_DATA static struct NamingScreenData *sNamingScreen = NULL;
+EWRAM_DATA bool8 gSeedNamingCancelled = FALSE;
 
 static const u8 sPCIconOff_Gfx[] = INCGFX_U8("graphics/naming_screen/pc_icon_off.png", ".4bpp");
 static const u8 sPCIconOn_Gfx[] = INCGFX_U8("graphics/naming_screen/pc_icon_on.png", ".4bpp");
@@ -1531,6 +1532,14 @@ static bool8 HandleKeyboardEvent(void)
     }
     else if (input == INPUT_B_BUTTON)
     {
+        if (sNamingScreen->templateNum == NAMING_SCREEN_SEED)
+        {
+            gSeedNamingCancelled = TRUE;
+            SetInputState(INPUT_STATE_DISABLED);
+            SetCursorFlashing(FALSE);
+            sNamingScreen->state = STATE_FADE_OUT;
+            return TRUE;
+        }
         DeleteTextCharacter();
         return FALSE;
     }
