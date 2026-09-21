@@ -1,5 +1,6 @@
 #include "global.h"
 #include "config/save.h"
+#include "battle_main.h"
 #include "battle_pike.h"
 #include "battle_pyramid.h"
 #include "battle_pyramid_bag.h"
