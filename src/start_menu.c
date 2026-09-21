@@ -243,7 +243,10 @@ static const u8 sText_GameInfoVersion[] = _("VERSION: DEVELOPMENT");
 static const u8 sText_GameInfoWild[] = _("WILD: ");
 static const u8 sText_GameInfoStarters[] = _("STARTERS: ");
 static const u8 sText_GameInfoSeed[] = _("SEED: ");
-static const u8 sText_GameInfoValue[] = _("VALUE: {STR_VAR_1}");
+static const u8 sText_GameInfoSeedValue[] = _("SEED: {STR_VAR_1} ");
+static const u8 sText_GameInfoBst[] = _("BST: ");
+static const u8 sText_GameInfoBstOff[] = _("OFF");
+static const u8 sText_GameInfoBstShuffle[] = _("SHUFFLE");
 static const u8 sText_GameInfoBack[] = _("A/B: BACK");
 static const u8 sText_GameInfoNormal[] = _("NORMAL");
 static const u8 sText_GameInfoHoenn[] = _("HOENN");
@@ -1807,7 +1810,8 @@ static bool8 StartMenuGameInfo(void)
         StringAppend(gStringVar4, sText_GameInfoHoenn);
     PrintGameInfoLine(gStringVar4, 57);
 
-    StringCopy(gStringVar4, sText_GameInfoSeed);
+    ConvertIntToDecimalStringN(gStringVar1, gSaveBlock3Ptr->worldSeed, STR_CONV_MODE_LEFT_ALIGN, 8);
+    StringExpandPlaceholders(gStringVar4, sText_GameInfoSeedValue);
     if (VarGet(VAR_RUN_SEED_SOURCE) == 2)
         StringAppend(gStringVar4, sText_GameInfoCustom);
     else if (VarGet(VAR_RUN_SEED_SOURCE) == 1)
@@ -1816,8 +1820,13 @@ static bool8 StartMenuGameInfo(void)
         StringAppend(gStringVar4, sText_GameInfoUnknown);
     PrintGameInfoLine(gStringVar4, 73);
 
-    ConvertIntToDecimalStringN(gStringVar1, gSaveBlock3Ptr->worldSeed, STR_CONV_MODE_LEFT_ALIGN, 8);
-    StringExpandPlaceholders(gStringVar4, sText_GameInfoValue);
+    StringCopy(gStringVar4, sText_GameInfoBst);
+    if (gSaveBlock3Ptr->bstMode == RUN_BST_SHUFFLE)
+        StringAppend(gStringVar4, sText_GameInfoBstShuffle);
+    else if (gSaveBlock3Ptr->bstMode == RUN_BST_RANDOM)
+        StringAppend(gStringVar4, sText_GameInfoRandom);
+    else
+        StringAppend(gStringVar4, sText_GameInfoBstOff);
     PrintGameInfoLine(gStringVar4, 89);
 
     ConvertIntToDecimalStringN(gStringVar1, GetCurrentLevelCap(), STR_CONV_MODE_LEFT_ALIGN, 3);
