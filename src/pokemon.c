@@ -44,6 +44,7 @@
 #include "pokemon_storage_system.h"
 #include "pokerus.h"
 #include "random.h"
+#include "run_settings.h"
 #include "random_mon_generation.h"
 #include "recorded_battle.h"
 #include "regions.h"
@@ -3220,34 +3221,168 @@ enum Ability GetSpeciesAbility(enum Species species, u8 slot)
     return gSpeciesInfo[SanitizeSpeciesId(species)].abilities[slot];
 }
 
+static u32 GetRawSpeciesBaseStat(enum Species species, u32 statIndex)
+{
+    const struct SpeciesInfo *info = &gSpeciesInfo[SanitizeSpeciesId(species)];
+
+    switch (statIndex)
+    {
+    case STAT_HP:
+        return info->baseHP;
+    case STAT_ATK:
+        return info->baseAttack;
+    case STAT_DEF:
+        return info->baseDefense;
+    case STAT_SPEED:
+        return info->baseSpeed;
+    case STAT_SPATK:
+        return info->baseSpAttack;
+    case STAT_SPDEF:
+        return info->baseSpDefense;
+    }
+    return 0;
+}
+
+static u32 RunBstHash(u32 value)
+{
+    value ^= value >> 16;
+    value *= 0x7FEB352D;
+    value ^= value >> 15;
+    value *= 0x846CA68B;
+    value ^= value >> 16;
+    return value;
+}
+
+static void GetRunRandomizedBaseStats(enum Species species, u8 stats[NUM_STATS])
+{
+    u32 i;
+    u32 mode = gSaveBlock3Ptr == NULL ? RUN_BST_OFF : gSaveBlock3Ptr->bstMode;
+    u32 seed = gSaveBlock3Ptr == NULL ? 0 : gSaveBlock3Ptr->worldSeed;
+    u32 rawTotal = 0;
+
+    species = SanitizeSpeciesId(species);
+    for (i = 0; i < NUM_STATS; i++)
+    {
+        stats[i] = GetRawSpeciesBaseStat(species, i);
+        rawTotal += stats[i];
+    }
+
+    if (mode == RUN_BST_OFF || species == SPECIES_NONE || species == SPECIES_EGG)
+        return;
+
+    if (mode == RUN_BST_SHUFFLE)
+    {
+        for (i = NUM_STATS - 1; i > 0; i--)
+        {
+            u32 j = RunBstHash(seed ^ ((u32)species * 0x9E3779B9) ^ (i * 0x85EBCA6B)) % (i + 1);
+            u8 temp = stats[i];
+            stats[i] = stats[j];
+            stats[j] = temp;
+        }
+        return;
+    }
+
+    if (mode == RUN_BST_RANDOM)
+    {
+        u32 minTotal;
+        u32 maxTotal;
+        u32 targetTotal;
+        u32 weights[NUM_STATS];
+        u32 weightTotal = 0;
+        u32 assigned = 0;
+
+        if (rawTotal < 350)
+        {
+            minTotal = 280;
+            maxTotal = 380;
+        }
+        else if (rawTotal < 450)
+        {
+            minTotal = 350;
+            maxTotal = 480;
+        }
+        else if (rawTotal < 550)
+        {
+            minTotal = 430;
+            maxTotal = 580;
+        }
+        else
+        {
+            minTotal = 500;
+            maxTotal = 650;
+        }
+
+        targetTotal = minTotal + (RunBstHash(seed ^ ((u32)species * 0xA24BAED5)) % (maxTotal - minTotal + 1));
+        for (i = 0; i < NUM_STATS; i++)
+        {
+            weights[i] = 35 + (RunBstHash(seed ^ ((u32)species * 0x9E3779B9) ^ (i * 0x27D4EB2D)) % 66);
+            weightTotal += weights[i];
+        }
+
+        for (i = 0; i < NUM_STATS; i++)
+        {
+            u32 remainingStats = NUM_STATS - i - 1;
+            u32 value;
+
+            if (i == NUM_STATS - 1)
+                value = targetTotal - assigned;
+            else
+            {
+                value = (targetTotal * weights[i]) / weightTotal;
+                if (value < 20)
+                    value = 20;
+                if (value > 200)
+                    value = 200;
+                if (targetTotal - assigned - value < remainingStats * 20)
+                    value = targetTotal - assigned - remainingStats * 20;
+            }
+
+            stats[i] = value;
+            assigned += value;
+        }
+    }
+}
+
 u32 GetSpeciesBaseHP(enum Species species)
 {
-    return gSpeciesInfo[SanitizeSpeciesId(species)].baseHP;
+    u8 stats[NUM_STATS];
+    GetRunRandomizedBaseStats(species, stats);
+    return stats[STAT_HP];
 }
 
 u32 GetSpeciesBaseAttack(enum Species species)
 {
-    return gSpeciesInfo[SanitizeSpeciesId(species)].baseAttack;
+    u8 stats[NUM_STATS];
+    GetRunRandomizedBaseStats(species, stats);
+    return stats[STAT_ATK];
 }
 
 u32 GetSpeciesBaseDefense(enum Species species)
 {
-    return gSpeciesInfo[SanitizeSpeciesId(species)].baseDefense;
+    u8 stats[NUM_STATS];
+    GetRunRandomizedBaseStats(species, stats);
+    return stats[STAT_DEF];
 }
 
 u32 GetSpeciesBaseSpAttack(enum Species species)
 {
-    return gSpeciesInfo[SanitizeSpeciesId(species)].baseSpAttack;
+    u8 stats[NUM_STATS];
+    GetRunRandomizedBaseStats(species, stats);
+    return stats[STAT_SPATK];
 }
 
 u32 GetSpeciesBaseSpDefense(enum Species species)
 {
-    return gSpeciesInfo[SanitizeSpeciesId(species)].baseSpDefense;
+    u8 stats[NUM_STATS];
+    GetRunRandomizedBaseStats(species, stats);
+    return stats[STAT_SPDEF];
 }
 
 u32 GetSpeciesBaseSpeed(enum Species species)
 {
-    return gSpeciesInfo[SanitizeSpeciesId(species)].baseSpeed;
+    u8 stats[NUM_STATS];
+    GetRunRandomizedBaseStats(species, stats);
+    return stats[STAT_SPEED];
 }
 
 u32 GetSpeciesBaseStat(enum Species species, u32 statIndex)

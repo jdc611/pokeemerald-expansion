@@ -60,6 +60,7 @@ extern EWRAM_DATA u8 gRunSetupStarterMode;
 extern EWRAM_DATA u32 gRunSetupWorldSeed;
 extern EWRAM_DATA u8 gRunSetupFilterMode;
 extern EWRAM_DATA u16 gRunSetupFilterValue;
+extern EWRAM_DATA u8 gRunSetupBstMode;
 extern const u8 EventScript_ResetAllMapFlags[];
 extern const u8 EventScript_ResetAllMapFlagsFrlg[];
 
@@ -249,6 +250,7 @@ void NewGameInitData(void)
 gSaveBlock3Ptr->rivalMode = RUN_RIVAL_NORMAL;
 gSaveBlock3Ptr->filterMode = gRunSetupFilterMode;
 gSaveBlock3Ptr->filterValue = gRunSetupFilterValue;
+gSaveBlock3Ptr->bstMode = gRunSetupBstMode;
 gSaveBlock3Ptr->futureEvolutionEligible = FALSE;
     ClearFollowerNPCData();
 }

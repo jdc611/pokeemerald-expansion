@@ -282,6 +282,7 @@ struct SaveBlock3
     u16 filterValue;
     u8 futureEvolutionEligible;
     u8 minimalGrindingMode;
+    u8 bstMode;
 }; /* max size 1624 bytes */
 
 extern struct SaveBlock3 *gSaveBlock3Ptr;
