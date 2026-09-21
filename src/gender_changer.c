@@ -50,3 +50,32 @@ void SetSelectedMonGender(void)
 
     gSpecialVar_Result = 0;
 }
+
+
+// Swaps only between the two normal ability slots. Hidden abilities remain
+// item-controlled. Result: 0 success, 1 no alternate normal ability,
+// 2 currently using a hidden ability.
+void ToggleSelectedMonNormalAbility(void)
+{
+    struct Pokemon *mon = &gParties[B_TRAINER_PLAYER][gSpecialVar_0x8004];
+    enum Species species = GetMonData(mon, MON_DATA_SPECIES);
+    u8 currentSlot = GetMonData(mon, MON_DATA_ABILITY_NUM);
+    u8 targetSlot;
+
+    if (currentSlot >= NUM_NORMAL_ABILITY_SLOTS)
+    {
+        gSpecialVar_Result = 2;
+        return;
+    }
+
+    targetSlot = currentSlot == 0 ? 1 : 0;
+    if (GetSpeciesAbility(species, targetSlot) == ABILITY_NONE
+     || GetSpeciesAbility(species, targetSlot) == GetSpeciesAbility(species, currentSlot))
+    {
+        gSpecialVar_Result = 1;
+        return;
+    }
+
+    SetMonData(mon, MON_DATA_ABILITY_NUM, &targetSlot);
+    gSpecialVar_Result = 0;
+}

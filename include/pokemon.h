@@ -857,6 +857,10 @@ enum Ability GetRandomizedAbilityForSeed(enum Species species, u8 slot, u32 seed
 bool32 DoesSpeciesMatchRunFilterForSettings(enum Species species, u8 filterMode, u16 filterValue, u8 abilityMode, u32 seed);
 bool32 DoesSpeciesOrReachableFormMatchRunFilterForSettings(enum Species species, u8 filterMode, u16 filterValue, u8 abilityMode, u8 evolutionMode, u8 difficulty, u32 seed);
 bool32 DoesSpeciesMatchActiveRunFilter(enum Species species);
+bool32 DoesMonMatchActiveRunFilter(struct Pokemon *mon);
+bool32 DoesBoxMonMatchActiveRunFilter(struct BoxPokemon *boxMon);
+bool32 TrySetMonAbilityToActiveRunFilter(struct Pokemon *mon);
+bool32 IsPlayerInPokemonCenter(void);
 enum Species GetRandomEvolutionTargetForSettings(enum Species species, u8 difficulty, u32 seed);
 u8 GetRandomEvolutionLevelForSettings(enum Species species, u32 seed);
 bool32 PlayerPartyHasPermanentMega(void);

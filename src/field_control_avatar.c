@@ -72,6 +72,7 @@ static bool8 IsArrowWarpMetatileBehavior(u16, enum Direction);
 static s8 GetWarpEventAtMapPosition(struct MapHeader *, struct MapPosition *);
 static void SetupWarp(struct MapHeader *, s8, struct MapPosition *);
 static bool8 TryDoorWarp(struct MapPosition *, u16, enum Direction);
+static bool8 TryBlockIllegalPokemonCenterExit(void);
 static s8 GetWarpEventAtPosition(struct MapHeader *, u16, u16, u8);
 static const u8 *GetCoordEventScriptAtPosition(struct MapHeader *, u16, u16, u8);
 static const struct BgEvent *GetBackgroundEventAtPosition(struct MapHeader *, u16, u16, u8);
@@ -89,6 +90,29 @@ static void SetMsgSignPostAndVarFacing(enum Direction playerDirection);
 static void SetUpWalkIntoSignScript(const u8 *script, enum Direction playerDirection);
 static u32 GetFacingSignpostType(u16 metatileBehvaior, enum Direction direction);
 static const u8 *GetSignpostScriptAtMapPosition(struct MapPosition *position);
+
+static bool8 TryBlockIllegalPokemonCenterExit(void)
+{
+    u8 badPartyIndex;
+    u8 reason;
+
+    if (!IsPlayerInPokemonCenter() || IsPlayerPartyLegalForRun(&badPartyIndex, &reason))
+        return FALSE;
+
+    if (IsFieldMessageBoxHidden())
+    {
+        if (reason == RUN_PARTY_ILLEGAL_FILTER)
+        {
+            GetMonData(&gParties[B_TRAINER_PLAYER][badPartyIndex], MON_DATA_NICKNAME, gStringVar1);
+            StringGet_Nickname(gStringVar1);
+            StringExpandPlaceholders(gStringVar4, sText_RunFilterPartyBlocked);
+            ShowFieldMessage(gStringVar4);
+        }
+        else
+            ShowFieldMessage(sText_RunMegaPartyBlocked);
+    }
+    return TRUE;
+}
 
 void FieldClearPlayerInput(struct FieldInput *input)
 {
@@ -176,28 +200,6 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     gSelectedObjectEvent = 0;
 
     gMsgIsSignPost = FALSE;
-
-    if (input->heldDirection)
-    {
-        u8 badPartyIndex;
-        u8 reason;
-        if (!IsPlayerPartyLegalForRun(&badPartyIndex, &reason))
-        {
-            if (IsFieldMessageBoxHidden())
-            {
-                if (reason == RUN_PARTY_ILLEGAL_FILTER)
-                {
-                    GetMonData(&gParties[B_TRAINER_PLAYER][badPartyIndex], MON_DATA_NICKNAME, gStringVar1);
-                    StringGet_Nickname(gStringVar1);
-                    StringExpandPlaceholders(gStringVar4, sText_RunFilterPartyBlocked);
-                    ShowFieldMessage(gStringVar4);
-                }
-                else
-                    ShowFieldMessage(sText_RunMegaPartyBlocked);
-            }
-            return TRUE;
-        }
-    }
 
     playerDirection = GetPlayerFacingDirection();
     GetPlayerPosition(&position);
@@ -1014,6 +1016,8 @@ static bool8 TryStartWarpEventScript(struct MapPosition *position, u16 metatileB
 
     if (warpEventId != WARP_ID_NONE && IsWarpMetatileBehavior(metatileBehavior) == TRUE)
     {
+        if (TryBlockIllegalPokemonCenterExit())
+            return TRUE;
         StoreInitialPlayerAvatarState();
         SetupWarp(&gMapHeader, warpEventId, position);
         if (MetatileBehavior_IsEscalator(metatileBehavior) == TRUE)
@@ -1157,6 +1161,8 @@ static bool8 TryDoorWarp(struct MapPosition *position, u16 metatileBehavior, enu
             warpEventId = GetWarpEventAtMapPosition(&gMapHeader, position);
             if (warpEventId != WARP_ID_NONE && IsWarpMetatileBehavior(metatileBehavior) == TRUE)
             {
+                if (TryBlockIllegalPokemonCenterExit())
+                    return TRUE;
                 StoreInitialPlayerAvatarState();
                 SetupWarp(&gMapHeader, warpEventId, position);
                 DoDoorWarp();

@@ -83,6 +83,7 @@ enum
     MENU_ACTION_POKEVIAL,
     MENU_ACTION_CHANGE_NATURE,
     MENU_ACTION_CHANGE_GENDER,
+    MENU_ACTION_CHANGE_ABILITY,
     MENU_ACTION_TYPE_HINTS,
     MENU_ACTION_TIME_CHANGER,
     MENU_ACTION_AUTO_REPEL,
@@ -143,6 +144,7 @@ static bool8 StartMenu_PCStorage(void);
 static bool8 StartMenuPokeVial(void);
 static bool8 StartMenuChangeNature(void);
 static bool8 StartMenuChangeGender(void);
+static bool8 StartMenuChangeAbility(void);
 static bool8 StartMenuTypeHints(void);
 static bool8 StartMenuTimeChanger(void);
 static bool8 StartMenuAutoRepel(void);
@@ -293,6 +295,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_POKEVIAL] = {COMPOUND_STRING("POKéVIAL"), {.u8_void = StartMenuPokeVial}},
     [MENU_ACTION_CHANGE_NATURE] = {COMPOUND_STRING("NATURE"), {.u8_void = StartMenuChangeNature}},
     [MENU_ACTION_CHANGE_GENDER] = {COMPOUND_STRING("GENDER"), {.u8_void = StartMenuChangeGender}},
+    [MENU_ACTION_CHANGE_ABILITY] = {COMPOUND_STRING("ABILITY"), {.u8_void = StartMenuChangeAbility}},
     [MENU_ACTION_TYPE_HINTS] = {COMPOUND_STRING("TYPE HINTS"), {.u8_void = StartMenuTypeHints}},
     [MENU_ACTION_TIME_CHANGER] = {COMPOUND_STRING("TIME"), {.u8_void = StartMenuTimeChanger}},
     [MENU_ACTION_AUTO_REPEL] = {COMPOUND_STRING("AUTO REPEL"), {.u8_void = StartMenuAutoRepel}},
@@ -427,13 +430,20 @@ static void BuildNormalStartMenu(void)
 
     if (sQuickToolsMode)
     {
-        AddStartMenuAction(MENU_ACTION_POKEVIAL);
-        AddStartMenuAction(MENU_ACTION_PC_STORAGE);
-        AddStartMenuAction(MENU_ACTION_POKERIDER);
-        AddStartMenuAction(MENU_ACTION_TIME_CHANGER);
-        AddStartMenuAction(MENU_ACTION_AUTO_REPEL);
-        AddStartMenuAction(MENU_ACTION_CHANGE_NATURE);
-        AddStartMenuAction(MENU_ACTION_CHANGE_GENDER);
+        if (sStartMenuPage == 0)
+        {
+            AddStartMenuAction(MENU_ACTION_POKEVIAL);
+            AddStartMenuAction(MENU_ACTION_PC_STORAGE);
+            AddStartMenuAction(MENU_ACTION_POKERIDER);
+            AddStartMenuAction(MENU_ACTION_TIME_CHANGER);
+            AddStartMenuAction(MENU_ACTION_AUTO_REPEL);
+        }
+        else
+        {
+            AddStartMenuAction(MENU_ACTION_CHANGE_NATURE);
+            AddStartMenuAction(MENU_ACTION_CHANGE_GENDER);
+            AddStartMenuAction(MENU_ACTION_CHANGE_ABILITY);
+        }
         AddStartMenuAction(MENU_ACTION_EXIT);
         return;
     }
@@ -771,7 +781,7 @@ void ShowQuickToolsMenu(void)
 {
     sQuickToolsMode = TRUE;
     sGameOptionsMode = FALSE;
-    sStartMenuPage = 1;
+    sStartMenuPage = 0;
     sStartMenuCursorPos = 0;
     if (!IsOverworldLinkActive())
     {
@@ -796,7 +806,7 @@ static bool8 HandleStartMenuInput(void)
         PlaySE(SE_SELECT);
         sStartMenuCursorPos = Menu_MoveCursor(1);
     }
-    if (!sQuickToolsMode && !sGameOptionsMode && JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
+    if (!sGameOptionsMode && JOY_NEW(DPAD_RIGHT | DPAD_LEFT))
     {
         PlaySE(SE_SELECT);
 
@@ -833,6 +843,7 @@ static bool8 HandleStartMenuInput(void)
             && gMenuCallback != StartMenuPokeVial
             && gMenuCallback != StartMenuChangeNature
             && gMenuCallback != StartMenuChangeGender
+            && gMenuCallback != StartMenuChangeAbility
             && gMenuCallback != StartMenuTypeHints
             && gMenuCallback != StartMenuTimeChanger
             && gMenuCallback != StartMenuAutoRepel
@@ -1740,6 +1751,19 @@ static bool8 StartMenuChangeGender(void)
         RemoveExtraStartMenuWindows();
         HideStartMenu();
         ScriptContext_SetupScript(EventScript_ChangeGender);
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+static bool8 StartMenuChangeAbility(void)
+{
+    if (!gPaletteFade.active)
+    {
+        RemoveExtraStartMenuWindows();
+        HideStartMenu();
+        ScriptContext_SetupScript(EventScript_ChangeAbility);
         return TRUE;
     }
 

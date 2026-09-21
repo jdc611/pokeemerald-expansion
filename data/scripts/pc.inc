@@ -226,6 +226,36 @@ EventScript_ChangeNature_Close::
     releaseall
     end
 
+EventScript_ChangeAbility::
+    special ChoosePartyMon
+    waitstate
+    goto_if_ge VAR_0x8004, PARTY_SIZE, EventScript_ChangeAbility_Close
+    specialvar VAR_RESULT, ScriptGetPartyMonSpecies
+    goto_if_eq VAR_RESULT, SPECIES_EGG, EventScript_ChangeAbility_Close
+    special ToggleSelectedMonNormalAbility
+    goto_if_eq VAR_RESULT, 1, EventScript_ChangeAbility_NoAlternate
+    goto_if_eq VAR_RESULT, 2, EventScript_ChangeAbility_Hidden
+    msgbox EventScript_Text_AbilityChanged, MSGBOX_DEFAULT
+    goto EventScript_ChangeAbility_Close
+
+EventScript_ChangeAbility_NoAlternate::
+    msgbox EventScript_Text_AbilityNoAlternate, MSGBOX_DEFAULT
+    goto EventScript_ChangeAbility_Close
+
+EventScript_ChangeAbility_Hidden::
+    msgbox EventScript_Text_AbilityHiddenItemOnly, MSGBOX_DEFAULT
+
+EventScript_ChangeAbility_Close::
+    releaseall
+    end
+
+EventScript_Text_AbilityChanged:
+    .string "Normal ability successfully changed!$"
+EventScript_Text_AbilityNoAlternate:
+    .string "This POKéMON has no other normal ability.$"
+EventScript_Text_AbilityHiddenItemOnly:
+    .string "Hidden Abilities can only be changed with the proper item.$"
+
 EventScript_ChangeGender::
     special ChoosePartyMon
     waitstate

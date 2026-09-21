@@ -3238,8 +3238,11 @@ enum Ability GetRandomizedAbilityForSeed(enum Species species, u8 slot, u32 seed
 {
     u32 hash;
 
-    species = SanitizeSpeciesId(species);
-    if (species == SPECIES_NONE || species == SPECIES_EGG || slot >= NUM_ABILITY_SLOTS)
+    // Filter/setup scans can encounter disabled form IDs. Treat those as
+    // ineligible instead of feeding them through SanitizeSpeciesId, whose
+    // debug assertion is intended for actual live Pokémon data.
+    if (species <= SPECIES_NONE || species >= NUM_SPECIES || !IsSpeciesEnabled(species)
+     || species == SPECIES_EGG || slot >= NUM_ABILITY_SLOTS)
         return ABILITY_NONE;
 
     hash = RunAbilityHash(seed ^ ((u32)species * 0x9E3779B9) ^ ((u32)slot * 0x85EBCA6B));
@@ -3259,7 +3262,8 @@ enum Ability GetSpeciesAbility(enum Species species, u8 slot)
 static bool32 SpeciesHasAbilityForSettings(enum Species species, enum Ability ability, u8 abilityMode, u32 seed)
 {
     u32 slot;
-    species = SanitizeSpeciesId(species);
+    if (species <= SPECIES_NONE || species >= NUM_SPECIES || !IsSpeciesEnabled(species) || species == SPECIES_EGG)
+        return FALSE;
     for (slot = 0; slot < NUM_ABILITY_SLOTS; slot++)
     {
         enum Ability candidate = abilityMode == RUN_ABILITIES_RANDOM
@@ -3275,8 +3279,7 @@ bool32 DoesSpeciesMatchRunFilterForSettings(enum Species species, u8 filterMode,
 {
     enum Type type;
     enum Ability ability;
-    species = SanitizeSpeciesId(species);
-    if (species == SPECIES_NONE || species == SPECIES_EGG)
+    if (species <= SPECIES_NONE || species >= NUM_SPECIES || !IsSpeciesEnabled(species) || species == SPECIES_EGG)
         return FALSE;
 
     switch (filterMode)
@@ -3567,6 +3570,77 @@ bool32 DoesSpeciesMatchActiveRunFilter(enum Species species)
                                                 gSaveBlock3Ptr->abilityMode, gSaveBlock3Ptr->worldSeed);
 }
 
+static enum Ability GetActiveRunFilterAbility(void)
+{
+    if (gSaveBlock3Ptr == NULL)
+        return ABILITY_NONE;
+    if (gSaveBlock3Ptr->filterMode == RUN_FILTER_ABILITY)
+        return gSaveBlock3Ptr->filterValue;
+    if (gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE_ABILITY)
+        return gSaveBlock3Ptr->filterValue >> 5;
+    return ABILITY_NONE;
+}
+
+bool32 DoesMonMatchActiveRunFilter(struct Pokemon *mon)
+{
+    enum Species species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
+    enum Ability requiredAbility;
+
+    if (species == SPECIES_NONE || species == SPECIES_EGG)
+        return TRUE;
+    if (!DoesSpeciesMatchActiveRunFilter(species))
+        return FALSE;
+
+    requiredAbility = GetActiveRunFilterAbility();
+    if (requiredAbility != ABILITY_NONE && GetMonAbility(mon) != requiredAbility)
+        return FALSE;
+    return TRUE;
+}
+
+bool32 DoesBoxMonMatchActiveRunFilter(struct BoxPokemon *boxMon)
+{
+    enum Species species = GetBoxMonData(boxMon, MON_DATA_SPECIES_OR_EGG);
+    enum Ability requiredAbility;
+    u8 abilityNum;
+
+    if (species == SPECIES_NONE || species == SPECIES_EGG)
+        return TRUE;
+    if (!DoesSpeciesMatchActiveRunFilter(species))
+        return FALSE;
+
+    requiredAbility = GetActiveRunFilterAbility();
+    if (requiredAbility == ABILITY_NONE)
+        return TRUE;
+
+    abilityNum = GetBoxMonData(boxMon, MON_DATA_ABILITY_NUM);
+    return GetSpeciesAbility(species, abilityNum) == requiredAbility;
+}
+
+bool32 TrySetMonAbilityToActiveRunFilter(struct Pokemon *mon)
+{
+    enum Species species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
+    enum Ability requiredAbility = GetActiveRunFilterAbility();
+    u8 slot;
+
+    if (requiredAbility == ABILITY_NONE || species == SPECIES_NONE || species == SPECIES_EGG)
+        return TRUE;
+
+    for (slot = 0; slot < NUM_ABILITY_SLOTS; slot++)
+    {
+        if (GetSpeciesAbility(species, slot) == requiredAbility)
+        {
+            SetMonData(mon, MON_DATA_ABILITY_NUM, &slot);
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+bool32 IsPlayerInPokemonCenter(void)
+{
+    return gMapHeader.mapLayoutId == LAYOUT_POKEMON_CENTER_1F;
+}
+
 bool32 PlayerPartyHasPermanentMega(void)
 {
     u32 i;
@@ -3598,7 +3672,7 @@ bool32 IsPlayerPartyLegalForRun(u8 *badPartyIndex, u8 *reason)
         enum Species species = GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_SPECIES_OR_EGG);
         if (species == SPECIES_NONE || species == SPECIES_EGG)
             continue;
-        if (!DoesSpeciesMatchActiveRunFilter(species))
+        if (!DoesMonMatchActiveRunFilter(&gParties[B_TRAINER_PLAYER][i]))
         {
             if (badPartyIndex != NULL) *badPartyIndex = i;
             if (reason != NULL) *reason = RUN_PARTY_ILLEGAL_FILTER;
