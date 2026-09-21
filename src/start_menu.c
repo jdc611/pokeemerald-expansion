@@ -1881,7 +1881,7 @@ static void DrawGameInfo(void)
         PrintGameInfoLine(gStringVar4, 41 + row * 16);
     }
     if (sGameInfoScroll > 0 || sGameInfoScroll < 6)
-        PrintGameInfoLine(COMPOUND_STRING("▲/▼ SCROLL   A/B BACK"), 137);
+        PrintGameInfoLine(COMPOUND_STRING("UP/DOWN SCROLL  A/B BACK"), 137);
     else
         PrintGameInfoLine(sText_GameInfoBack, 137);
     PutWindowTilemap(GetStartMenuWindowId());
