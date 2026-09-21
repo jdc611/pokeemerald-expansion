@@ -27,6 +27,7 @@
 #include "metatile_behavior.h"
 #include "overworld.h"
 #include "pokemon.h"
+#include "run_settings.h"
 #include "safari_zone.h"
 #include "script.h"
 #include "secret_base.h"
