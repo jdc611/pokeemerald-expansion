@@ -3395,8 +3395,12 @@ static void BuildRandomEvolutionPools(void)
 
         for (i = 0; evolutions[i].method != EVOLUTIONS_END; i++)
         {
-            enum Species target = SanitizeSpeciesId(evolutions[i].targetSpecies);
-            if (target <= SPECIES_NONE || target >= NUM_SPECIES)
+            enum Species target = evolutions[i].targetSpecies;
+            // Evolution tables can reference compiled-but-disabled species.
+            // Do not sanitize them here: SanitizeSpeciesId intentionally asserts
+            // on disabled species, which caused the blue crash screen while
+            // building random-evolution pools.
+            if (target <= SPECIES_NONE || target >= NUM_SPECIES || !IsSpeciesEnabled(target))
                 continue;
             sRandomEvolutionClass[candidate] |= RANDOM_EVO_CLASS_HAS_NEXT;
             sRandomEvolutionClass[target] |= RANDOM_EVO_CLASS_HAS_PREV;
@@ -3415,8 +3419,8 @@ static void BuildRandomEvolutionPools(void)
 
         for (i = 0; evolutions[i].method != EVOLUTIONS_END; i++)
         {
-            enum Species target = SanitizeSpeciesId(evolutions[i].targetSpecies);
-            if (target > SPECIES_NONE && target < NUM_SPECIES
+            enum Species target = evolutions[i].targetSpecies;
+            if (target > SPECIES_NONE && target < NUM_SPECIES && IsSpeciesEnabled(target)
              && (sRandomEvolutionClass[target] & RANDOM_EVO_CLASS_HAS_NEXT))
             {
                 sRandomEvolutionClass[candidate] |= RANDOM_EVO_CLASS_THREE_START;
