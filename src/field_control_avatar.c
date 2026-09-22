@@ -278,7 +278,15 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
         // apparent freeze at the exit.
         if (IsPlayerInPokemonCenter() && MetatileBehavior_IsWarpDoor(metatileBehavior)
          && TryBlockIllegalPokemonCenterExit())
+        {
+            // The movement engine has already committed to MOVING when Down is
+            // held toward a door. A normal warp consumes that state; a blocked
+            // warp must explicitly put the avatar back into a stationary state
+            // or subsequent directional input is ignored.
+            StopPlayerAvatar();
+            PlayerFaceDirection(DIR_SOUTH);
             return FALSE;
+        }
         if (TryDoorWarp(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;
     }
