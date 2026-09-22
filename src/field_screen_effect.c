@@ -39,6 +39,7 @@
 #include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
 #include "constants/heal_locations.h"
+#include "constants/layouts.h"
 #include "constants/songs.h"
 #include "constants/rgb.h"
 #include "trainer_hill.h"
