@@ -5803,3 +5803,11 @@ bool8 CheckAddCoins(void)
     else
         return TRUE;
 }
+
+void ReturnPlayerToLastPokemonCenter(void)
+{
+    // This is invoked only after the player is fully outside and the warning
+    // message has been dismissed. Use the engine's ordinary warp machinery.
+    SetWarpDestinationToLastHealLocation();
+    DoWarp();
+}
