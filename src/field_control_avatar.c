@@ -1015,12 +1015,16 @@ static bool8 TryArrowWarp(struct MapPosition *position, u16 metatileBehavior, en
 
     if (IsArrowWarpMetatileBehavior(metatileBehavior, direction) == TRUE)
     {
+        if (TryBlockIllegalPokemonCenterExit())
+            return TRUE;
         StorePlayerStateAndSetupWarp(position, warpEventId);
         DoWarp();
         return TRUE;
     }
     else if (IsDirectionalStairWarpMetatileBehavior(metatileBehavior, direction) == TRUE)
     {
+        if (TryBlockIllegalPokemonCenterExit())
+            return TRUE;
         delay = 0;
         if (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_BIKE)
         {
