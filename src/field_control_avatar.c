@@ -276,18 +276,6 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
         // Returning TRUE from TryDoorWarp after cancelling a warp leaves the
         // avatar in its door-transition input state, which is what caused the
         // apparent freeze at the exit.
-        if (IsPlayerInPokemonCenter() && MetatileBehavior_IsWarpDoor(metatileBehavior)
-         && TryBlockIllegalPokemonCenterExit())
-        {
-            // ProcessPlayerFieldInput runs after PlayerStep. By this point the
-            // avatar has already started its one-tile movement onto the door.
-            // Do not interrupt that movement here; doing so leaves the object
-            // event held movement / tile-transition state half-finished and
-            // locks control. Let the step finish normally, but suppress the
-            // warp. On the next frame the ordinary movement engine returns to
-            // T_TILE_CENTER/NOT_MOVING and accepts input again.
-            return FALSE;
-        }
         if (TryDoorWarp(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;
     }
