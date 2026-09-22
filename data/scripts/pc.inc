@@ -414,3 +414,10 @@ EventScript_Text_MaleOnly:
 
 EventScript_Text_FemaleOnly:
     .string "This Pokémon can only be female.$"
+
+EventScript_RunFilterReturnToCenter::
+    lockall
+    msgbox gText_RunFilterReturnToCenter, MSGBOX_DEFAULT
+    special ReturnPlayerToLastPokemonCenter
+    waitstate
+    end
