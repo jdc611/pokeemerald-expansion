@@ -2804,7 +2804,8 @@ static void Task_WithdrawMon(u8 taskId)
             PrintMessage(MSG_PARTY_FULL);
             sStorage->state = 1;
         }
-        else if (!DoesBoxMonMatchActiveRunFilter(GetBoxedMonPtr(StorageGetCurrentBox(), sCursorPosition)))
+        else if (!IsPlayerInPokemonCenter()
+              && !DoesBoxMonMatchActiveRunFilter(GetBoxedMonPtr(StorageGetCurrentBox(), sCursorPosition)))
         {
             PrintMessage(MSG_RUN_FILTER_BLOCKED);
             sStorage->state = 1;
