@@ -112,24 +112,12 @@ static bool8 TryBlockIllegalPokemonCenterExit(void)
         return FALSE;
     }
 
-    // Block the warp every time the party is illegal, but only open the
-    // explanation once per exit attempt. Requiring the player to release the
-    // direction before another warning prevents the message from immediately
-    // reopening when it closes.
-    if (!sRunFilterExitMessageLatch && IsFieldMessageBoxHidden())
-    {
-        sRunFilterExitMessageLatch = TRUE;
-        sRunFilterExitStepBack = TRUE;
-        if (reason == RUN_PARTY_ILLEGAL_FILTER)
-        {
-            GetMonData(&gParties[B_TRAINER_PLAYER][badPartyIndex], MON_DATA_NICKNAME, gStringVar1);
-            StringGet_Nickname(gStringVar1);
-            StringExpandPlaceholders(gStringVar4, sText_RunFilterPartyBlocked);
-            ShowFieldMessage(gStringVar4);
-        }
-        else
-            ShowFieldMessage(sText_RunMegaPartyBlocked);
-    }
+    // Do not open a field message from the warp-input handler. Field messages
+    // started here leave the player locked in the door-warp input state after
+    // dismissal. For now, simply cancel an illegal exit attempt and return
+    // control immediately; the PC remains the repair zone.
+    sRunFilterExitMessageLatch = TRUE;
+    sRunFilterExitStepBack = FALSE;
     return TRUE;
 }
 
