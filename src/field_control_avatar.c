@@ -120,6 +120,10 @@ static bool8 TryBlockIllegalPokemonCenterExit(void)
     {
         sRunFilterExitMessageLatch = TRUE;
         sRunFilterExitStepBack = TRUE;
+        // Move the player one tile back into the Center before opening the
+        // warning. This prevents the closed message from leaving the avatar
+        // parked on the exit/door trigger and immediately re-entering it.
+        PlayerTurnInPlace(DIR_NORTH);
         if (reason == RUN_PARTY_ILLEGAL_FILTER)
         {
             GetMonData(&gParties[B_TRAINER_PLAYER][badPartyIndex], MON_DATA_NICKNAME, gStringVar1);
