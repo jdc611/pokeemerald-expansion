@@ -3592,13 +3592,21 @@ bool32 DoesMonMatchActiveRunFilter(struct Pokemon *mon)
 
     if (species == SPECIES_NONE || species == SPECIES_EGG)
         return TRUE;
-    if (!DoesSpeciesMatchActiveRunFilter(species))
-        return FALSE;
-
     requiredAbility = GetActiveRunFilterAbility();
+
+    // Ability legality is a property of the actual mon, not merely of the
+    // species' generated ability table. This matters after random evolution,
+    // where the required ability has already been assigned to the mon.
     if (requiredAbility != ABILITY_NONE && GetMonAbility(mon) != requiredAbility)
         return FALSE;
-    return TRUE;
+
+    // For combined Type + Ability runs, the ability was checked above; retain
+    // the species check for the type portion. Pure Ability filters need no
+    // second species-level eligibility test.
+    if (gSaveBlock3Ptr != NULL && gSaveBlock3Ptr->filterMode == RUN_FILTER_ABILITY)
+        return TRUE;
+
+    return DoesSpeciesMatchActiveRunFilter(species);
 }
 
 bool32 DoesBoxMonMatchActiveRunFilter(struct BoxPokemon *boxMon)
