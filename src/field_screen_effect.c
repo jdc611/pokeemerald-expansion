@@ -25,6 +25,7 @@
 #include "mirage_tower.h"
 #include "metatile_behavior.h"
 #include "palette.h"
+#include "pokemon.h"
 #include "oras_dowse.h"
 #include "overworld.h"
 #include "scanline_effect.h"
@@ -52,6 +53,7 @@ static void Task_ExitDoor(u8);
 static bool32 WaitForWeatherFadeIn(void);
 static void Task_SpinEnterWarp(u8 taskId);
 static void Task_EnableScriptAfterMusicFade(u8 taskId);
+static void Task_RunFilterPostCenterExit(u8 taskId);
 
 static void ExitStairsMovement(s16*, s16*, s16*, s16*, s16*);
 static void GetStairsMovementDirection(u32, s16*, s16*);
@@ -339,6 +341,22 @@ static void FieldCB_MossdeepGymWarpExit(void)
     SetObjectEventLoadFlag((~SKIP_OBJECT_EVENT_LOAD) & 0xF);
 }
 
+
+static void Task_RunFilterPostCenterExit(u8 taskId)
+{
+    u8 badPartyIndex, reason;
+
+    // Run only after the normal door-exit task has completely finished and
+    // restored field control. Never participate in the warp/input path itself.
+    if (gPaletteFade.active || !IsPlayerStandingStill())
+        return;
+
+    if (!IsPlayerPartyLegalForRun(&badPartyIndex, &reason))
+        ScriptContext_SetupScript(EventScript_RunFilterReturnToCenter);
+
+    DestroyTask(taskId);
+}
+
 static void Task_ExitDoor(u8 taskId)
 {
     struct Task *task = &gTasks[taskId];
@@ -388,6 +406,12 @@ static void Task_ExitDoor(u8 taskId)
         // Don't unlock controls until the map preview has finished.
         if (!FadeInMapPreviewScreenIsRunning())
             UnlockPlayerFieldControls();
+
+        // If this door came from a Pokémon Center, validate only now: the
+        // vanilla warp, fade, door animation, and control restoration are done.
+        if (gLastUsedWarp.mapGroup >= 0
+         && Overworld_GetMapHeaderByGroupAndId(gLastUsedWarp.mapGroup, gLastUsedWarp.mapNum)->mapLayoutId == LAYOUT_POKEMON_CENTER_1F)
+            CreateTask(Task_RunFilterPostCenterExit, 80);
 
         DestroyTask(taskId);
         break;
