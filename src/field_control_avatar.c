@@ -49,9 +49,6 @@
 
 static EWRAM_DATA u8 sWildEncounterImmunitySteps = 0;
 static EWRAM_DATA u16 sPrevMetatileBehavior = 0;
-static EWRAM_DATA bool8 sRunFilterExitMessageLatch = FALSE;
-static EWRAM_DATA bool8 sRunFilterExitStepBack = FALSE;
-
 static const u8 sText_RunFilterPartyBlocked[] = _("{STR_VAR_1} doesn't currently meet\nthe active run filter.\pDeposit it in the PC before\ncontinuing.");
 static const u8 sText_RunMegaPartyBlocked[] = _("Only one permanent MEGA may be\nin your party.\pDeposit one before continuing.");
 
@@ -74,7 +71,6 @@ static bool8 IsArrowWarpMetatileBehavior(u16, enum Direction);
 static s8 GetWarpEventAtMapPosition(struct MapHeader *, struct MapPosition *);
 static void SetupWarp(struct MapHeader *, s8, struct MapPosition *);
 static bool8 TryDoorWarp(struct MapPosition *, u16, enum Direction);
-static bool8 TryBlockIllegalPokemonCenterExit(void);
 static s8 GetWarpEventAtPosition(struct MapHeader *, u16, u16, u8);
 static const u8 *GetCoordEventScriptAtPosition(struct MapHeader *, u16, u16, u8);
 static const struct BgEvent *GetBackgroundEventAtPosition(struct MapHeader *, u16, u16, u8);
@@ -92,34 +88,6 @@ static void SetMsgSignPostAndVarFacing(enum Direction playerDirection);
 static void SetUpWalkIntoSignScript(const u8 *script, enum Direction playerDirection);
 static u32 GetFacingSignpostType(u16 metatileBehvaior, enum Direction direction);
 static const u8 *GetSignpostScriptAtMapPosition(struct MapPosition *position);
-
-static bool8 TryBlockIllegalPokemonCenterExit(void)
-{
-    u8 badPartyIndex;
-    u8 reason;
-
-    if (!IsPlayerInPokemonCenter())
-    {
-        sRunFilterExitMessageLatch = FALSE;
-        sRunFilterExitStepBack = FALSE;
-        return FALSE;
-    }
-
-    if (IsPlayerPartyLegalForRun(&badPartyIndex, &reason))
-    {
-        sRunFilterExitMessageLatch = FALSE;
-        sRunFilterExitStepBack = FALSE;
-        return FALSE;
-    }
-
-    // Do not open a field message from the warp-input handler. Field messages
-    // started here leave the player locked in the door-warp input state after
-    // dismissal. For now, simply cancel an illegal exit attempt and return
-    // control immediately; the PC remains the repair zone.
-    sRunFilterExitMessageLatch = TRUE;
-    sRunFilterExitStepBack = FALSE;
-    return TRUE;
-}
 
 void FieldClearPlayerInput(struct FieldInput *input)
 {
@@ -264,18 +232,8 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     if (input->pressedAButton && TryStartInteractionScript(&position, metatileBehavior, playerDirection) == TRUE)
         return TRUE;
 
-    if (!input->heldDirection2)
-    {
-        sRunFilterExitMessageLatch = FALSE;
-        sRunFilterExitStepBack = FALSE;
-    }
-
     if (input->heldDirection2 && input->dpadDirection == playerDirection)
     {
-        // Check Center party legality before entering the door-warp state.
-        // Returning TRUE from TryDoorWarp after cancelling a warp leaves the
-        // avatar in its door-transition input state, which is what caused the
-        // apparent freeze at the exit.
         if (TryDoorWarp(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;
     }
@@ -1007,16 +965,12 @@ static bool8 TryArrowWarp(struct MapPosition *position, u16 metatileBehavior, en
 
     if (IsArrowWarpMetatileBehavior(metatileBehavior, direction) == TRUE)
     {
-        if (TryBlockIllegalPokemonCenterExit())
-            return TRUE;
         StorePlayerStateAndSetupWarp(position, warpEventId);
         DoWarp();
         return TRUE;
     }
     else if (IsDirectionalStairWarpMetatileBehavior(metatileBehavior, direction) == TRUE)
     {
-        if (TryBlockIllegalPokemonCenterExit())
-            return TRUE;
         delay = 0;
         if (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_BIKE)
         {
