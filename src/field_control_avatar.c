@@ -259,6 +259,11 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
 
     if (input->heldDirection2 && input->dpadDirection == playerDirection)
     {
+        // A Pokemon Center is the repair zone for an illegal party: allow the
+        // player to withdraw/fix mons inside, but do not let an illegal party
+        // cross the exit warp.
+        if (TryBlockIllegalPokemonCenterExit())
+            return TRUE;
         if (TryDoorWarp(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;
     }
