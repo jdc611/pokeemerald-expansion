@@ -20,4 +20,4 @@ gText_AccessedBillsPC::
 	.string "Accessed BILL's PC.$"
 
 gText_RunFilterReturnToCenter::
-	.string "Your party doesn't meet the active run rules.\\nReturn to the POKéMON CENTER and fix your party.$"
+	.string "Your party doesn't meet the active run rules.\nReturn to the POKéMON CENTER and fix your party.$"
