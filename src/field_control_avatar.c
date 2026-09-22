@@ -279,12 +279,13 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
         if (IsPlayerInPokemonCenter() && MetatileBehavior_IsWarpDoor(metatileBehavior)
          && TryBlockIllegalPokemonCenterExit())
         {
-            // The movement engine has already committed to MOVING when Down is
-            // held toward a door. A normal warp consumes that state; a blocked
-            // warp must explicitly put the avatar back into a stationary state
-            // or subsequent directional input is ignored.
-            StopPlayerAvatar();
-            PlayerFaceDirection(DIR_SOUTH);
+            // ProcessPlayerFieldInput runs after PlayerStep. By this point the
+            // avatar has already started its one-tile movement onto the door.
+            // Do not interrupt that movement here; doing so leaves the object
+            // event held movement / tile-transition state half-finished and
+            // locks control. Let the step finish normally, but suppress the
+            // warp. On the next frame the ordinary movement engine returns to
+            // T_TILE_CENTER/NOT_MOVING and accepts input again.
             return FALSE;
         }
         if (TryDoorWarp(&position, metatileBehavior, playerDirection) == TRUE)
