@@ -272,6 +272,13 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
 
     if (input->heldDirection2 && input->dpadDirection == playerDirection)
     {
+        // Check Center party legality before entering the door-warp state.
+        // Returning TRUE from TryDoorWarp after cancelling a warp leaves the
+        // avatar in its door-transition input state, which is what caused the
+        // apparent freeze at the exit.
+        if (IsPlayerInPokemonCenter() && MetatileBehavior_IsWarpDoor(metatileBehavior)
+         && TryBlockIllegalPokemonCenterExit())
+            return FALSE;
         if (TryDoorWarp(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;
     }
@@ -1178,8 +1185,6 @@ static bool8 TryDoorWarp(struct MapPosition *position, u16 metatileBehavior, enu
             warpEventId = GetWarpEventAtMapPosition(&gMapHeader, position);
             if (warpEventId != WARP_ID_NONE && IsWarpMetatileBehavior(metatileBehavior) == TRUE)
             {
-                if (TryBlockIllegalPokemonCenterExit())
-                    return TRUE;
                 StoreInitialPlayerAvatarState();
                 SetupWarp(&gMapHeader, warpEventId, position);
                 DoDoorWarp();
