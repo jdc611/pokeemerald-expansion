@@ -3645,7 +3645,14 @@ bool32 TrySetMonAbilityToActiveRunFilter(struct Pokemon *mon)
             return TRUE;
         }
     }
-    return FALSE;
+
+    // A filtered run must never create a live Pokemon that fails its selected
+    // ability merely because this species' seeded random slots did not contain
+    // it. The filter is authoritative for generated/corrected Pokemon.
+    // Reserve the last ability slot as the run-filter override.
+    slot = NUM_ABILITY_SLOTS - 1;
+    SetMonData(mon, MON_DATA_ABILITY_NUM, &slot);
+    return GetMonAbility(mon) == requiredAbility;
 }
 
 bool32 IsPlayerInPokemonCenter(void)
