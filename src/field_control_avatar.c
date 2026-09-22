@@ -50,6 +50,7 @@
 static EWRAM_DATA u8 sWildEncounterImmunitySteps = 0;
 static EWRAM_DATA u16 sPrevMetatileBehavior = 0;
 static EWRAM_DATA bool8 sRunFilterExitMessageLatch = FALSE;
+static EWRAM_DATA bool8 sRunFilterExitStepBack = FALSE;
 
 static const u8 sText_RunFilterPartyBlocked[] = _("{STR_VAR_1} doesn't currently meet\nthe active run filter.\pDeposit it in the PC before\ncontinuing.");
 static const u8 sText_RunMegaPartyBlocked[] = _("Only one permanent MEGA may be\nin your party.\pDeposit one before continuing.");
@@ -100,12 +101,14 @@ static bool8 TryBlockIllegalPokemonCenterExit(void)
     if (!IsPlayerInPokemonCenter())
     {
         sRunFilterExitMessageLatch = FALSE;
+        sRunFilterExitStepBack = FALSE;
         return FALSE;
     }
 
     if (IsPlayerPartyLegalForRun(&badPartyIndex, &reason))
     {
         sRunFilterExitMessageLatch = FALSE;
+        sRunFilterExitStepBack = FALSE;
         return FALSE;
     }
 
@@ -116,6 +119,7 @@ static bool8 TryBlockIllegalPokemonCenterExit(void)
     if (!sRunFilterExitMessageLatch && IsFieldMessageBoxHidden())
     {
         sRunFilterExitMessageLatch = TRUE;
+        sRunFilterExitStepBack = TRUE;
         if (reason == RUN_PARTY_ILLEGAL_FILTER)
         {
             GetMonData(&gParties[B_TRAINER_PLAYER][badPartyIndex], MON_DATA_NICKNAME, gStringVar1);
@@ -273,7 +277,17 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
         return TRUE;
 
     if (!input->heldDirection2)
+    {
         sRunFilterExitMessageLatch = FALSE;
+        // After dismissing an exit warning, consume one released-input frame.
+        // This gets the player out of the held-warp retry loop and restores
+        // normal overworld control before another exit attempt is accepted.
+        if (sRunFilterExitStepBack)
+        {
+            sRunFilterExitStepBack = FALSE;
+            return FALSE;
+        }
+    }
 
     if (input->heldDirection2 && input->dpadDirection == playerDirection)
     {
