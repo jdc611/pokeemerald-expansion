@@ -120,10 +120,6 @@ static bool8 TryBlockIllegalPokemonCenterExit(void)
     {
         sRunFilterExitMessageLatch = TRUE;
         sRunFilterExitStepBack = TRUE;
-        // Move the player one tile back into the Center before opening the
-        // warning. This prevents the closed message from leaving the avatar
-        // parked on the exit/door trigger and immediately re-entering it.
-        PlayerTurnInPlace(DIR_NORTH);
         if (reason == RUN_PARTY_ILLEGAL_FILTER)
         {
             GetMonData(&gParties[B_TRAINER_PLAYER][badPartyIndex], MON_DATA_NICKNAME, gStringVar1);
@@ -283,23 +279,11 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     if (!input->heldDirection2)
     {
         sRunFilterExitMessageLatch = FALSE;
-        // After dismissing an exit warning, consume one released-input frame.
-        // This gets the player out of the held-warp retry loop and restores
-        // normal overworld control before another exit attempt is accepted.
-        if (sRunFilterExitStepBack)
-        {
-            sRunFilterExitStepBack = FALSE;
-            return FALSE;
-        }
+        sRunFilterExitStepBack = FALSE;
     }
 
     if (input->heldDirection2 && input->dpadDirection == playerDirection)
     {
-        // A Pokemon Center is the repair zone for an illegal party: allow the
-        // player to withdraw/fix mons inside, but do not let an illegal party
-        // cross the exit warp.
-        if (TryBlockIllegalPokemonCenterExit())
-            return TRUE;
         if (TryDoorWarp(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;
     }
