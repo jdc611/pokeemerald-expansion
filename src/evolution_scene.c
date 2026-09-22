@@ -785,6 +785,9 @@ static void Task_EvolutionScene(u8 taskId)
             PlayBGM(MUS_EVOLVED);
             gTasks[taskId].tState++;
             SetMonData(mon, MON_DATA_SPECIES, (void *)(&gTasks[taskId].tPostEvoSpecies));
+            // Random evolutions must remain legal under an active Ability filter.
+            // Apply the required ability immediately after changing species.
+            TrySetMonAbilityToActiveRunFilter(mon);
             SetMonData(mon, MON_DATA_EVOLUTION_TRACKER, &zero);
             CalculateMonStats(mon);
             EvolutionRenameMon(mon, gTasks[taskId].tPreEvoSpecies, gTasks[taskId].tPostEvoSpecies);
@@ -1212,6 +1215,7 @@ static void Task_TradeEvolutionScene(u8 taskId)
             PlayFanfare(MUS_EVOLVED);
             gTasks[taskId].tState++;
             SetMonData(mon, MON_DATA_SPECIES, (&gTasks[taskId].tPostEvoSpecies));
+            TrySetMonAbilityToActiveRunFilter(mon);
             SetMonData(mon, MON_DATA_EVOLUTION_TRACKER, &zero);
             CalculateMonStats(mon);
             EvolutionRenameMon(mon, gTasks[taskId].tPreEvoSpecies, gTasks[taskId].tPostEvoSpecies);
