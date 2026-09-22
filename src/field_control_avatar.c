@@ -49,6 +49,7 @@
 
 static EWRAM_DATA u8 sWildEncounterImmunitySteps = 0;
 static EWRAM_DATA u16 sPrevMetatileBehavior = 0;
+static EWRAM_DATA bool8 sRunFilterExitMessageLatch = FALSE;
 
 static const u8 sText_RunFilterPartyBlocked[] = _("{STR_VAR_1} doesn't currently meet\nthe active run filter.\pDeposit it in the PC before\ncontinuing.");
 static const u8 sText_RunMegaPartyBlocked[] = _("Only one permanent MEGA may be\nin your party.\pDeposit one before continuing.");
@@ -96,11 +97,25 @@ static bool8 TryBlockIllegalPokemonCenterExit(void)
     u8 badPartyIndex;
     u8 reason;
 
-    if (!IsPlayerInPokemonCenter() || IsPlayerPartyLegalForRun(&badPartyIndex, &reason))
-        return FALSE;
-
-    if (IsFieldMessageBoxHidden())
+    if (!IsPlayerInPokemonCenter())
     {
+        sRunFilterExitMessageLatch = FALSE;
+        return FALSE;
+    }
+
+    if (IsPlayerPartyLegalForRun(&badPartyIndex, &reason))
+    {
+        sRunFilterExitMessageLatch = FALSE;
+        return FALSE;
+    }
+
+    // Block the warp every time the party is illegal, but only open the
+    // explanation once per exit attempt. Requiring the player to release the
+    // direction before another warning prevents the message from immediately
+    // reopening when it closes.
+    if (!sRunFilterExitMessageLatch && IsFieldMessageBoxHidden())
+    {
+        sRunFilterExitMessageLatch = TRUE;
         if (reason == RUN_PARTY_ILLEGAL_FILTER)
         {
             GetMonData(&gParties[B_TRAINER_PLAYER][badPartyIndex], MON_DATA_NICKNAME, gStringVar1);
@@ -256,6 +271,9 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
 
     if (input->pressedAButton && TryStartInteractionScript(&position, metatileBehavior, playerDirection) == TRUE)
         return TRUE;
+
+    if (!input->heldDirection2)
+        sRunFilterExitMessageLatch = FALSE;
 
     if (input->heldDirection2 && input->dpadDirection == playerDirection)
     {
