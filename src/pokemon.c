@@ -3585,6 +3585,11 @@ static enum Ability GetActiveRunFilterAbility(void)
     return ABILITY_NONE;
 }
 
+enum Ability GetActiveRunFilterAbilityForMonChanges(void)
+{
+    return GetActiveRunFilterAbility();
+}
+
 bool32 DoesMonMatchActiveRunFilter(struct Pokemon *mon)
 {
     enum Species species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
