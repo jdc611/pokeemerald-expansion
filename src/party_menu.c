@@ -5058,16 +5058,15 @@ void Task_AbilityPatch(u8 taskId)
             return;
         }
 
-        // Ability Patch is player-controlled too: do not allow it to create a
-        // mon that violates the active run filter.
+        // Ability Patch is the only path that may enter/leave hidden-ability
+        // territory. With an Ability Filter active, its RESULT must be the
+        // selected filtered ability.
         {
-            struct Pokemon *mon = &gParties[B_TRAINER_PLAYER][tMonId];
-            u8 oldAbilityNum = GetMonData(mon, MON_DATA_ABILITY_NUM);
+            enum Ability requiredAbility = GetActiveRunFilterAbilityForMonChanges();
+            enum Ability candidateAbility = GetSpeciesAbility(tSpecies, tAbilityNum);
 
-            SetMonData(mon, MON_DATA_ABILITY_NUM, &tAbilityNum);
-            if (!DoesMonMatchActiveRunFilter(mon))
+            if (requiredAbility != ABILITY_NONE && candidateAbility != requiredAbility)
             {
-                SetMonData(mon, MON_DATA_ABILITY_NUM, &oldAbilityNum);
                 gPartyMenuUseExitCallback = FALSE;
                 PlaySE(SE_FAILURE);
                 DisplayPartyMenuMessage(sText_AbilityFilterBlocked, 1);
@@ -5075,7 +5074,6 @@ void Task_AbilityPatch(u8 taskId)
                 gTasks[taskId].func = Task_ClosePartyMenuAfterText;
                 return;
             }
-            SetMonData(mon, MON_DATA_ABILITY_NUM, &oldAbilityNum);
         }
 
         gPartyMenuUseExitCallback = TRUE;
