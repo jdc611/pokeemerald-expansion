@@ -235,6 +235,7 @@ EventScript_ChangeAbility::
     special ToggleSelectedMonNormalAbility
     goto_if_eq VAR_RESULT, 1, EventScript_ChangeAbility_NoAlternate
     goto_if_eq VAR_RESULT, 2, EventScript_ChangeAbility_Hidden
+    goto_if_eq VAR_RESULT, 3, EventScript_ChangeAbility_FilterBlocked
     msgbox EventScript_Text_AbilityChanged, MSGBOX_DEFAULT
     goto EventScript_ChangeAbility_Close
 
@@ -244,6 +245,10 @@ EventScript_ChangeAbility_NoAlternate::
 
 EventScript_ChangeAbility_Hidden::
     msgbox EventScript_Text_AbilityHiddenItemOnly, MSGBOX_DEFAULT
+    goto EventScript_ChangeAbility_Close
+
+EventScript_ChangeAbility_FilterBlocked::
+    msgbox EventScript_Text_AbilityFilterBlocked, MSGBOX_DEFAULT
 
 EventScript_ChangeAbility_Close::
     releaseall
@@ -255,6 +260,8 @@ EventScript_Text_AbilityNoAlternate:
     .string "This POKéMON has no other normal ability.$"
 EventScript_Text_AbilityHiddenItemOnly:
     .string "Hidden Abilities can only be changed with the proper item.$"
+EventScript_Text_AbilityFilterBlocked:
+    .string "That Ability doesn't match your current Ability Filter.$"
 
 EventScript_ChangeGender::
     special ChoosePartyMon
