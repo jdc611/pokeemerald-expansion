@@ -507,6 +507,7 @@ static u8 IndividualToCombinedPartyId(u8 index, enum BattlerId battler);
 
 static const u8 sText_askText[] = _("Would you like to change {STR_VAR_1}'s\nability to {STR_VAR_2}?");
 static const u8 sText_doneText[] = _("{STR_VAR_1}'s ability became\n{STR_VAR_2}!{PAUSE_UNTIL_PRESS}");
+static const u8 sText_AbilityFilterBlocked[] = _("That Ability doesn't match your\ncurrent Ability Filter.{PAUSE_UNTIL_PRESS}");
 static const u8 sText_BasePointsResetToZero[] = _("{STR_VAR_1}'s base points\nwere all reset to zero!{PAUSE_UNTIL_PRESS}");
 static const u8 sText_CannotSendMonToBoxHM[] = _("Cannot send that mon to the box,\nbecause it knows a HM move.{PAUSE_UNTIL_PRESS}");
 static const u8 sText_CannotSendMonToBoxPartner[] = _("Cannot send a mon that doesn't\nbelong to you to the box.{PAUSE_UNTIL_PRESS}");
@@ -5056,6 +5057,27 @@ void Task_AbilityPatch(u8 taskId)
             gTasks[taskId].func = Task_ClosePartyMenuAfterText;
             return;
         }
+
+        // Ability Patch is player-controlled too: do not allow it to create a
+        // mon that violates the active run filter.
+        {
+            struct Pokemon *mon = &gParties[B_TRAINER_PLAYER][tMonId];
+            u8 oldAbilityNum = GetMonData(mon, MON_DATA_ABILITY_NUM);
+
+            SetMonData(mon, MON_DATA_ABILITY_NUM, &tAbilityNum);
+            if (!DoesMonMatchActiveRunFilter(mon))
+            {
+                SetMonData(mon, MON_DATA_ABILITY_NUM, &oldAbilityNum);
+                gPartyMenuUseExitCallback = FALSE;
+                PlaySE(SE_FAILURE);
+                DisplayPartyMenuMessage(sText_AbilityFilterBlocked, 1);
+                ScheduleBgCopyTilemapToVram(2);
+                gTasks[taskId].func = Task_ClosePartyMenuAfterText;
+                return;
+            }
+            SetMonData(mon, MON_DATA_ABILITY_NUM, &oldAbilityNum);
+        }
+
         gPartyMenuUseExitCallback = TRUE;
         GetMonNickname(&gParties[B_TRAINER_PLAYER][tMonId], gStringVar1);
         StringCopy(gStringVar2, gAbilitiesInfo[GetAbilityBySpecies(tSpecies, tAbilityNum)].name);
