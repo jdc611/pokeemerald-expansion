@@ -4625,6 +4625,51 @@ void SetSelectedMonGender(void)
     gSpecialVar_Result = 0;
 }
 
+void ToggleSelectedMonNormalAbility(void)
+{
+    struct Pokemon *mon;
+    enum Species species;
+    u8 currentSlot;
+    u8 slot;
+
+    if (gSpecialVar_0x8004 >= PARTY_SIZE)
+    {
+        gSpecialVar_Result = 1;
+        return;
+    }
+
+    mon = &gParties[B_TRAINER_PLAYER][gSpecialVar_0x8004];
+    species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
+    if (species == SPECIES_NONE || species == SPECIES_EGG)
+    {
+        gSpecialVar_Result = 1;
+        return;
+    }
+
+    currentSlot = GetMonData(mon, MON_DATA_ABILITY_NUM);
+
+    // Hidden abilities are item-only. The free tool never enters or leaves a
+    // hidden slot; it only rotates among populated normal ability slots.
+    if (currentSlot >= NUM_NORMAL_ABILITY_SLOTS)
+    {
+        gSpecialVar_Result = 2;
+        return;
+    }
+
+    for (slot = 1; slot <= NUM_NORMAL_ABILITY_SLOTS; slot++)
+    {
+        u8 candidate = (currentSlot + slot) % NUM_NORMAL_ABILITY_SLOTS;
+        if (candidate != currentSlot && GetSpeciesAbility(species, candidate) != ABILITY_NONE)
+        {
+            SetMonData(mon, MON_DATA_ABILITY_NUM, &candidate);
+            gSpecialVar_Result = 0;
+            return;
+        }
+    }
+
+    gSpecialVar_Result = 1;
+}
+
 void SetAbility(void)
 {
     enum Ability ability = gSpecialVar_Result;
