@@ -5812,13 +5812,3 @@ void ReturnPlayerToLastPokemonCenter(void)
     DoWarp();
 }
 
-void ApplyActiveRunFilterAbilityToChosenMon(void)
-{
-    if (gSpecialVar_0x8004 >= PARTY_SIZE)
-    {
-        gSpecialVar_Result = FALSE;
-        return;
-    }
-
-    gSpecialVar_Result = TrySetMonAbilityToActiveRunFilter(&gParties[B_TRAINER_PLAYER][gSpecialVar_0x8004]);
-}
