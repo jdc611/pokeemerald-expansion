@@ -4629,6 +4629,8 @@ void ToggleSelectedMonNormalAbility(void)
 {
     struct Pokemon *mon;
     enum Species species;
+    enum Ability currentAbility;
+    enum Ability requiredAbility;
     u8 currentSlot;
     u8 slot;
 
@@ -4647,52 +4649,55 @@ void ToggleSelectedMonNormalAbility(void)
     }
 
     currentSlot = GetMonData(mon, MON_DATA_ABILITY_NUM);
+    currentAbility = GetMonAbility(mon);
 
-    // Treat the mon as hidden only when its CURRENT ability exists exclusively
-    // in a hidden slot. Filter/randomizer setup can place the same ability in a
-    // hidden-numbered slot even when it is also a normal ability; in that case
-    // the free changer should normalize to that normal slot and continue.
+    // The free Ability Changer is normal-ability-only. A filtered/randomized
+    // mon may carry its ability in an override/hidden-numbered slot, so slot
+    // number alone cannot decide whether the current ability is "hidden".
+    // Normalize only when the ACTUAL current ability also exists in a normal
+    // slot for this species.
     if (currentSlot >= NUM_NORMAL_ABILITY_SLOTS)
     {
-        enum Ability currentAbility = GetMonAbility(mon);
+        bool32 foundNormalSlot = FALSE;
 
         for (slot = 0; slot < NUM_NORMAL_ABILITY_SLOTS; slot++)
         {
             if (GetSpeciesAbility(species, slot) == currentAbility)
             {
                 currentSlot = slot;
-                SetMonData(mon, MON_DATA_ABILITY_NUM, &currentSlot);
+                foundNormalSlot = TRUE;
                 break;
             }
         }
 
-        if (currentSlot >= NUM_NORMAL_ABILITY_SLOTS)
+        if (!foundNormalSlot)
         {
             gSpecialVar_Result = 2;
             return;
         }
     }
 
+    requiredAbility = GetActiveRunFilterAbilityForMonChanges();
+
     for (slot = 1; slot <= NUM_NORMAL_ABILITY_SLOTS; slot++)
     {
         u8 candidate = (currentSlot + slot) % NUM_NORMAL_ABILITY_SLOTS;
-        if (candidate != currentSlot
-         && GetSpeciesAbility(species, candidate) != ABILITY_NONE
-         && GetSpeciesAbility(species, candidate) != GetSpeciesAbility(species, currentSlot))
-        {
-            u8 oldSlot = currentSlot;
+        enum Ability candidateAbility = GetSpeciesAbility(species, candidate);
 
-            // Never let a player-controlled ability change create an illegal
-            // party member. Test the proposed slot against the active run
-            // filter before committing it.
-            SetMonData(mon, MON_DATA_ABILITY_NUM, &candidate);
-            if (!DoesMonMatchActiveRunFilter(mon))
+        if (candidate != currentSlot
+         && candidateAbility != ABILITY_NONE
+         && candidateAbility != currentAbility)
+        {
+            // Check the proposed ability directly. Do not temporarily write a
+            // slot and call GetMonAbility(): run-filter override slots can make
+            // slot identity differ from the actual filtered ability.
+            if (requiredAbility != ABILITY_NONE && candidateAbility != requiredAbility)
             {
-                SetMonData(mon, MON_DATA_ABILITY_NUM, &oldSlot);
                 gSpecialVar_Result = 3;
                 return;
             }
 
+            SetMonData(mon, MON_DATA_ABILITY_NUM, &candidate);
             gSpecialVar_Result = 0;
             return;
         }
