@@ -21,3 +21,9 @@ gText_AccessedBillsPC::
 
 gText_RunFilterReturnToCenter::
 	.string "Your party breaks the active run rules.\\pPlease fix your party inside the\\nPOKéMON CENTER.$"
+
+gText_RunFilterAbilityApplied::
+	.string "Ability changed to match your\\nactive run filter.$"
+
+gText_RunFilterAbilityFailed::
+	.string "This POKéMON can't use the ability\\nrequired by your run filter.$"
