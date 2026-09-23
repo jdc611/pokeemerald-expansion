@@ -4680,7 +4680,19 @@ void ToggleSelectedMonNormalAbility(void)
          && GetSpeciesAbility(species, candidate) != ABILITY_NONE
          && GetSpeciesAbility(species, candidate) != GetSpeciesAbility(species, currentSlot))
         {
+            u8 oldSlot = currentSlot;
+
+            // Never let a player-controlled ability change create an illegal
+            // party member. Test the proposed slot against the active run
+            // filter before committing it.
             SetMonData(mon, MON_DATA_ABILITY_NUM, &candidate);
+            if (!DoesMonMatchActiveRunFilter(mon))
+            {
+                SetMonData(mon, MON_DATA_ABILITY_NUM, &oldSlot);
+                gSpecialVar_Result = 3;
+                return;
+            }
+
             gSpecialVar_Result = 0;
             return;
         }
