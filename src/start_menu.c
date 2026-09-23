@@ -1763,12 +1763,7 @@ static bool8 StartMenuChangeAbility(void)
     {
         RemoveExtraStartMenuWindows();
         HideStartMenu();
-        if (gSaveBlock3Ptr != NULL
-         && (gSaveBlock3Ptr->filterMode == RUN_FILTER_ABILITY
-          || gSaveBlock3Ptr->filterMode == RUN_FILTER_TYPE_ABILITY))
-            ScriptContext_SetupScript(EventScript_ChangeAbilityForRunFilter);
-        else
-            ScriptContext_SetupScript(EventScript_ChangeAbility);
+        ScriptContext_SetupScript(EventScript_ChangeAbility);
         return TRUE;
     }
 
