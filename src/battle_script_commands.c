@@ -8372,7 +8372,7 @@ static void Cmd_givecaughtmon(void)
                 break;
         }
 
-        if (GiveCapturedMonToPlayer(caughtMon) != MON_GIVEN_TO_PARTY
+        // Re-assert the active Ability filter at the capture boundary. Battle\n        // setup/form handling must never allow a caught mon to lose the run ability.\n        TrySetMonAbilityToActiveRunFilter(caughtMon);\n\n        if (GiveCapturedMonToPlayer(caughtMon) != MON_GIVEN_TO_PARTY
          && gBattleCommunication[MULTISTRING_CHOOSER] != B_MSG_SWAPPED_INTO_PARTY)
         {
             if (!ShouldShowBoxWasFullMessage())
