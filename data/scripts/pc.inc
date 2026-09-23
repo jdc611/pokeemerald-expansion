@@ -421,3 +421,19 @@ EventScript_RunFilterReturnToCenter::
     special ReturnPlayerToLastPokemonCenter
     waitstate
     end
+
+EventScript_ChangeAbilityForRunFilter::
+    lockall
+    getpartysize
+    goto_if_eq VAR_RESULT, 0, EventScript_ChangeAbilityForRunFilter_End
+    special ChoosePartyMon
+    goto_if_ge VAR_0x8004, PARTY_SIZE, EventScript_ChangeAbilityForRunFilter_End
+    callnative ApplyActiveRunFilterAbilityToChosenMon
+    goto_if_eq VAR_RESULT, FALSE, EventScript_ChangeAbilityForRunFilter_Failed
+    msgbox gText_RunFilterAbilityApplied, MSGBOX_DEFAULT
+    goto EventScript_ChangeAbilityForRunFilter_End
+EventScript_ChangeAbilityForRunFilter_Failed:
+    msgbox gText_RunFilterAbilityFailed, MSGBOX_DEFAULT
+EventScript_ChangeAbilityForRunFilter_End:
+    releaseall
+    end
