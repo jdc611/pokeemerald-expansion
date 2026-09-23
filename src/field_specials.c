@@ -4648,18 +4648,37 @@ void ToggleSelectedMonNormalAbility(void)
 
     currentSlot = GetMonData(mon, MON_DATA_ABILITY_NUM);
 
-    // Hidden abilities are item-only. The free tool never enters or leaves a
-    // hidden slot; it only rotates among populated normal ability slots.
+    // Treat the mon as hidden only when its CURRENT ability exists exclusively
+    // in a hidden slot. Filter/randomizer setup can place the same ability in a
+    // hidden-numbered slot even when it is also a normal ability; in that case
+    // the free changer should normalize to that normal slot and continue.
     if (currentSlot >= NUM_NORMAL_ABILITY_SLOTS)
     {
-        gSpecialVar_Result = 2;
-        return;
+        enum Ability currentAbility = GetMonAbility(mon);
+
+        for (slot = 0; slot < NUM_NORMAL_ABILITY_SLOTS; slot++)
+        {
+            if (GetSpeciesAbility(species, slot) == currentAbility)
+            {
+                currentSlot = slot;
+                SetMonData(mon, MON_DATA_ABILITY_NUM, &currentSlot);
+                break;
+            }
+        }
+
+        if (currentSlot >= NUM_NORMAL_ABILITY_SLOTS)
+        {
+            gSpecialVar_Result = 2;
+            return;
+        }
     }
 
     for (slot = 1; slot <= NUM_NORMAL_ABILITY_SLOTS; slot++)
     {
         u8 candidate = (currentSlot + slot) % NUM_NORMAL_ABILITY_SLOTS;
-        if (candidate != currentSlot && GetSpeciesAbility(species, candidate) != ABILITY_NONE)
+        if (candidate != currentSlot
+         && GetSpeciesAbility(species, candidate) != ABILITY_NONE
+         && GetSpeciesAbility(species, candidate) != GetSpeciesAbility(species, currentSlot))
         {
             SetMonData(mon, MON_DATA_ABILITY_NUM, &candidate);
             gSpecialVar_Result = 0;
