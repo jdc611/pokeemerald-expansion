@@ -860,6 +860,7 @@ bool32 DoesSpeciesMatchActiveRunFilter(enum Species species);
 bool32 DoesMonMatchActiveRunFilter(struct Pokemon *mon);
 bool32 DoesBoxMonMatchActiveRunFilter(struct BoxPokemon *boxMon);
 bool32 TrySetMonAbilityToActiveRunFilter(struct Pokemon *mon);
+enum Ability GetActiveRunFilterAbilityForMonChanges(void);
 bool32 IsPlayerInPokemonCenter(void);
 enum Species GetRandomEvolutionTargetForSettings(enum Species species, u8 difficulty, u32 seed);
 u8 GetRandomEvolutionLevelForSettings(enum Species species, u32 seed);
