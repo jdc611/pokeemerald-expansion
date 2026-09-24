@@ -1935,7 +1935,7 @@ static void DrawGameRules(void)
 
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
     PrintGameInfoLine(sText_GameRulesTitle, 9);
-    AddTextPrinterParameterized(windowId, FONT_SMALL, sGameRulesPages[sGameRulesPage], 8, 29, TEXT_SKIP_DRAW, NULL);
+    AddTextPrinterParameterized(windowId, FONT_SMALL, sText_GameRulesPages[sGameRulesPage], 8, 29, TEXT_SKIP_DRAW, NULL);
     PutWindowTilemap(windowId);
     CopyWindowToVram(windowId, COPYWIN_FULL);
 }
@@ -1957,13 +1957,13 @@ static bool8 HandleGameRulesInput(void)
 {
     if (JOY_NEW(L_BUTTON))
     {
-        sGameRulesPage = sGameRulesPage == 0 ? ARRAY_COUNT(sGameRulesPages) - 1 : sGameRulesPage - 1;
+        sGameRulesPage = sGameRulesPage == 0 ? ARRAY_COUNT(sText_GameRulesPages) - 1 : sGameRulesPage - 1;
         PlaySE(SE_SELECT);
         DrawGameRules();
     }
     else if (JOY_NEW(R_BUTTON))
     {
-        sGameRulesPage = (sGameRulesPage + 1) % ARRAY_COUNT(sGameRulesPages);
+        sGameRulesPage = (sGameRulesPage + 1) % ARRAY_COUNT(sText_GameRulesPages);
         PlaySE(SE_SELECT);
         DrawGameRules();
     }
