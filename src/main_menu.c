@@ -2281,11 +2281,6 @@ static void RunSetup_DrawAbilityNotice(void)
     CopyWindowToVram(0, COPYWIN_FULL);
 }
 
-static u32 RunSetup_CountEligibleFilterMons(void)
-{
-    return RunSetup_CountEligibleSelection(sRunSetupType, sRunSetupAbility, 6);
-}
-
 // This check deliberately runs after the seed is finalized. Randomized
 // abilities make filter eligibility seed-dependent, so pre-seed counts can be
 // misleading. Count the complete pool here for the final confirmation screen.
