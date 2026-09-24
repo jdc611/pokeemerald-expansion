@@ -2274,12 +2274,11 @@ static u32 RunSetup_CountEligibleFilterMons(void)
     return RunSetup_CountEligibleSelection(sRunSetupType, sRunSetupAbility, 6);
 }
 
-// This check deliberately runs after the seed is finalized. Randomized
-// abilities make filter eligibility seed-dependent, so pre-seed counts can be
-// misleading. Count the complete pool here for the final confirmation screen.
+// Count the complete finalized pool. Passing UINT32_MAX prevents the helper
+// from stopping early without depending on a Pokédex-count macro here.
 static u32 RunSetup_CountFinalEligibleMons(void)
 {
-    return RunSetup_CountEligibleSelection(sRunSetupType, sRunSetupAbility, NATIONAL_DEX_COUNT);
+    return RunSetup_CountEligibleSelection(sRunSetupType, sRunSetupAbility, UINT32_MAX);
 }
 
 static void RunSetup_DrawConfirmLine(u8 row, u8 y)
