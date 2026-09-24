@@ -629,6 +629,13 @@ static const struct DebugMenuOption sDebugMenu_Actions_Utilities[] =
     { COMPOUND_STRING("Test Item Randomizer"),      DebugAction_Selection_Init, &sItemGeneratorSelection },
     { COMPOUND_STRING("Starter Test"),              DebugAction_Util_StarterTest },
     { COMPOUND_STRING("Field Move Test Prep"),       DebugAction_Util_FieldMoveTestPrep },
+    { COMPOUND_STRING("CUT: prep + Fly"),             DebugAction_Util_FieldMoveTestPrep },
+    { COMPOUND_STRING("ROCK SMASH: prep + Fly"),      DebugAction_Util_FieldMoveTestPrep },
+    { COMPOUND_STRING("STRENGTH: prep + Fly"),        DebugAction_Util_FieldMoveTestPrep },
+    { COMPOUND_STRING("SURF/FISH: prep + Fly"),       DebugAction_Util_FieldMoveTestPrep },
+    { COMPOUND_STRING("WATERFALL: prep + Fly"),       DebugAction_Util_FieldMoveTestPrep },
+    { COMPOUND_STRING("DIVE: prep + Fly"),            DebugAction_Util_FieldMoveTestPrep },
+    { COMPOUND_STRING("FLASH: prep + Fly"),           DebugAction_Util_FieldMoveTestPrep },
     { COMPOUND_STRING("Wally Tutorial"),            DebugAction_ExecuteScript, Debug_EventScript_WallyTutorial },
     { COMPOUND_STRING("Steven Multi"),              DebugAction_ExecuteScript, Debug_EventScript_Steven_Multi },
     { NULL }
