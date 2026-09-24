@@ -1983,9 +1983,11 @@ static void DrawGameRules(void)
 
 static bool8 StartMenuGameRules(void)
 {
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
-    RemoveStartMenuWindow();
-    AddGameOptionsWindow(9);
+    // Game Rules is an in-place detail view, just like Game Info.  Reusing the
+    // already-visible Game Options window avoids tearing down/recreating a
+    // window with a height derived from a fake action count (9 => 20 tiles),
+    // which exceeds the 18-tile field BG and produced a black screen at runtime.
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), FALSE);
     DrawStdWindowFrame(GetStartMenuWindowId(), FALSE);
     sGameRulesPage = 0;
     DrawGameRules();
