@@ -126,7 +126,7 @@ EWRAM_DATA static bool8 sSavingComplete = FALSE;
 EWRAM_DATA static u8 sSaveInfoWindowId = 0;
 EWRAM_DATA static u8 sGameInfoScroll = 0;
 EWRAM_DATA static u8 sGameRulesPage = 0;
-EWRAM_DATA static bool8 sGameRulesContents = TRUE;
+EWRAM_DATA static bool8 sGameRulesContents = FALSE;
 
 // Menu action callbacks
 static bool8 StartMenuPokedexCallback(void);
