@@ -1919,21 +1919,25 @@ static void DrawGameInfo(void)
     CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_FULL);
 }
 
-static const u8 *const sGameRulesPages[] =
+static const u8 sText_GameRulesTitle[] = _("GAME RULES");
+static const u8 sText_GameRulesPages[][256] =
 {
-    COMPOUND_STRING("GAME RULES  1/5\n\nDIFFICULTY\nEasy: forgiving rules.\nNormal: standard rules.\nHard: tougher challenge.\nNuzlocke: encounter/faint rules.\n\nR: NEXT   A/B: BACK"),
-    COMPOUND_STRING("GAME RULES  2/5\n\nLEVEL CAPS / GRINDING\nCaps apply in every mode.\nMGM is optional.\nRare Candy cannot pass the cap.\nAt cap, valid evolutions may occur.\n\nL/R: PAGE   A/B: BACK"),
-    COMPOUND_STRING("GAME RULES  3/5\n\nNUZLOCKE\nOne eligible encounter per area.\nGifts do not use the encounter.\nFainted Pokemon go to GRAVE.\nGRAVE Pokemon cannot be withdrawn.\nNuzlocke cannot be disabled mid-run.\n\nL/R: PAGE   A/B: BACK"),
-    COMPOUND_STRING("GAME RULES  4/5\n\nRANDOMIZER / FILTERS\nSeed controls randomized results.\nType/Ability filters restrict pools.\nFinal pool is checked after seed.\n3-5 requires start confirmation.\nFewer than 3 cannot start.\n\nL/R: PAGE   A/B: BACK"),
-    COMPOUND_STRING("GAME RULES  5/5\n\nPOKEMON / PARTY\nFiltered Pokemon cannot be used\noutside a Pokemon Center.\nAbility Changer swaps normal abilities.\nHidden abilities require their item.\nOnly one Mega may be used in a party.\n\nL: PREV   A/B: BACK"),
+    _("1/5  DIFFICULTY\n\nEasy: forgiving rules.\nNormal: standard rules.\nHard: tougher challenge.\nNuzlocke: encounter/faint rules.\n\nR NEXT   A/B BACK"),
+    _("2/5  LEVEL CAPS / GRINDING\n\nCaps apply in every mode.\nMGM is optional.\nRare Candy cannot pass the cap.\nAt cap, valid evolutions may occur.\n\nL/R PAGE   A/B BACK"),
+    _("3/5  NUZLOCKE\n\nOne eligible encounter per area.\nGifts do not use the encounter.\nFainted Pokemon go to GRAVE.\nGRAVE Pokemon cannot be withdrawn.\nNuzlocke cannot be disabled mid-run.\n\nL/R PAGE   A/B BACK"),
+    _("4/5  RANDOMIZER / FILTERS\n\nSeed controls randomized results.\nType/Ability filters may be paired.\nFinal pool is checked after seed.\n3-5 requires start confirmation.\nFewer than 3 cannot start.\n\nL/R PAGE   A/B BACK"),
+    _("5/5  POKEMON / PARTY\n\nFiltered Pokemon cannot be used\noutside a Pokemon Center.\nAbility Changer swaps normal abilities.\nHidden abilities require their item.\nOnly one Mega may be used in a party.\n\nL PREV   A/B BACK"),
 };
 
 static void DrawGameRules(void)
 {
-    FillWindowPixelBuffer(GetStartMenuWindowId(), PIXEL_FILL(1));
-    AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_SMALL, sGameRulesPages[sGameRulesPage], 8, 9, TEXT_SKIP_DRAW, NULL);
-    PutWindowTilemap(GetStartMenuWindowId());
-    CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_FULL);
+    u8 windowId = GetStartMenuWindowId();
+
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+    PrintGameInfoLine(sText_GameRulesTitle, 9);
+    AddTextPrinterParameterized(windowId, FONT_SMALL, sGameRulesPages[sGameRulesPage], 8, 29, TEXT_SKIP_DRAW, NULL);
+    PutWindowTilemap(windowId);
+    CopyWindowToVram(windowId, COPYWIN_FULL);
 }
 
 static bool8 StartMenuGameRules(void)
@@ -1953,18 +1957,13 @@ static bool8 HandleGameRulesInput(void)
 {
     if (JOY_NEW(L_BUTTON))
     {
-        if (sGameRulesPage > 0)
-            sGameRulesPage--;
-        else
-            sGameRulesPage = ARRAY_COUNT(sGameRulesPages) - 1;
+        sGameRulesPage = sGameRulesPage == 0 ? ARRAY_COUNT(sGameRulesPages) - 1 : sGameRulesPage - 1;
         PlaySE(SE_SELECT);
         DrawGameRules();
     }
     else if (JOY_NEW(R_BUTTON))
     {
-        sGameRulesPage++;
-        if (sGameRulesPage >= ARRAY_COUNT(sGameRulesPages))
-            sGameRulesPage = 0;
+        sGameRulesPage = (sGameRulesPage + 1) % ARRAY_COUNT(sGameRulesPages);
         PlaySE(SE_SELECT);
         DrawGameRules();
     }
