@@ -1969,6 +1969,7 @@ static void DrawGameRules(void)
             PrintGameInfoLine(COMPOUND_STRING("Intended difficulty."), 89);
             PrintGameInfoLine(COMPOUND_STRING("HARD"), 105);
             PrintGameInfoLine(COMPOUND_STRING("Better AI; gym/cave resets."), 121);
+            PrintGameInfoLine(COMPOUND_STRING("No PC/PokeVial in gym/caves."), 137);
             break;
         case 1:
             PrintGameInfoLine(COMPOUND_STRING("Caps apply in every mode."), 41);
@@ -2000,7 +2001,8 @@ static void DrawGameRules(void)
             PrintGameInfoLine(COMPOUND_STRING("Illegal mons stay boxed."), 105);
             break;
         }
-        PrintGameInfoLine(COMPOUND_STRING("B: CONTENTS"), 137);
+        if (sGameRulesPage != 0)
+            PrintGameInfoLine(COMPOUND_STRING("B: CONTENTS"), 137);
     }
     PutWindowTilemap(windowId);
     CopyWindowToVram(windowId, COPYWIN_FULL);
