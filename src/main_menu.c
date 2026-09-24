@@ -214,6 +214,7 @@ static EWRAM_DATA u8 sRunSetupAbilityEligibleCounts[ABILITIES_COUNT];
 static EWRAM_DATA u16 sRunSetupAbilityChoiceCount;
 static EWRAM_DATA u8 sRunSetupConfirmScroll;
 static EWRAM_DATA u32 sRunSetupFinalEligible;
+static EWRAM_DATA bool8 sRunSetupLowPoolConfirmed;
 static EWRAM_DATA u8 sRunSetupNidokingSpriteId;
 static EWRAM_DATA u8 sRunSetupArcanineSpriteId;
 
@@ -387,6 +388,8 @@ static const u8 sText_RunSetupEnterSeed[] = _("PRESS A TO ENTER SEED");
 static const u8 sText_RunSetupPool[] = _("ELIGIBLE");
 static const u8 sText_RunSetupPoolLow[] = _("LOW");
 static const u8 sText_RunSetupPoolBlocked[] = _("TOO LOW");
+static const u8 sText_RunSetupLowPoolWarn[] = _("LOW POOL! A=START  B=CHANGE");
+static const u8 sText_RunSetupPoolMustChange[] = _("POOL TOO LOW - B=CHANGE");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -2477,6 +2480,13 @@ static void RunSetup_Draw(u8 cursor)
         if (sRunSetupConfirmScroll < 7)
             AddTextPrinterParameterized3(0, FONT_SMALL, 198, 91, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupScrollDown);
 
+        if (sRunSetupFilter != RUN_FILTER_NONE && sRunSetupFinalEligible <= 5 && cursor == 1)
+        {
+            ConvertIntToDecimalStringN(gStringVar1, sRunSetupFinalEligible, STR_CONV_MODE_LEFT_ALIGN, 4);
+            AddTextPrinterParameterized3(0, FONT_SMALL, 8, 96, sTextColor_Headers, TEXT_SKIP_DRAW,
+                                         sRunSetupFinalEligible < 3 ? sText_RunSetupPoolMustChange : sText_RunSetupLowPoolWarn);
+            AddTextPrinterParameterized3(0, FONT_SMALL, 184, 96, sTextColor_Headers, TEXT_SKIP_DRAW, gStringVar1);
+        }
         RunSetup_DrawWideChoice(sText_RunSetupBack, 18, 108, 78, cursor == 0);
         RunSetup_DrawWideChoice(sText_RunSetupStartJourney, 112, 108, 78, cursor == 1);
     }
@@ -2810,17 +2820,25 @@ static void Task_RunSetup_Input(u8 taskId)
         else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && *cursor == 0))
         {
             sRunSetupConfirm = FALSE;
+            sRunSetupLowPoolConfirmed = FALSE;
             sRunSetupPage = RUN_SETUP_PAGE_CONFIRM;
             *cursor = 2;
             sRunSetupConfirmScroll = 0;
         }
         else if (JOY_NEW(A_BUTTON) && *cursor == 1)
         {
-            // Final seed-dependent validation. A very small pool is allowed,
-            // but fewer than three eligible species cannot support the run.
+            // Final seed-dependent validation. Require a second A press for
+            // a 3-5 pool; fewer than three can never start.
             if (sRunSetupFilter != RUN_FILTER_NONE && sRunSetupFinalEligible < 3)
             {
                 PlaySE(SE_BOO);
+                RunSetup_Draw(*cursor);
+                return;
+            }
+            if (sRunSetupFilter != RUN_FILTER_NONE && sRunSetupFinalEligible <= 5 && !sRunSetupLowPoolConfirmed)
+            {
+                sRunSetupLowPoolConfirmed = TRUE;
+                PlaySE(SE_SELECT);
                 RunSetup_Draw(*cursor);
                 return;
             }
@@ -2894,6 +2912,7 @@ static void Task_RunSetup_Input(u8 taskId)
                 RunSetup_Draw(*cursor);
                 return;
             }
+            sRunSetupLowPoolConfirmed = FALSE;
             sRunSetupPage = RUN_SETUP_PAGE_CONFIRM;
             *cursor = 0;
         }
