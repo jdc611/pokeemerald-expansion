@@ -1816,9 +1816,14 @@ static bool8 StartMenuGameOptions(void)
     return FALSE;
 }
 
+static void PrintGameInfoLineToWindow(u8 windowId, const u8 *text, u8 y)
+{
+    AddTextPrinterParameterized(windowId, FONT_NORMAL, text, 8, y, TEXT_SKIP_DRAW, NULL);
+}
+
 static void PrintGameInfoLine(const u8 *text, u8 y)
 {
-    AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_NORMAL, text, 8, y, TEXT_SKIP_DRAW, NULL);
+    PrintGameInfoLineToWindow(GetStartMenuWindowId(), text, y);
 }
 
 static void BuildGameInfoLine(u8 row)
@@ -1934,55 +1939,54 @@ static void DrawGameRules(void)
     u8 windowId = GetStartMenuWindowId();
 
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
-    PrintGameInfoLine(sText_GameRulesTitle, 9);
-    PrintGameInfoLine(sText_GameRulesPageTitles[sGameRulesPage], 25);
+    PrintGameInfoLineToWindow(windowId, sText_GameRulesTitle, 9);
+    PrintGameInfoLineToWindow(windowId, sText_GameRulesPageTitles[sGameRulesPage], 25);
 
     switch (sGameRulesPage)
     {
     case 0:
-        PrintGameInfoLine(COMPOUND_STRING("Easy: forgiving rules."), 41);
-        PrintGameInfoLine(COMPOUND_STRING("Normal: standard rules."), 57);
-        PrintGameInfoLine(COMPOUND_STRING("Hard: tougher challenge."), 73);
-        PrintGameInfoLine(COMPOUND_STRING("Nuzlocke: encounter/faint rules."), 89);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Easy: forgiving rules."), 41);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Normal: standard rules."), 57);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Hard: tougher challenge."), 73);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Nuzlocke: encounter/faint rules."), 89);
         break;
     case 1:
-        PrintGameInfoLine(COMPOUND_STRING("Caps apply in every mode."), 41);
-        PrintGameInfoLine(COMPOUND_STRING("MGM is optional."), 57);
-        PrintGameInfoLine(COMPOUND_STRING("Rare Candy cannot pass cap."), 73);
-        PrintGameInfoLine(COMPOUND_STRING("At cap, evolutions may occur."), 89);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Caps apply in every mode."), 41);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("MGM is optional."), 57);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Rare Candy cannot pass cap."), 73);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("At cap, evolutions may occur."), 89);
         break;
     case 2:
-        PrintGameInfoLine(COMPOUND_STRING("One eligible encounter per area."), 41);
-        PrintGameInfoLine(COMPOUND_STRING("Gifts do not use encounter."), 57);
-        PrintGameInfoLine(COMPOUND_STRING("Fainted Pokemon go to GRAVE."), 73);
-        PrintGameInfoLine(COMPOUND_STRING("GRAVE Pokemon stay unavailable."), 89);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("One eligible encounter per area."), 41);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Gifts do not use encounter."), 57);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Fainted Pokemon go to GRAVE."), 73);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("GRAVE Pokemon stay unavailable."), 89);
         break;
     case 3:
-        PrintGameInfoLine(COMPOUND_STRING("Seed controls random results."), 41);
-        PrintGameInfoLine(COMPOUND_STRING("Type + Ability may be paired."), 57);
-        PrintGameInfoLine(COMPOUND_STRING("Pool is checked after seed."), 73);
-        PrintGameInfoLine(COMPOUND_STRING("3-5 warns; below 3 blocks."), 89);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Seed controls random results."), 41);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Type + Ability may be paired."), 57);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Pool is checked after seed."), 73);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("3-5 warns; below 3 blocks."), 89);
         break;
     case 4:
-        PrintGameInfoLine(COMPOUND_STRING("Filters apply outside Centers."), 41);
-        PrintGameInfoLine(COMPOUND_STRING("Changer swaps normal abilities."), 57);
-        PrintGameInfoLine(COMPOUND_STRING("Hidden ability needs its item."), 73);
-        PrintGameInfoLine(COMPOUND_STRING("Only one Mega per party."), 89);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Filters apply outside Centers."), 41);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Changer swaps normal abilities."), 57);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Hidden ability needs its item."), 73);
+        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Only one Mega per party."), 89);
         break;
     }
 
-    PrintGameInfoLine(COMPOUND_STRING("L/R PAGE   A/B BACK"), 137);
+    PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("L/R PAGE   A/B BACK"), 137);
     PutWindowTilemap(windowId);
     CopyWindowToVram(windowId, COPYWIN_FULL);
 }
 
 static bool8 StartMenuGameRules(void)
 {
-    u8 windowId;
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();
-    windowId = AddGameOptionsWindow(9);
-    DrawStdWindowFrame(windowId, FALSE);
+    AddGameOptionsWindow(9);
+    DrawStdWindowFrame(GetStartMenuWindowId(), FALSE);
     sGameRulesPage = 0;
     DrawGameRules();
     gMenuCallback = HandleGameRulesInput;
