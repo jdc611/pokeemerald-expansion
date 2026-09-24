@@ -90,7 +90,6 @@ enum
     MENU_ACTION_MOVE_RELEARNER,
     MENU_ACTION_GAME_OPTIONS,
     MENU_ACTION_GAME_INFO,
-    MENU_ACTION_GAME_RULES,
     MENU_ACTION_POKERIDER,
     MENU_ACTION_TRAIN_TO_CAP,
     MENU_ACTION_MGM,
@@ -125,9 +124,6 @@ EWRAM_DATA static u8 sSaveDialogTimer = 0;
 EWRAM_DATA static bool8 sSavingComplete = FALSE;
 EWRAM_DATA static u8 sSaveInfoWindowId = 0;
 EWRAM_DATA static u8 sGameInfoScroll = 0;
-EWRAM_DATA static u8 sGameRulesPage = 0;
-EWRAM_DATA static u8 sGameRulesScroll = 0;
-EWRAM_DATA static u8 sGameRulesCursor = 0;
 
 // Menu action callbacks
 static bool8 StartMenuPokedexCallback(void);
@@ -155,7 +151,6 @@ static bool8 StartMenuAutoRepel(void);
 static bool8 StartMenuMoveRelearner(void);
 static bool8 StartMenuGameOptions(void);
 static bool8 StartMenuGameInfo(void);
-static bool8 StartMenuGameRules(void);
 static bool8 StartMenuPokeRider(void);
 static bool8 StartMenuTrainToCap(void);
 static bool8 StartMenuMGM(void);
@@ -170,7 +165,6 @@ static bool8 BattlePyramidRetireReturnCallback(void);
 static bool8 BattlePyramidRetireCallback(void);
 static bool8 HandleStartMenuInput(void);
 static bool8 HandleGameInfoInput(void);
-static bool8 HandleGameRulesInput(void);
 
 // Save dialog callbacks
 static u8 SaveConfirmSaveCallback(void);
@@ -308,7 +302,6 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_MOVE_RELEARNER] = {COMPOUND_STRING("MOVE RELEARNER"), {.u8_void = StartMenuMoveRelearner}},
     [MENU_ACTION_GAME_OPTIONS] = {COMPOUND_STRING("GAME OPTIONS"), {.u8_void = StartMenuGameOptions}},
     [MENU_ACTION_GAME_INFO] = {COMPOUND_STRING("GAME INFO"), {.u8_void = StartMenuGameInfo}},
-    [MENU_ACTION_GAME_RULES] = {COMPOUND_STRING("GAME RULES"), {.u8_void = StartMenuGameRules}},
     [MENU_ACTION_POKERIDER] = {COMPOUND_STRING("POKéRIDER"), {.u8_void = StartMenuPokeRider}},
     [MENU_ACTION_TRAIN_TO_CAP] = {COMPOUND_STRING("TRAIN TO CAP"), {.u8_void = StartMenuTrainToCap}},
     [MENU_ACTION_MGM] = {COMPOUND_STRING("MGM"), {.u8_void = StartMenuMGM}},
@@ -482,7 +475,6 @@ static void BuildNormalStartMenu(void)
         AddStartMenuAction(MENU_ACTION_MOVE_RELEARNER);
         AddStartMenuAction(MENU_ACTION_GAME_OPTIONS);
         AddStartMenuAction(MENU_ACTION_GAME_INFO);
-        AddStartMenuAction(MENU_ACTION_GAME_RULES);
         AddStartMenuAction(MENU_ACTION_EXIT);
     }
 }
@@ -1919,160 +1911,6 @@ static void DrawGameInfo(void)
         PrintGameInfoLine(sText_GameInfoBack, 137);
     PutWindowTilemap(GetStartMenuWindowId());
     CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_FULL);
-}
-
-static const u8 *const sGameRulesTitles[] =
-{
-    COMPOUND_STRING("CONTENTS"),
-    COMPOUND_STRING("DIFFICULTY MODES"),
-    COMPOUND_STRING("LEVEL CAPS / GRINDING"),
-    COMPOUND_STRING("BATTLE RULES"),
-    COMPOUND_STRING("NUZLOCKE"),
-    COMPOUND_STRING("RANDOMIZER"),
-    COMPOUND_STRING("FILTERS"),
-    COMPOUND_STRING("POKEMON / PARTY"),
-    COMPOUND_STRING("QOL / FIELD"),
-};
-
-static const u8 *const sGameRulesBody[] =
-{
-    COMPOUND_STRING("DIFFICULTY MODES\nLEVEL CAPS / GRINDING\nBATTLE RULES\nNUZLOCKE\nRANDOMIZER\nFILTERS\nPOKEMON / PARTY\nQOL / FIELD"),
-    COMPOUND_STRING("EASY: forgiving battle rules.\nNORMAL: standard Continuum rules.\nHARD: stronger AI and tighter access\nto healing/PC tools in key areas.\nNUZLOCKE: Hard-style challenge plus\nencounter and fainting rules."),
-    COMPOUND_STRING("Level caps apply in every mode.\nImportant battles meet the current cap.\nMGM is optional and maximizes training\nvalues automatically. Rare Candy cannot\nraise a Pokemon above the cap; at cap it\nmay still trigger a valid evolution."),
-    COMPOUND_STRING("Easy allows switching after a KO.\nNormal uses the standard run rules.\nHard uses smarter AI and resets key\ntrainer battles if their area is left.\nImportant trainers use curated teams\nand are built around the current cap."),
-    COMPOUND_STRING("One eligible encounter per area.\nGift Pokemon do not use the encounter.\nFainted Pokemon go to the locked GRAVE.\nThe run continues while usable Pokemon\nremain in storage. Replacement uses the\ntop listed legal PC Pokemon.\nA failed run may continue with a restart\ncount. Nuzlocke cannot be disabled mid-run."),
-    COMPOUND_STRING("Starters: Hoenn, Custom, or Random.\nWild: Normal, Random, or Scaled.\nRandom evolutions move forward only.\nBST can be Off, Shuffle, or Random.\nA random or custom numeric seed controls\nseed-dependent results."),
-    COMPOUND_STRING("Type and Ability filters restrict legal\nPokemon pools. Ability filtering requires\nRandom/Custom starters and Random/Scaled\nwild encounters. Final pool size is checked\nafter the seed is finalized. 3-5 is LOW;\nfewer than 3 blocks starting the run."),
-    COMPOUND_STRING("Pokemon that violate an active filter\ncannot be used outside a Pokemon Center.\nNormal abilities can be swapped with the\nAbility Changer. Hidden abilities require\nthe special hidden-ability item.\nOnly one Mega may be used in a party."),
-    COMPOUND_STRING("PokeRider replaces routine HM travel.\nField obstacles will use direct A-button\ninteraction rather than a separate HM menu.\nWater interaction will offer Surf, Fish,\nor Back. Dark caves will not require the\nplayer to manually use Flash."),
-};
-
-static u8 GameRulesMaxScroll(void)
-{
-    switch (sGameRulesPage)
-    {
-    case 4: return 2;
-    default: return 0;
-    }
-}
-
-static void DrawGameRules(void)
-{
-    u8 i;
-    u8 windowId = GetStartMenuWindowId();
-    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
-    AddTextPrinterParameterized(windowId, FONT_NORMAL, sGameRulesTitles[sGameRulesPage], 8, 8, TEXT_SKIP_DRAW, NULL);
-
-    if (sGameRulesPage == 0)
-    {
-        // Keep the contents list above the persistent two-line footer.
-        for (i = 0; i < 8; i++)
-        {
-            const u8 *name = sGameRulesTitles[i + 1];
-            if (i == sGameRulesCursor)
-            {
-                StringCopy(gStringVar4, COMPOUND_STRING("> "));
-                StringAppend(gStringVar4, name);
-                name = gStringVar4;
-            }
-            AddTextPrinterParameterized(windowId, FONT_SMALL, name, 12, 25 + i * 11, TEXT_SKIP_DRAW, NULL);
-        }
-    }
-    else
-    {
-        AddTextPrinterParameterized(windowId, FONT_SMALL, sGameRulesBody[sGameRulesPage], 8, 28 - sGameRulesScroll * 12, TEXT_SKIP_DRAW, NULL);
-    }
-
-    AddTextPrinterParameterized(windowId, FONT_SMALL, COMPOUND_STRING("L/R PAGE  UP/DOWN SCROLL"), 8, 116, TEXT_SKIP_DRAW, NULL);
-    AddTextPrinterParameterized(windowId, FONT_SMALL, COMPOUND_STRING("SELECT CONTENTS  B BACK"), 8, 128, TEXT_SKIP_DRAW, NULL);
-    PutWindowTilemap(windowId);
-    CopyWindowToVram(windowId, COPYWIN_FULL);
-}
-
-static bool8 StartMenuGameRules(void)
-{
-    u8 windowId;
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
-    RemoveStartMenuWindow();
-    // Match the proven Game Info window dimensions. This stays safely inside
-    // the field BG/window layout and avoids introducing a new oversized shape.
-    windowId = AddGameOptionsWindow(7);
-    DrawStdWindowFrame(windowId, FALSE);
-    sGameRulesPage = 0;
-    sGameRulesScroll = 0;
-    sGameRulesCursor = 0;
-    DrawGameRules();
-    gMenuCallback = HandleGameRulesInput;
-    return FALSE;
-}
-
-static bool8 HandleGameRulesInput(void)
-{
-    bool8 redraw = FALSE;
-
-    if (JOY_NEW(L_BUTTON))
-    {
-        sGameRulesPage = (sGameRulesPage == 0) ? ARRAY_COUNT(sGameRulesTitles) - 1 : sGameRulesPage - 1;
-        sGameRulesScroll = 0;
-        redraw = TRUE;
-    }
-    else if (JOY_NEW(R_BUTTON))
-    {
-        sGameRulesPage = (sGameRulesPage + 1) % ARRAY_COUNT(sGameRulesTitles);
-        sGameRulesScroll = 0;
-        redraw = TRUE;
-    }
-    else if (JOY_NEW(SELECT_BUTTON))
-    {
-        sGameRulesPage = 0;
-        sGameRulesScroll = 0;
-        redraw = TRUE;
-    }
-    else if (JOY_NEW(DPAD_UP))
-    {
-        if (sGameRulesPage == 0)
-        {
-            if (sGameRulesCursor > 0)
-                sGameRulesCursor--;
-        }
-        else if (sGameRulesScroll > 0)
-            sGameRulesScroll--;
-        redraw = TRUE;
-    }
-    else if (JOY_NEW(DPAD_DOWN))
-    {
-        if (sGameRulesPage == 0)
-        {
-            if (sGameRulesCursor < 7)
-                sGameRulesCursor++;
-        }
-        else if (sGameRulesScroll < GameRulesMaxScroll())
-            sGameRulesScroll++;
-        redraw = TRUE;
-    }
-    else if (JOY_NEW(A_BUTTON) && sGameRulesPage == 0)
-    {
-        sGameRulesPage = sGameRulesCursor + 1;
-        sGameRulesScroll = 0;
-        redraw = TRUE;
-    }
-    else if (JOY_NEW(B_BUTTON))
-    {
-        PlaySE(SE_SELECT);
-        ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
-        RemoveStartMenuWindow();
-        sStartMenuCursorPos = 4;
-        InitStartMenu();
-        gMenuCallback = HandleStartMenuInput;
-        return FALSE;
-    }
-
-    if (redraw)
-    {
-        PlaySE(SE_SELECT);
-        DrawGameRules();
-    }
-    return FALSE;
 }
 
 static bool8 StartMenuGameInfo(void)
