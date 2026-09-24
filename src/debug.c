@@ -680,10 +680,24 @@ static const struct DebugMenuOption sDebugMenu_Actions_FollowerNPCMenu[] =
     { NULL }
 };
 
+static const struct DebugMenuOption sDebugMenu_Actions_FieldMoveTests[] =
+{
+    { COMPOUND_STRING("Prepare only"),          DebugAction_Util_FieldMoveTestPrep },
+    { COMPOUND_STRING("Cut"),                   DebugAction_Util_FieldMoveCut },
+    { COMPOUND_STRING("Rock Smash"),            DebugAction_Util_FieldMoveRockSmash },
+    { COMPOUND_STRING("Strength"),              DebugAction_Util_FieldMoveStrength },
+    { COMPOUND_STRING("Surf / Fish"),           DebugAction_Util_FieldMoveSurfFish },
+    { COMPOUND_STRING("Waterfall"),             DebugAction_Util_FieldMoveWaterfall },
+    { COMPOUND_STRING("Dive / Surface"),        DebugAction_Util_FieldMoveDive },
+    { COMPOUND_STRING("Flash / Darkness"),      DebugAction_Util_FieldMoveFlash },
+    { NULL }
+};
+
 static const struct DebugMenuOption sDebugMenu_Actions_Utilities[] =
 {
     { COMPOUND_STRING("Fly to map…"),               DebugAction_Util_Fly },
     { COMPOUND_STRING("Warp to map warp…"),         DebugAction_Selection_Init, &sWarpSelection},
+    { COMPOUND_STRING("Field Move Tests…"),         DebugAction_OpenSubMenu, sDebugMenu_Actions_FieldMoveTests },
     { COMPOUND_STRING("Set weather…"),              DebugAction_Selection_Init, &sSetWeatherSelection },
     { COMPOUND_STRING("Font Test…"),                DebugAction_ExecuteScript, Debug_EventScript_FontTest },
     { COMPOUND_STRING("Time Functions…"),           DebugAction_OpenSubMenu, sDebugMenu_Actions_TimeMenu, },
@@ -695,14 +709,6 @@ static const struct DebugMenuOption sDebugMenu_Actions_Utilities[] =
     { COMPOUND_STRING("Test Species Randomizer"),   DebugAction_Selection_Init, &sSpeciesGeneratorSelection },
     { COMPOUND_STRING("Test Item Randomizer"),      DebugAction_Selection_Init, &sItemGeneratorSelection },
     { COMPOUND_STRING("Starter Test"),              DebugAction_Util_StarterTest },
-    { COMPOUND_STRING("Field Move Test Prep"),       DebugAction_Util_FieldMoveTestPrep },
-    { COMPOUND_STRING("CUT test warp"),               DebugAction_Util_FieldMoveCut },
-    { COMPOUND_STRING("ROCK SMASH test warp"),        DebugAction_Util_FieldMoveRockSmash },
-    { COMPOUND_STRING("STRENGTH test warp"),          DebugAction_Util_FieldMoveStrength },
-    { COMPOUND_STRING("SURF/FISH test warp"),         DebugAction_Util_FieldMoveSurfFish },
-    { COMPOUND_STRING("WATERFALL test warp"),         DebugAction_Util_FieldMoveWaterfall },
-    { COMPOUND_STRING("DIVE test warp"),              DebugAction_Util_FieldMoveDive },
-    { COMPOUND_STRING("FLASH test warp"),             DebugAction_Util_FieldMoveFlash },
     { COMPOUND_STRING("Wally Tutorial"),            DebugAction_ExecuteScript, Debug_EventScript_WallyTutorial },
     { COMPOUND_STRING("Steven Multi"),              DebugAction_ExecuteScript, Debug_EventScript_Steven_Multi },
     { NULL }
