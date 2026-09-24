@@ -383,6 +383,9 @@ static const u8 sText_RunSetupShuffle[] = _("SHUFFLE");
 static const u8 sText_RunSetupFiltersPage[] = _("3/4  FILTERS");
 static const u8 sText_RunSetupSeedPage[] = _("4/4  SEED");
 static const u8 sText_RunSetupEnterSeed[] = _("PRESS A TO ENTER SEED");
+static const u8 sText_RunSetupPool[] = _("ELIGIBLE");
+static const u8 sText_RunSetupPoolLow[] = _("LOW");
+static const u8 sText_RunSetupPoolBlocked[] = _("TOO LOW - CHANGE SEED/FILTERS");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -2271,6 +2274,14 @@ static u32 RunSetup_CountEligibleFilterMons(void)
     return RunSetup_CountEligibleSelection(sRunSetupType, sRunSetupAbility, 6);
 }
 
+// This check deliberately runs after the seed is finalized. Randomized
+// abilities make filter eligibility seed-dependent, so pre-seed counts can be
+// misleading. Count the complete pool here for the final confirmation screen.
+static u32 RunSetup_CountFinalEligibleMons(void)
+{
+    return RunSetup_CountEligibleSelection(sRunSetupType, sRunSetupAbility, NATIONAL_DEX_COUNT);
+}
+
 static void RunSetup_DrawConfirmLine(u8 row, u8 y)
 {
     const u8 *label = sText_RunSetupSeed;
@@ -2444,6 +2455,7 @@ static void RunSetup_Draw(u8 cursor)
     if (sRunSetupConfirm)
     {
         u8 row;
+        u32 eligible = RunSetup_CountFinalEligibleMons();
 
         for (row = sRunSetupConfirmScroll; row < sRunSetupConfirmScroll + 5 && row < 11; row++)
             RunSetup_DrawConfirmLine(row, 31 + 15 * (row - sRunSetupConfirmScroll));
@@ -2452,6 +2464,17 @@ static void RunSetup_Draw(u8 cursor)
             AddTextPrinterParameterized3(0, FONT_SMALL, 198, 29, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupScrollUp);
         if (sRunSetupConfirmScroll < 6)
             AddTextPrinterParameterized3(0, FONT_SMALL, 198, 91, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupScrollDown);
+
+        if (sRunSetupFilter != RUN_FILTER_NONE)
+        {
+            ConvertIntToDecimalStringN(gStringVar1, eligible, STR_CONV_MODE_LEFT_ALIGN, 4);
+            AddTextPrinterParameterized3(0, FONT_SMALL, 8, 96, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupPool);
+            AddTextPrinterParameterized3(0, FONT_SMALL, 66, 96, sTextColor_Headers, TEXT_SKIP_DRAW, gStringVar1);
+            if (eligible < 3)
+                AddTextPrinterParameterized3(0, FONT_SMALL, 101, 96, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupPoolBlocked);
+            else if (eligible <= 5)
+                AddTextPrinterParameterized3(0, FONT_SMALL, 151, 96, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupPoolLow);
+        }
 
         RunSetup_DrawWideChoice(sText_RunSetupBack, 18, 108, 78, cursor == 0);
         RunSetup_DrawWideChoice(sText_RunSetupStartJourney, 112, 108, 78, cursor == 1);
@@ -2797,6 +2820,14 @@ static void Task_RunSetup_Input(u8 taskId)
         }
         else if (JOY_NEW(A_BUTTON) && *cursor == 1)
         {
+            // Final seed-dependent validation. A very small pool is allowed,
+            // but fewer than three eligible species cannot support the run.
+            if (sRunSetupFilter != RUN_FILTER_NONE && RunSetup_CountFinalEligibleMons() < 3)
+            {
+                PlaySE(SE_BOO);
+                RunSetup_Draw(*cursor);
+                return;
+            }
             gRunSetupRandomizerEnabled = sRunSetupRandomizer;
             gRunSetupSeedIsCustom = sRunSetupCustom;
             gRunSetupStarterMode = sRunSetupStarter;
@@ -2937,6 +2968,8 @@ static void Task_RunSetup_Input(u8 taskId)
                 RunSetup_Draw(*cursor);
                 return;
             }
+            // The final confirmation is the first point where the chosen seed
+            // is authoritative, so seed-dependent pool viability is shown there.
             sRunSetupConfirm = TRUE;
             sRunSetupConfirmScroll = 0;
             *cursor = 1;
