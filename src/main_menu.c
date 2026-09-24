@@ -214,6 +214,7 @@ static EWRAM_DATA u8 sRunSetupAbilityEligibleCounts[ABILITIES_COUNT];
 static EWRAM_DATA u16 sRunSetupAbilityChoiceCount;
 static EWRAM_DATA u8 sRunSetupConfirmScroll;
 static EWRAM_DATA u32 sRunSetupFinalEligible;
+static EWRAM_DATA u32 sRunSetupFilterEligible;
 static EWRAM_DATA u8 sRunSetupNidokingSpriteId;
 static EWRAM_DATA u8 sRunSetupArcanineSpriteId;
 
@@ -2482,7 +2483,7 @@ static void RunSetup_Draw(u8 cursor)
     }
     else if (sRunSetupPage == RUN_SETUP_PAGE_FILTERS)
     {
-        u32 eligible = RunSetup_CountEligibleFilterMons();
+        u32 eligible = sRunSetupFilterEligible;
         const u8 *type = sRunSetupType == TYPE_NONE ? sText_RunSetupAll : gTypesInfo[sRunSetupType].name;
         const u8 *ability = sRunSetupAbility == ABILITY_NONE ? sText_RunSetupAll : gAbilitiesInfo[sRunSetupAbility].name;
 
@@ -2632,6 +2633,7 @@ static void Task_RunSetup_Input(u8 taskId)
                 sRunSetupType = RunSetup_PickerIndexToType(index);
                 sRunSetupAbilityChoiceCount = 0;
                 RunSetup_UpdateFilterMode();
+                sRunSetupFilterEligible = RunSetup_CountEligibleFilterMons();
                 *picker = 0;
                 RunSetup_Draw(*cursor);
                 PlaySE(SE_SELECT);
@@ -2661,6 +2663,7 @@ static void Task_RunSetup_Input(u8 taskId)
                 {
                     sRunSetupAbility = ABILITY_NONE;
                     RunSetup_UpdateFilterMode();
+                    sRunSetupFilterEligible = RunSetup_CountEligibleFilterMons();
                     *picker = 0;
                     RunSetup_Draw(*cursor);
                 }
@@ -2789,6 +2792,7 @@ static void Task_RunSetup_Input(u8 taskId)
         else if (JOY_NEW(A_BUTTON) && *cursor == 7)
         {
             sRunSetupPage = RUN_SETUP_PAGE_FILTERS;
+            sRunSetupFilterEligible = RunSetup_CountEligibleFilterMons();
             *cursor = 0;
         }
         else return;
