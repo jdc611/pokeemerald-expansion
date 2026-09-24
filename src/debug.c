@@ -293,7 +293,6 @@ static void DebugAction_Util_Fly(u8 taskId);
 static void DebugAction_Util_WatchCredits(u8 taskId);
 static void DebugAction_Util_CheatStart(u8 taskId);
 static void DebugAction_Util_StarterTest(u8 taskId);
-static void DebugAction_Util_FieldMoveTestPrep(u8 taskId);
 static void DebugAction_Util_FieldMoveCut(u8 taskId);
 static void DebugAction_Util_FieldMoveRockSmash(u8 taskId);
 static void DebugAction_Util_FieldMoveStrength(u8 taskId);
@@ -384,20 +383,6 @@ static void DebugAction_Util_StarterTest(u8 taskId)
     SetMainCallback2(CB2_ChooseStarter);
 }
 
-static void DebugAction_Util_FieldMoveTestPrep(u8 taskId)
-{
-    u16 i;
-
-    // Unlock every badge-gated field move and provide all machines/rods so a
-    // tester can use the existing Fly/Warp debug tools to exercise each case.
-    for (i = FLAG_BADGE01_GET; i <= FLAG_BADGE08_GET; i++)
-        FlagSet(i);
-    DebugAction_PCBag_Fill_PocketTMHM(taskId);
-    AddBagItem(ITEM_OLD_ROD, 1);
-    AddBagItem(ITEM_GOOD_ROD, 1);
-    AddBagItem(ITEM_SUPER_ROD, 1);
-    PlaySE(MUS_LEVEL_UP);
-}
 
 static void DebugAction_Util_FieldMoveWarp(u8 taskId, u16 map, s16 x, s16 y)
 {
