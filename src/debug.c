@@ -293,6 +293,7 @@ static void DebugAction_Util_Fly(u8 taskId);
 static void DebugAction_Util_WatchCredits(u8 taskId);
 static void DebugAction_Util_CheatStart(u8 taskId);
 static void DebugAction_Util_StarterTest(u8 taskId);
+static void DebugAction_Util_FieldMoveTestPrep(u8 taskId);
 
 static void DebugAction_TimeMenu_ChangeTimeOfDay(u8 taskId);
 static void DebugAction_TimeMenu_ChangeWeekdays(u8 taskId);
@@ -374,6 +375,21 @@ static void DebugAction_Util_StarterTest(u8 taskId)
     Debug_DestroyMenu_Full(taskId);
     gMain.savedCallback = CB2_ReturnToField;
     SetMainCallback2(CB2_ChooseStarter);
+}
+
+static void DebugAction_Util_FieldMoveTestPrep(u8 taskId)
+{
+    u16 i;
+
+    // Unlock every badge-gated field move and provide all machines/rods so a
+    // tester can use the existing Fly/Warp debug tools to exercise each case.
+    for (i = FLAG_BADGE01_GET; i <= FLAG_BADGE08_GET; i++)
+        FlagSet(i);
+    DebugAction_PCBag_Fill_PocketTMHM(taskId);
+    AddBagItem(ITEM_OLD_ROD, 1);
+    AddBagItem(ITEM_GOOD_ROD, 1);
+    AddBagItem(ITEM_SUPER_ROD, 1);
+    PlaySE(MUS_LEVEL_UP);
 }
 
 extern const u8 Debug_FlagsNotSetOverworldConfigMessage[];
@@ -612,6 +628,7 @@ static const struct DebugMenuOption sDebugMenu_Actions_Utilities[] =
     { COMPOUND_STRING("Test Species Randomizer"),   DebugAction_Selection_Init, &sSpeciesGeneratorSelection },
     { COMPOUND_STRING("Test Item Randomizer"),      DebugAction_Selection_Init, &sItemGeneratorSelection },
     { COMPOUND_STRING("Starter Test"),              DebugAction_Util_StarterTest },
+    { COMPOUND_STRING("Field Move Test Prep"),       DebugAction_Util_FieldMoveTestPrep },
     { COMPOUND_STRING("Wally Tutorial"),            DebugAction_ExecuteScript, Debug_EventScript_WallyTutorial },
     { COMPOUND_STRING("Steven Multi"),              DebugAction_ExecuteScript, Debug_EventScript_Steven_Multi },
     { NULL }
