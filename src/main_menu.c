@@ -2274,11 +2274,12 @@ static u32 RunSetup_CountEligibleFilterMons(void)
     return RunSetup_CountEligibleSelection(sRunSetupType, sRunSetupAbility, 6);
 }
 
-// Count the complete finalized pool. Passing UINT32_MAX prevents the helper
-// from stopping early without depending on a Pokédex-count macro here.
+// Count the complete finalized pool. The helper only needs a stop value above
+// any possible species count; 0xFFFFFFFF avoids adding another header/macro
+// dependency to the intro module.
 static u32 RunSetup_CountFinalEligibleMons(void)
 {
-    return RunSetup_CountEligibleSelection(sRunSetupType, sRunSetupAbility, UINT32_MAX);
+    return RunSetup_CountEligibleSelection(sRunSetupType, sRunSetupAbility, 0xFFFFFFFF);
 }
 
 static void RunSetup_DrawConfirmLine(u8 row, u8 y)
