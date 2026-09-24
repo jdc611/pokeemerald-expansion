@@ -214,7 +214,6 @@ static EWRAM_DATA u8 sRunSetupAbilityEligibleCounts[ABILITIES_COUNT];
 static EWRAM_DATA u16 sRunSetupAbilityChoiceCount;
 static EWRAM_DATA u8 sRunSetupConfirmScroll;
 static EWRAM_DATA u32 sRunSetupFinalEligible;
-static EWRAM_DATA bool8 sRunSetupPoolWarning;
 static EWRAM_DATA u8 sRunSetupNidokingSpriteId;
 static EWRAM_DATA u8 sRunSetupArcanineSpriteId;
 
@@ -388,10 +387,6 @@ static const u8 sText_RunSetupEnterSeed[] = _("PRESS A TO ENTER SEED");
 static const u8 sText_RunSetupPool[] = _("ELIGIBLE");
 static const u8 sText_RunSetupPoolLow[] = _("LOW");
 static const u8 sText_RunSetupPoolBlocked[] = _("TOO LOW");
-static const u8 sText_RunSetupPoolWarningTitle[] = _("LOW ELIGIBLE POOL");
-static const u8 sText_RunSetupPoolWarningBody[] = _("This filter/seed gives only {STR_VAR_1}\neligible Pokemon. Consider changing\nyour filters or seed.");
-static const u8 sText_RunSetupChange[] = _("CHANGE");
-static const u8 sText_RunSetupStartAnyway[] = _("START ANYWAY");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
@@ -2378,26 +2373,6 @@ static void RunSetup_Draw(u8 cursor)
     AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, title);
     FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_3), 48, 25, 112, 1);
 
-    if (sRunSetupPoolWarning)
-    {
-        ConvertIntToDecimalStringN(gStringVar1, sRunSetupFinalEligible, STR_CONV_MODE_LEFT_ALIGN, 4);
-        StringExpandPlaceholders(gStringVar4, sText_RunSetupPoolWarningBody);
-        AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, sText_RunSetupPoolWarningTitle, 208), 10, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupPoolWarningTitle);
-        AddTextPrinterParameterized3(0, FONT_SMALL, 12, 38, sTextColor_Headers, TEXT_SKIP_DRAW, gStringVar4);
-        if (sRunSetupFinalEligible < 3)
-        {
-            RunSetup_DrawWideChoice(sText_RunSetupChange, 72, 106, 64, TRUE);
-        }
-        else
-        {
-            RunSetup_DrawWideChoice(sText_RunSetupChange, 18, 106, 80, cursor == 0);
-            RunSetup_DrawWideChoice(sText_RunSetupStartAnyway, 106, 106, 96, cursor == 1);
-        }
-        PutWindowTilemap(0);
-        CopyWindowToVram(0, COPYWIN_FULL);
-        return;
-    }
-
     if (sRunSetupPage == RUN_SETUP_PAGE_PLAY_STYLE && !sRunSetupConfirm)
     {
         const u8 *difficulty = sRunSetupDifficulty == RUN_DIFFICULTY_EASY ? sText_RunSetupEasy
@@ -2818,32 +2793,6 @@ static void Task_RunSetup_Input(u8 taskId)
         return;
     }
 
-    if (sRunSetupPoolWarning)
-    {
-        if (sRunSetupFinalEligible >= 3 && JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
-        {
-            *cursor ^= 1;
-            PlaySE(SE_SELECT);
-            RunSetup_Draw(*cursor);
-        }
-        else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && (sRunSetupFinalEligible < 3 || *cursor == 0)))
-        {
-            sRunSetupPoolWarning = FALSE;
-            sRunSetupConfirm = FALSE;
-            sRunSetupPage = RUN_SETUP_PAGE_FILTERS;
-            *cursor = 0;
-            PlaySE(SE_SELECT);
-            RunSetup_Draw(*cursor);
-        }
-        else if (JOY_NEW(A_BUTTON) && *cursor == 1 && sRunSetupFinalEligible >= 3)
-        {
-            sRunSetupPoolWarning = FALSE;
-            // Continue below through the normal START path without warning again.
-        }
-        else
-            return;
-    }
-
     if (sRunSetupConfirm)
     {
         if (JOY_NEW(DPAD_UP))
@@ -2867,13 +2816,11 @@ static void Task_RunSetup_Input(u8 taskId)
         }
         else if (JOY_NEW(A_BUTTON) && *cursor == 1)
         {
-            // Final seed-dependent validation. Warn before starting with a
-            // very small pool; fewer than three species must be changed.
-            if (sRunSetupFilter != RUN_FILTER_NONE && sRunSetupFinalEligible <= 5 && !sRunSetupPoolWarning)
+            // Final seed-dependent validation. A very small pool is allowed,
+            // but fewer than three eligible species cannot support the run.
+            if (sRunSetupFilter != RUN_FILTER_NONE && sRunSetupFinalEligible < 3)
             {
-                sRunSetupPoolWarning = TRUE;
-                *cursor = 0;
-                PlaySE(sRunSetupFinalEligible < 3 ? SE_BOO : SE_SELECT);
+                PlaySE(SE_BOO);
                 RunSetup_Draw(*cursor);
                 return;
             }
