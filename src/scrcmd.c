@@ -2320,6 +2320,7 @@ bool8 ScrCmd_checkfieldmove(struct ScriptContext *ctx)
         case MOVE_ROCK_SMASH: hmItem = ITEM_HM_ROCK_SMASH; break;
         case MOVE_WATERFALL:  hmItem = ITEM_HM_WATERFALL;  break;
         case MOVE_DIVE:       hmItem = ITEM_HM_DIVE;       break;
+        default: break;
         }
 
         if (hmItem != ITEM_NONE && CheckBagHasItem(hmItem, 1))
