@@ -2856,6 +2856,7 @@ static void Task_RunSetup_Input(u8 taskId)
 
     if (sRunSetupPage == RUN_SETUP_PAGE_FILTERS)
     {
+        u32 eligible;
         if (JOY_NEW(DPAD_UP))
             *cursor = (*cursor + 3) % 4;
         else if (JOY_NEW(DPAD_DOWN))
@@ -2886,6 +2887,13 @@ static void Task_RunSetup_Input(u8 taskId)
         }
         else if (JOY_NEW(A_BUTTON) && *cursor == 3)
         {
+            eligible = RunSetup_CountEligibleFilterMons();
+            if (sRunSetupFilter != RUN_FILTER_NONE && eligible < 3)
+            {
+                PlaySE(SE_BOO);
+                RunSetup_Draw(*cursor);
+                return;
+            }
             sRunSetupPage = RUN_SETUP_PAGE_CONFIRM;
             *cursor = 0;
         }
