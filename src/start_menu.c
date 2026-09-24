@@ -1965,6 +1965,7 @@ static void DrawGameRules(void)
 
     if (sGameRulesPage == 0)
     {
+        // Keep the contents list above the persistent two-line footer.
         for (i = 0; i < 8; i++)
         {
             const u8 *name = sGameRulesTitles[i + 1];
@@ -1974,7 +1975,7 @@ static void DrawGameRules(void)
                 StringAppend(gStringVar4, name);
                 name = gStringVar4;
             }
-            AddTextPrinterParameterized(windowId, FONT_SMALL, name, 12, 27 + i * 12, TEXT_SKIP_DRAW, NULL);
+            AddTextPrinterParameterized(windowId, FONT_SMALL, name, 12, 25 + i * 11, TEXT_SKIP_DRAW, NULL);
         }
     }
     else
@@ -1982,8 +1983,8 @@ static void DrawGameRules(void)
         AddTextPrinterParameterized(windowId, FONT_SMALL, sGameRulesBody[sGameRulesPage], 8, 28 - sGameRulesScroll * 12, TEXT_SKIP_DRAW, NULL);
     }
 
-    AddTextPrinterParameterized(windowId, FONT_SMALL, COMPOUND_STRING("L/R PAGE  UP/DOWN SCROLL"), 8, 125, TEXT_SKIP_DRAW, NULL);
-    AddTextPrinterParameterized(windowId, FONT_SMALL, COMPOUND_STRING("SELECT CONTENTS  B BACK"), 8, 137, TEXT_SKIP_DRAW, NULL);
+    AddTextPrinterParameterized(windowId, FONT_SMALL, COMPOUND_STRING("L/R PAGE  UP/DOWN SCROLL"), 8, 116, TEXT_SKIP_DRAW, NULL);
+    AddTextPrinterParameterized(windowId, FONT_SMALL, COMPOUND_STRING("SELECT CONTENTS  B BACK"), 8, 128, TEXT_SKIP_DRAW, NULL);
     PutWindowTilemap(windowId);
     CopyWindowToVram(windowId, COPYWIN_FULL);
 }
@@ -1993,10 +1994,9 @@ static bool8 StartMenuGameRules(void)
     u8 windowId;
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();
-    // Game Rules is a full-screen guide. Keep the window inside the 20-tile
-    // GBA screen height; AddGameOptionsWindow(9) creates a 20-tile window at
-    // y=1 and can overflow VRAM/window bounds.
-    windowId = AddGameOptionsWindow(8);
+    // Match the proven Game Info window dimensions. This stays safely inside
+    // the field BG/window layout and avoids introducing a new oversized shape.
+    windowId = AddGameOptionsWindow(7);
     DrawStdWindowFrame(windowId, FALSE);
     sGameRulesPage = 0;
     sGameRulesScroll = 0;
