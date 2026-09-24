@@ -126,6 +126,7 @@ EWRAM_DATA static bool8 sSavingComplete = FALSE;
 EWRAM_DATA static u8 sSaveInfoWindowId = 0;
 EWRAM_DATA static u8 sGameInfoScroll = 0;
 EWRAM_DATA static u8 sGameRulesPage = 0;
+EWRAM_DATA static bool8 sGameRulesContents = TRUE;
 
 // Menu action callbacks
 static bool8 StartMenuPokedexCallback(void);
@@ -1926,53 +1927,78 @@ static void DrawGameInfo(void)
 }
 
 static const u8 sText_GameRulesTitle[] = _("GAME RULES");
-
-// Keep Game Rules on the exact same proven renderer and scrolling model as
-// Game Info.  Each row is a normal encoded game string; no large compound
-// strings, no page-sized text buffers, and no separate window assumptions.
-static const u8 *const sText_GameRulesLines[] =
+static const u8 sText_GameRulesContentsTitle[] = _("CONTENTS");
+static const u8 sText_GameRulesPageTitles[][32] =
 {
-    COMPOUND_STRING("1/5  DIFFICULTY"),
-    COMPOUND_STRING("Easy: forgiving rules."),
-    COMPOUND_STRING("Normal: standard rules."),
-    COMPOUND_STRING("Hard: tougher challenge."),
-    COMPOUND_STRING("Nuzlocke: encounter/faint rules."),
-    COMPOUND_STRING("2/5  LEVEL CAPS"),
-    COMPOUND_STRING("Caps apply in every mode."),
-    COMPOUND_STRING("MGM is optional."),
-    COMPOUND_STRING("Rare Candy cannot pass cap."),
-    COMPOUND_STRING("At cap, evolutions may occur."),
-    COMPOUND_STRING("3/5  NUZLOCKE"),
-    COMPOUND_STRING("One eligible encounter per area."),
-    COMPOUND_STRING("Gifts do not use encounter."),
-    COMPOUND_STRING("Fainted Pokemon go to GRAVE."),
-    COMPOUND_STRING("GRAVE Pokemon stay unavailable."),
-    COMPOUND_STRING("4/5  RANDOMIZER"),
-    COMPOUND_STRING("Seed controls random results."),
-    COMPOUND_STRING("Type + Ability may be paired."),
-    COMPOUND_STRING("Pool is checked after seed."),
-    COMPOUND_STRING("3-5 warns; below 3 blocks."),
-    COMPOUND_STRING("5/5  POKEMON / PARTY"),
-    COMPOUND_STRING("Filters apply outside Centers."),
-    COMPOUND_STRING("Changer swaps normal abilities."),
-    COMPOUND_STRING("Hidden ability needs its item."),
-    COMPOUND_STRING("Only one Mega per party."),
+    _("DIFFICULTY"),
+    _("LEVEL CAPS / GRINDING"),
+    _("NUZLOCKE"),
+    _("RANDOMIZER / FILTERS"),
+    _("POKEMON / PARTY"),
 };
 
 static void DrawGameRules(void)
 {
-    u8 row;
-    FillWindowPixelBuffer(GetStartMenuWindowId(), PIXEL_FILL(1));
+    u8 windowId = GetStartMenuWindowId();
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
     PrintGameInfoLine(sText_GameRulesTitle, 9);
-    for (row = 0; row < 6; row++)
+
+    if (sGameRulesContents)
     {
-        u8 line = sGameRulesPage + row;
-        if (line < ARRAY_COUNT(sText_GameRulesLines))
-            PrintGameInfoLine(sText_GameRulesLines[line], 25 + row * 16);
+        PrintGameInfoLine(sText_GameRulesContentsTitle, 25);
+        PrintGameInfoLine(COMPOUND_STRING("DIFFICULTY"), 41);
+        PrintGameInfoLine(COMPOUND_STRING("LEVEL CAPS / GRINDING"), 57);
+        PrintGameInfoLine(COMPOUND_STRING("NUZLOCKE"), 73);
+        PrintGameInfoLine(COMPOUND_STRING("RANDOMIZER / FILTERS"), 89);
+        PrintGameInfoLine(COMPOUND_STRING("POKEMON / PARTY"), 105);
+        PrintGameInfoLine(COMPOUND_STRING("UP/DOWN + A: OPEN   B: BACK"), 137);
+        InitMenuNormal(windowId, FONT_NORMAL, 0, 41, 16, ARRAY_COUNT(sText_GameRulesPageTitles), sGameRulesPage);
     }
-    PrintGameInfoLine(COMPOUND_STRING("UP/DOWN SCROLL  A/B BACK"), 137);
-    PutWindowTilemap(GetStartMenuWindowId());
-    CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_FULL);
+    else
+    {
+        PrintGameInfoLine(sText_GameRulesPageTitles[sGameRulesPage], 25);
+        switch (sGameRulesPage)
+        {
+        case 0:
+            PrintGameInfoLine(COMPOUND_STRING("Easy: switch after KO; TM learner."), 41);
+            PrintGameInfoLine(COMPOUND_STRING("Normal: intended difficulty."), 57);
+            PrintGameInfoLine(COMPOUND_STRING("Hard: stronger trainer AI."), 73);
+            PrintGameInfoLine(COMPOUND_STRING("Hard: exit/faint resets gym/cave."), 89);
+            PrintGameInfoLine(COMPOUND_STRING("No PC/PokeVial there on Hard."), 105);
+            break;
+        case 1:
+            PrintGameInfoLine(COMPOUND_STRING("Caps apply in every mode."), 41);
+            PrintGameInfoLine(COMPOUND_STRING("Key battles are fought at cap."), 57);
+            PrintGameInfoLine(COMPOUND_STRING("MGM is optional."), 73);
+            PrintGameInfoLine(COMPOUND_STRING("Rare Candy cannot pass cap."), 89);
+            PrintGameInfoLine(COMPOUND_STRING("At cap, evolutions may occur."), 105);
+            break;
+        case 2:
+            PrintGameInfoLine(COMPOUND_STRING("One eligible encounter per area."), 41);
+            PrintGameInfoLine(COMPOUND_STRING("Gifts do not use encounter."), 57);
+            PrintGameInfoLine(COMPOUND_STRING("Fainted Pokemon go to GRAVE."), 73);
+            PrintGameInfoLine(COMPOUND_STRING("GRAVE Pokemon stay unavailable."), 89);
+            PrintGameInfoLine(COMPOUND_STRING("Uses Hard rules; MGM optional."), 105);
+            break;
+        case 3:
+            PrintGameInfoLine(COMPOUND_STRING("Seed controls random results."), 41);
+            PrintGameInfoLine(COMPOUND_STRING("Type + Ability may be paired."), 57);
+            PrintGameInfoLine(COMPOUND_STRING("Pool is checked after seed."), 73);
+            PrintGameInfoLine(COMPOUND_STRING("3-5 warns; below 3 blocks."), 89);
+            PrintGameInfoLine(COMPOUND_STRING("Random/Scaled obey filters."), 105);
+            break;
+        case 4:
+            PrintGameInfoLine(COMPOUND_STRING("Filters apply outside Centers."), 41);
+            PrintGameInfoLine(COMPOUND_STRING("Changer swaps normal abilities."), 57);
+            PrintGameInfoLine(COMPOUND_STRING("Hidden ability needs its item."), 73);
+            PrintGameInfoLine(COMPOUND_STRING("Only one Mega per party."), 89);
+            PrintGameInfoLine(COMPOUND_STRING("Illegal mons stay boxed."), 105);
+            break;
+        }
+        PrintGameInfoLine(COMPOUND_STRING("SELECT: CONTENTS   B: BACK"), 137);
+    }
+    PutWindowTilemap(windowId);
+    CopyWindowToVram(windowId, COPYWIN_FULL);
 }
 
 static bool8 StartMenuGameRules(void)
@@ -1980,10 +2006,10 @@ static bool8 StartMenuGameRules(void)
     u8 windowId;
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();
-    // Deliberately use the identical window dimensions as working Game Info.
     windowId = AddGameOptionsWindow(9);
     DrawStdWindowFrame(windowId, FALSE);
     sGameRulesPage = 0;
+    sGameRulesContents = TRUE;
     DrawGameRules();
     gMenuCallback = HandleGameRulesInput;
     return FALSE;
@@ -1991,28 +2017,45 @@ static bool8 StartMenuGameRules(void)
 
 static bool8 HandleGameRulesInput(void)
 {
-    if (JOY_NEW(DPAD_UP))
+    if (sGameRulesContents)
     {
-        if (sGameRulesPage > 0)
-            sGameRulesPage--;
+        if (JOY_NEW(DPAD_UP))
+        {
+            PlaySE(SE_SELECT);
+            sGameRulesPage = Menu_MoveCursor(-1);
+        }
+        else if (JOY_NEW(DPAD_DOWN))
+        {
+            PlaySE(SE_SELECT);
+            sGameRulesPage = Menu_MoveCursor(1);
+        }
+        else if (JOY_NEW(A_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            sGameRulesContents = FALSE;
+            DrawGameRules();
+        }
+        else if (JOY_NEW(B_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+            RemoveStartMenuWindow();
+            sStartMenuCursorPos = 4;
+            InitStartMenu();
+            gMenuCallback = HandleStartMenuInput;
+        }
+    }
+    else if (JOY_NEW(SELECT_BUTTON))
+    {
         PlaySE(SE_SELECT);
+        sGameRulesContents = TRUE;
         DrawGameRules();
     }
-    else if (JOY_NEW(DPAD_DOWN))
+    else if (JOY_NEW(B_BUTTON))
     {
-        if (sGameRulesPage + 6 < ARRAY_COUNT(sText_GameRulesLines))
-            sGameRulesPage++;
         PlaySE(SE_SELECT);
+        sGameRulesContents = TRUE;
         DrawGameRules();
-    }
-    else if (JOY_NEW(A_BUTTON | B_BUTTON))
-    {
-        PlaySE(SE_SELECT);
-        ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
-        RemoveStartMenuWindow();
-        sStartMenuCursorPos = 4;
-        InitStartMenu();
-        gMenuCallback = HandleStartMenuInput;
     }
     return FALSE;
 }
