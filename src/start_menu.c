@@ -1993,13 +1993,13 @@ static bool8 HandleGameRulesInput(void)
 {
     if (JOY_NEW(L_BUTTON))
     {
-        sGameRulesPage = sGameRulesPage == 0 ? ARRAY_COUNT(sText_GameRulesPages) - 1 : sGameRulesPage - 1;
+        sGameRulesPage = sGameRulesPage == 0 ? ARRAY_COUNT(sText_GameRulesPageTitles) - 1 : sGameRulesPage - 1;
         PlaySE(SE_SELECT);
         DrawGameRules();
     }
     else if (JOY_NEW(R_BUTTON))
     {
-        sGameRulesPage = (sGameRulesPage + 1) % ARRAY_COUNT(sText_GameRulesPages);
+        sGameRulesPage = (sGameRulesPage + 1) % ARRAY_COUNT(sText_GameRulesPageTitles);
         PlaySE(SE_SELECT);
         DrawGameRules();
     }
