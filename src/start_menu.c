@@ -90,6 +90,7 @@ enum
     MENU_ACTION_MOVE_RELEARNER,
     MENU_ACTION_GAME_OPTIONS,
     MENU_ACTION_GAME_INFO,
+    MENU_ACTION_GAME_RULES,
     MENU_ACTION_POKERIDER,
     MENU_ACTION_TRAIN_TO_CAP,
     MENU_ACTION_MGM,
@@ -124,6 +125,7 @@ EWRAM_DATA static u8 sSaveDialogTimer = 0;
 EWRAM_DATA static bool8 sSavingComplete = FALSE;
 EWRAM_DATA static u8 sSaveInfoWindowId = 0;
 EWRAM_DATA static u8 sGameInfoScroll = 0;
+EWRAM_DATA static u8 sGameRulesPage = 0;
 
 // Menu action callbacks
 static bool8 StartMenuPokedexCallback(void);
@@ -151,6 +153,7 @@ static bool8 StartMenuAutoRepel(void);
 static bool8 StartMenuMoveRelearner(void);
 static bool8 StartMenuGameOptions(void);
 static bool8 StartMenuGameInfo(void);
+static bool8 StartMenuGameRules(void);
 static bool8 StartMenuPokeRider(void);
 static bool8 StartMenuTrainToCap(void);
 static bool8 StartMenuMGM(void);
@@ -165,6 +168,7 @@ static bool8 BattlePyramidRetireReturnCallback(void);
 static bool8 BattlePyramidRetireCallback(void);
 static bool8 HandleStartMenuInput(void);
 static bool8 HandleGameInfoInput(void);
+static bool8 HandleGameRulesInput(void);
 
 // Save dialog callbacks
 static u8 SaveConfirmSaveCallback(void);
@@ -302,6 +306,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_MOVE_RELEARNER] = {COMPOUND_STRING("MOVE RELEARNER"), {.u8_void = StartMenuMoveRelearner}},
     [MENU_ACTION_GAME_OPTIONS] = {COMPOUND_STRING("GAME OPTIONS"), {.u8_void = StartMenuGameOptions}},
     [MENU_ACTION_GAME_INFO] = {COMPOUND_STRING("GAME INFO"), {.u8_void = StartMenuGameInfo}},
+    [MENU_ACTION_GAME_RULES] = {COMPOUND_STRING("GAME RULES"), {.u8_void = StartMenuGameRules}},
     [MENU_ACTION_POKERIDER] = {COMPOUND_STRING("POKéRIDER"), {.u8_void = StartMenuPokeRider}},
     [MENU_ACTION_TRAIN_TO_CAP] = {COMPOUND_STRING("TRAIN TO CAP"), {.u8_void = StartMenuTrainToCap}},
     [MENU_ACTION_MGM] = {COMPOUND_STRING("MGM"), {.u8_void = StartMenuMGM}},
@@ -475,6 +480,7 @@ static void BuildNormalStartMenu(void)
         AddStartMenuAction(MENU_ACTION_MOVE_RELEARNER);
         AddStartMenuAction(MENU_ACTION_GAME_OPTIONS);
         AddStartMenuAction(MENU_ACTION_GAME_INFO);
+        AddStartMenuAction(MENU_ACTION_GAME_RULES);
         AddStartMenuAction(MENU_ACTION_EXIT);
     }
 }
@@ -1911,6 +1917,67 @@ static void DrawGameInfo(void)
         PrintGameInfoLine(sText_GameInfoBack, 137);
     PutWindowTilemap(GetStartMenuWindowId());
     CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_FULL);
+}
+
+static const u8 *const sGameRulesPages[] =
+{
+    COMPOUND_STRING("GAME RULES  1/5\n\nDIFFICULTY\nEasy: forgiving rules.\nNormal: standard rules.\nHard: tougher challenge.\nNuzlocke: encounter/faint rules.\n\nR: NEXT   A/B: BACK"),
+    COMPOUND_STRING("GAME RULES  2/5\n\nLEVEL CAPS / GRINDING\nCaps apply in every mode.\nMGM is optional.\nRare Candy cannot pass the cap.\nAt cap, valid evolutions may occur.\n\nL/R: PAGE   A/B: BACK"),
+    COMPOUND_STRING("GAME RULES  3/5\n\nNUZLOCKE\nOne eligible encounter per area.\nGifts do not use the encounter.\nFainted Pokemon go to GRAVE.\nGRAVE Pokemon cannot be withdrawn.\nNuzlocke cannot be disabled mid-run.\n\nL/R: PAGE   A/B: BACK"),
+    COMPOUND_STRING("GAME RULES  4/5\n\nRANDOMIZER / FILTERS\nSeed controls randomized results.\nType/Ability filters restrict pools.\nFinal pool is checked after seed.\n3-5 requires start confirmation.\nFewer than 3 cannot start.\n\nL/R: PAGE   A/B: BACK"),
+    COMPOUND_STRING("GAME RULES  5/5\n\nPOKEMON / PARTY\nFiltered Pokemon cannot be used\noutside a Pokemon Center.\nAbility Changer swaps normal abilities.\nHidden abilities require their item.\nOnly one Mega may be used in a party.\n\nL: PREV   A/B: BACK"),
+};
+
+static void DrawGameRules(void)
+{
+    FillWindowPixelBuffer(GetStartMenuWindowId(), PIXEL_FILL(1));
+    AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_SMALL, sGameRulesPages[sGameRulesPage], 8, 9, TEXT_SKIP_DRAW, NULL);
+    PutWindowTilemap(GetStartMenuWindowId());
+    CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_FULL);
+}
+
+static bool8 StartMenuGameRules(void)
+{
+    u8 windowId;
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+    RemoveStartMenuWindow();
+    windowId = AddGameOptionsWindow(9);
+    DrawStdWindowFrame(windowId, FALSE);
+    sGameRulesPage = 0;
+    DrawGameRules();
+    gMenuCallback = HandleGameRulesInput;
+    return FALSE;
+}
+
+static bool8 HandleGameRulesInput(void)
+{
+    if (JOY_NEW(L_BUTTON))
+    {
+        if (sGameRulesPage > 0)
+            sGameRulesPage--;
+        else
+            sGameRulesPage = ARRAY_COUNT(sGameRulesPages) - 1;
+        PlaySE(SE_SELECT);
+        DrawGameRules();
+    }
+    else if (JOY_NEW(R_BUTTON))
+    {
+        sGameRulesPage++;
+        if (sGameRulesPage >= ARRAY_COUNT(sGameRulesPages))
+            sGameRulesPage = 0;
+        PlaySE(SE_SELECT);
+        DrawGameRules();
+    }
+    else if (JOY_NEW(A_BUTTON | B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+        RemoveStartMenuWindow();
+        sStartMenuCursorPos = 4;
+        InitStartMenu();
+        gMenuCallback = HandleStartMenuInput;
+    }
+    return FALSE;
 }
 
 static bool8 StartMenuGameInfo(void)
