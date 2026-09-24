@@ -1925,70 +1925,62 @@ static void DrawGameInfo(void)
 }
 
 static const u8 sText_GameRulesTitle[] = _("GAME RULES");
-static const u8 sText_GameRulesPageTitles[][32] =
+
+// Keep Game Rules on the exact same proven renderer and scrolling model as
+// Game Info.  Each row is a normal encoded game string; no large compound
+// strings, no page-sized text buffers, and no separate window assumptions.
+static const u8 *const sText_GameRulesLines[] =
 {
-    _("1/5  DIFFICULTY"),
-    _("2/5  LEVEL CAPS"),
-    _("3/5  NUZLOCKE"),
-    _("4/5  RANDOMIZER"),
-    _("5/5  POKEMON / PARTY"),
+    COMPOUND_STRING("1/5  DIFFICULTY"),
+    COMPOUND_STRING("Easy: forgiving rules."),
+    COMPOUND_STRING("Normal: standard rules."),
+    COMPOUND_STRING("Hard: tougher challenge."),
+    COMPOUND_STRING("Nuzlocke: encounter/faint rules."),
+    COMPOUND_STRING("2/5  LEVEL CAPS"),
+    COMPOUND_STRING("Caps apply in every mode."),
+    COMPOUND_STRING("MGM is optional."),
+    COMPOUND_STRING("Rare Candy cannot pass cap."),
+    COMPOUND_STRING("At cap, evolutions may occur."),
+    COMPOUND_STRING("3/5  NUZLOCKE"),
+    COMPOUND_STRING("One eligible encounter per area."),
+    COMPOUND_STRING("Gifts do not use encounter."),
+    COMPOUND_STRING("Fainted Pokemon go to GRAVE."),
+    COMPOUND_STRING("GRAVE Pokemon stay unavailable."),
+    COMPOUND_STRING("4/5  RANDOMIZER"),
+    COMPOUND_STRING("Seed controls random results."),
+    COMPOUND_STRING("Type + Ability may be paired."),
+    COMPOUND_STRING("Pool is checked after seed."),
+    COMPOUND_STRING("3-5 warns; below 3 blocks."),
+    COMPOUND_STRING("5/5  POKEMON / PARTY"),
+    COMPOUND_STRING("Filters apply outside Centers."),
+    COMPOUND_STRING("Changer swaps normal abilities."),
+    COMPOUND_STRING("Hidden ability needs its item."),
+    COMPOUND_STRING("Only one Mega per party."),
 };
 
 static void DrawGameRules(void)
 {
-    u8 windowId = GetStartMenuWindowId();
-
-    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
-    PrintGameInfoLineToWindow(windowId, sText_GameRulesTitle, 9);
-    PrintGameInfoLineToWindow(windowId, sText_GameRulesPageTitles[sGameRulesPage], 25);
-
-    switch (sGameRulesPage)
+    u8 row;
+    FillWindowPixelBuffer(GetStartMenuWindowId(), PIXEL_FILL(1));
+    PrintGameInfoLine(sText_GameRulesTitle, 9);
+    for (row = 0; row < 6; row++)
     {
-    case 0:
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Easy: forgiving rules."), 41);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Normal: standard rules."), 57);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Hard: tougher challenge."), 73);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Nuzlocke: encounter/faint rules."), 89);
-        break;
-    case 1:
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Caps apply in every mode."), 41);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("MGM is optional."), 57);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Rare Candy cannot pass cap."), 73);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("At cap, evolutions may occur."), 89);
-        break;
-    case 2:
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("One eligible encounter per area."), 41);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Gifts do not use encounter."), 57);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Fainted Pokemon go to GRAVE."), 73);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("GRAVE Pokemon stay unavailable."), 89);
-        break;
-    case 3:
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Seed controls random results."), 41);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Type + Ability may be paired."), 57);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Pool is checked after seed."), 73);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("3-5 warns; below 3 blocks."), 89);
-        break;
-    case 4:
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Filters apply outside Centers."), 41);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Changer swaps normal abilities."), 57);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Hidden ability needs its item."), 73);
-        PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("Only one Mega per party."), 89);
-        break;
+        u8 line = sGameRulesPage + row;
+        if (line < ARRAY_COUNT(sText_GameRulesLines))
+            PrintGameInfoLine(sText_GameRulesLines[line], 25 + row * 16);
     }
-
-    PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("L/R PAGE   A/B BACK"), 105);
-    PutWindowTilemap(windowId);
-    CopyWindowToVram(windowId, COPYWIN_FULL);
+    PrintGameInfoLine(COMPOUND_STRING("UP/DOWN SCROLL  A/B BACK"), 137);
+    PutWindowTilemap(GetStartMenuWindowId());
+    CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_FULL);
 }
 
 static bool8 StartMenuGameRules(void)
 {
-    // Match the proven Game Info lifecycle exactly.  Six actions produces a
-    // 14-tile-high window (112 px), which safely contains the rules content.
     u8 windowId;
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();
-    windowId = AddGameOptionsWindow(6);
+    // Deliberately use the identical window dimensions as working Game Info.
+    windowId = AddGameOptionsWindow(9);
     DrawStdWindowFrame(windowId, FALSE);
     sGameRulesPage = 0;
     DrawGameRules();
@@ -1998,15 +1990,17 @@ static bool8 StartMenuGameRules(void)
 
 static bool8 HandleGameRulesInput(void)
 {
-    if (JOY_NEW(L_BUTTON))
+    if (JOY_NEW(DPAD_UP))
     {
-        sGameRulesPage = sGameRulesPage == 0 ? ARRAY_COUNT(sText_GameRulesPageTitles) - 1 : sGameRulesPage - 1;
+        if (sGameRulesPage > 0)
+            sGameRulesPage--;
         PlaySE(SE_SELECT);
         DrawGameRules();
     }
-    else if (JOY_NEW(R_BUTTON))
+    else if (JOY_NEW(DPAD_DOWN))
     {
-        sGameRulesPage = (sGameRulesPage + 1) % ARRAY_COUNT(sText_GameRulesPageTitles);
+        if (sGameRulesPage + 6 < ARRAY_COUNT(sText_GameRulesLines))
+            sGameRulesPage++;
         PlaySE(SE_SELECT);
         DrawGameRules();
     }
