@@ -1941,50 +1941,55 @@ static void DrawGameRules(void)
 {
     u8 windowId = GetStartMenuWindowId();
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
-    PrintGameInfoLine(sText_GameRulesTitle, 9);
 
     if (sGameRulesContents)
     {
-        PrintGameInfoLine(sText_GameRulesContentsTitle, 25);
+        PrintGameInfoLine(COMPOUND_STRING("GAME RULES"), 9);
+        PrintGameInfoLine(COMPOUND_STRING("CONTENTS"), 25);
         PrintGameInfoLine(COMPOUND_STRING("DIFFICULTY"), 41);
         PrintGameInfoLine(COMPOUND_STRING("LEVEL CAPS / GRINDING"), 57);
         PrintGameInfoLine(COMPOUND_STRING("NUZLOCKE"), 73);
         PrintGameInfoLine(COMPOUND_STRING("RANDOMIZER / FILTERS"), 89);
         PrintGameInfoLine(COMPOUND_STRING("POKEMON / PARTY"), 105);
-        PrintGameInfoLine(COMPOUND_STRING("UP/DOWN + A: OPEN   B: BACK"), 137);
+        PrintGameInfoLine(COMPOUND_STRING("A: OPEN   B: BACK"), 137);
         InitMenuNormal(windowId, FONT_NORMAL, 0, 41, 16, ARRAY_COUNT(sText_GameRulesPageTitles), sGameRulesPage);
     }
     else
     {
-        PrintGameInfoLine(sText_GameRulesPageTitles[sGameRulesPage], 25);
+        // Topic pages use the topic itself as the screen header.  This removes
+        // the redundant GAME RULES label and gives the body more breathing room.
+        PrintGameInfoLine(sText_GameRulesPageTitles[sGameRulesPage], 9);
+        PrintGameInfoLine(COMPOUND_STRING("----------------------"), 25);
         switch (sGameRulesPage)
         {
         case 0:
-            PrintGameInfoLine(COMPOUND_STRING("Easy: switch after KO; TM learner."), 41);
-            PrintGameInfoLine(COMPOUND_STRING("Normal: intended difficulty."), 57);
-            PrintGameInfoLine(COMPOUND_STRING("Hard: stronger trainer AI."), 73);
-            PrintGameInfoLine(COMPOUND_STRING("Hard: exit/faint resets gym/cave."), 89);
-            PrintGameInfoLine(COMPOUND_STRING("No PC/PokeVial there on Hard."), 105);
+            PrintGameInfoLine(COMPOUND_STRING("EASY"), 41);
+            PrintGameInfoLine(COMPOUND_STRING("Switch after KO; TM learner."), 57);
+            PrintGameInfoLine(COMPOUND_STRING("NORMAL"), 73);
+            PrintGameInfoLine(COMPOUND_STRING("Intended difficulty."), 89);
+            PrintGameInfoLine(COMPOUND_STRING("HARD"), 105);
+            PrintGameInfoLine(COMPOUND_STRING("Better AI; gym/cave resets."), 121);
             break;
         case 1:
             PrintGameInfoLine(COMPOUND_STRING("Caps apply in every mode."), 41);
-            PrintGameInfoLine(COMPOUND_STRING("Key battles are fought at cap."), 57);
+            PrintGameInfoLine(COMPOUND_STRING("Key battles are at the cap."), 57);
             PrintGameInfoLine(COMPOUND_STRING("MGM is optional."), 73);
-            PrintGameInfoLine(COMPOUND_STRING("Rare Candy cannot pass cap."), 89);
-            PrintGameInfoLine(COMPOUND_STRING("At cap, evolutions may occur."), 105);
+            PrintGameInfoLine(COMPOUND_STRING("Candy cannot pass the cap."), 89);
+            PrintGameInfoLine(COMPOUND_STRING("At cap, evolutions still work."), 105);
             break;
         case 2:
-            PrintGameInfoLine(COMPOUND_STRING("One eligible encounter per area."), 41);
-            PrintGameInfoLine(COMPOUND_STRING("Gifts do not use encounter."), 57);
-            PrintGameInfoLine(COMPOUND_STRING("Fainted Pokemon go to GRAVE."), 73);
-            PrintGameInfoLine(COMPOUND_STRING("GRAVE Pokemon stay unavailable."), 89);
-            PrintGameInfoLine(COMPOUND_STRING("Uses Hard rules; MGM optional."), 105);
+            PrintGameInfoLine(COMPOUND_STRING("Uses Hard difficulty rules."), 41);
+            PrintGameInfoLine(COMPOUND_STRING("One encounter per area."), 57);
+            PrintGameInfoLine(COMPOUND_STRING("Gifts do not use encounter."), 73);
+            PrintGameInfoLine(COMPOUND_STRING("Fainted mons go to GRAVE."), 89);
+            PrintGameInfoLine(COMPOUND_STRING("GRAVE mons cannot return."), 105);
+            PrintGameInfoLine(COMPOUND_STRING("MGM remains optional."), 121);
             break;
         case 3:
             PrintGameInfoLine(COMPOUND_STRING("Seed controls random results."), 41);
-            PrintGameInfoLine(COMPOUND_STRING("Type + Ability may be paired."), 57);
-            PrintGameInfoLine(COMPOUND_STRING("Pool is checked after seed."), 73);
-            PrintGameInfoLine(COMPOUND_STRING("3-5 warns; below 3 blocks."), 89);
+            PrintGameInfoLine(COMPOUND_STRING("Type + Ability may pair."), 57);
+            PrintGameInfoLine(COMPOUND_STRING("Pool checked after seed."), 73);
+            PrintGameInfoLine(COMPOUND_STRING("3-5 warns; under 3 blocks."), 89);
             PrintGameInfoLine(COMPOUND_STRING("Random/Scaled obey filters."), 105);
             break;
         case 4:
@@ -1995,7 +2000,7 @@ static void DrawGameRules(void)
             PrintGameInfoLine(COMPOUND_STRING("Illegal mons stay boxed."), 105);
             break;
         }
-        PrintGameInfoLine(COMPOUND_STRING("SELECT: CONTENTS   B: BACK"), 137);
+        PrintGameInfoLine(COMPOUND_STRING("B: CONTENTS"), 137);
     }
     PutWindowTilemap(windowId);
     CopyWindowToVram(windowId, COPYWIN_FULL);
@@ -2044,12 +2049,6 @@ static bool8 HandleGameRulesInput(void)
             InitStartMenu();
             gMenuCallback = HandleStartMenuInput;
         }
-    }
-    else if (JOY_NEW(SELECT_BUTTON))
-    {
-        PlaySE(SE_SELECT);
-        sGameRulesContents = TRUE;
-        DrawGameRules();
     }
     else if (JOY_NEW(B_BUTTON))
     {
