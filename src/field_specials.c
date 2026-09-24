@@ -4652,42 +4652,42 @@ void ToggleSelectedMonNormalAbility(void)
     currentAbility = GetMonAbility(mon);
     requiredAbility = GetActiveRunFilterAbilityForMonChanges();
 
-    // In randomized-ability runs, the filter system can intentionally store
-    // the selected ability in the reserved override slot. That slot is not a
-    // real hidden-ability grant. If the live mon currently has the selected
-    // filtered ability, treat it as its legal normal starting state and let
-    // the normal changer evaluate only normal candidates.
-    if (currentSlot >= NUM_NORMAL_ABILITY_SLOTS)
+    // Filtered/randomized mons may keep the selected ability in a synthetic
+    // override slot. That must NEVER be mistaken for a genuine Hidden Ability.
+    // A real hidden ability is only one that equals this species' actual hidden
+    // slot and is not simply the active filter override.
+    if (currentSlot >= NUM_NORMAL_ABILITY_SLOTS
+     && !(requiredAbility != ABILITY_NONE && currentAbility == requiredAbility))
     {
-        bool32 foundNormalSlot = FALSE;
+        enum Ability hiddenAbility = GetSpeciesAbility(species, NUM_NORMAL_ABILITY_SLOTS);
 
-        for (slot = 0; slot < NUM_NORMAL_ABILITY_SLOTS; slot++)
+        if (hiddenAbility != ABILITY_NONE && currentAbility == hiddenAbility)
         {
-            if (GetSpeciesAbility(species, slot) == currentAbility)
-            {
-                currentSlot = slot;
-                foundNormalSlot = TRUE;
-                break;
-            }
+            gSpecialVar_Result = 2;
+            return;
         }
+    }
 
-        if (!foundNormalSlot)
+    // Locate the current ability among normal slots when possible. If it lives
+    // only in the synthetic filter override, there is no normal ability to
+    // toggle away from without violating the filter, so report FILTER BLOCKED,
+    // never HIDDEN.
+    for (slot = 0; slot < NUM_NORMAL_ABILITY_SLOTS; slot++)
+    {
+        if (GetSpeciesAbility(species, slot) == currentAbility)
         {
-            if (requiredAbility != ABILITY_NONE && currentAbility == requiredAbility)
-            {
-                // The override is the run filter's synthetic storage slot,
-                // not permission for the free changer to touch hidden slots.
-                // Use normal slot 0 only as the candidate-search anchor.
-                currentSlot = 0;
-            }
-            else
-            {
-                // A genuine hidden ability remains completely off-limits to
-                // the free Ability Changer.
-                gSpecialVar_Result = 2;
-                return;
-            }
+            currentSlot = slot;
+            break;
         }
+    }
+
+    if (slot == NUM_NORMAL_ABILITY_SLOTS)
+    {
+        if (requiredAbility != ABILITY_NONE && currentAbility == requiredAbility)
+            gSpecialVar_Result = 3;
+        else
+            gSpecialVar_Result = 1;
+        return;
     }
 
     for (slot = 1; slot <= NUM_NORMAL_ABILITY_SLOTS; slot++)
@@ -4711,12 +4711,7 @@ void ToggleSelectedMonNormalAbility(void)
         }
     }
 
-    // If the filtered override is the current legal ability and neither normal
-    // slot can preserve that filter, there is simply no legal normal swap.
-    if (requiredAbility != ABILITY_NONE && currentAbility == requiredAbility)
-        gSpecialVar_Result = 3;
-    else
-        gSpecialVar_Result = 1;
+    gSpecialVar_Result = 1;
 }
 
 void SetAbility(void)
