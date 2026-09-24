@@ -244,6 +244,7 @@ EventScript_ChangeAbility_NoAlternate::
     goto EventScript_ChangeAbility_Close
 
 EventScript_ChangeAbility_Hidden::
+    // This branch is reserved for a genuine species Hidden Ability only.
     msgbox EventScript_Text_AbilityHiddenItemOnly, MSGBOX_DEFAULT
     goto EventScript_ChangeAbility_Close
 
