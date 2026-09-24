@@ -294,6 +294,13 @@ static void DebugAction_Util_WatchCredits(u8 taskId);
 static void DebugAction_Util_CheatStart(u8 taskId);
 static void DebugAction_Util_StarterTest(u8 taskId);
 static void DebugAction_Util_FieldMoveTestPrep(u8 taskId);
+static void DebugAction_Util_FieldMoveCut(u8 taskId);
+static void DebugAction_Util_FieldMoveRockSmash(u8 taskId);
+static void DebugAction_Util_FieldMoveStrength(u8 taskId);
+static void DebugAction_Util_FieldMoveSurfFish(u8 taskId);
+static void DebugAction_Util_FieldMoveWaterfall(u8 taskId);
+static void DebugAction_Util_FieldMoveDive(u8 taskId);
+static void DebugAction_Util_FieldMoveFlash(u8 taskId);
 
 static void DebugAction_TimeMenu_ChangeTimeOfDay(u8 taskId);
 static void DebugAction_TimeMenu_ChangeWeekdays(u8 taskId);
@@ -390,6 +397,66 @@ static void DebugAction_Util_FieldMoveTestPrep(u8 taskId)
     AddBagItem(ITEM_GOOD_ROD, 1);
     AddBagItem(ITEM_SUPER_ROD, 1);
     PlaySE(MUS_LEVEL_UP);
+}
+
+static void DebugAction_Util_FieldMoveWarp(u8 taskId, u16 map, s16 x, s16 y)
+{
+    u16 i;
+
+    for (i = FLAG_BADGE01_GET; i <= FLAG_BADGE08_GET; i++)
+        FlagSet(i);
+    DebugAction_PCBag_Fill_PocketTMHM(taskId);
+    AddBagItem(ITEM_OLD_ROD, 1);
+    AddBagItem(ITEM_GOOD_ROD, 1);
+    AddBagItem(ITEM_SUPER_ROD, 1);
+
+    Debug_DestroyMenu_Full(taskId);
+    SetWarpDestination(MAP_GROUP(map), MAP_NUM(map), WARP_ID_NONE, x, y);
+    DoWarp();
+    ResetInitialPlayerAvatarState();
+}
+
+static void DebugAction_Util_FieldMoveCut(u8 taskId)
+{
+    // Route 116: stand immediately west of the cut tree at (21, 6).
+    DebugAction_Util_FieldMoveWarp(taskId, MAP_ROUTE116, 20, 6);
+}
+
+static void DebugAction_Util_FieldMoveRockSmash(u8 taskId)
+{
+    // Rusturf Tunnel: stand immediately west of the breakable rock at (24, 5).
+    DebugAction_Util_FieldMoveWarp(taskId, MAP_RUSTURF_TUNNEL, 23, 5);
+}
+
+static void DebugAction_Util_FieldMoveStrength(u8 taskId)
+{
+    // Seafloor Cavern Room 8: stand immediately south of the boulder at (4, 7).
+    DebugAction_Util_FieldMoveWarp(taskId, MAP_SEAFLOOR_CAVERN_ROOM8, 4, 8);
+}
+
+static void DebugAction_Util_FieldMoveSurfFish(u8 taskId)
+{
+    // Route 124 is almost entirely surfable/fishable water; this coordinate is
+    // a safe land test point near the eastern shore.
+    DebugAction_Util_FieldMoveWarp(taskId, MAP_ROUTE124, 70, 49);
+}
+
+static void DebugAction_Util_FieldMoveWaterfall(u8 taskId)
+{
+    // Route 119 contains the overworld waterfall and gives a quick Waterfall test.
+    DebugAction_Util_FieldMoveWarp(taskId, MAP_ROUTE119, 8, 39);
+}
+
+static void DebugAction_Util_FieldMoveDive(u8 taskId)
+{
+    // Route 124 has a direct DIVE connection to Underwater Route 124.
+    DebugAction_Util_FieldMoveWarp(taskId, MAP_ROUTE124, 32, 28);
+}
+
+static void DebugAction_Util_FieldMoveFlash(u8 taskId)
+{
+    // Granite Cave B1F is a canonical darkness/Flash test map.
+    DebugAction_Util_FieldMoveWarp(taskId, MAP_GRANITE_CAVE_B1F, 24, 13);
 }
 
 extern const u8 Debug_FlagsNotSetOverworldConfigMessage[];
@@ -629,13 +696,13 @@ static const struct DebugMenuOption sDebugMenu_Actions_Utilities[] =
     { COMPOUND_STRING("Test Item Randomizer"),      DebugAction_Selection_Init, &sItemGeneratorSelection },
     { COMPOUND_STRING("Starter Test"),              DebugAction_Util_StarterTest },
     { COMPOUND_STRING("Field Move Test Prep"),       DebugAction_Util_FieldMoveTestPrep },
-    { COMPOUND_STRING("CUT: prep + Fly"),             DebugAction_Util_FieldMoveTestPrep },
-    { COMPOUND_STRING("ROCK SMASH: prep + Fly"),      DebugAction_Util_FieldMoveTestPrep },
-    { COMPOUND_STRING("STRENGTH: prep + Fly"),        DebugAction_Util_FieldMoveTestPrep },
-    { COMPOUND_STRING("SURF/FISH: prep + Fly"),       DebugAction_Util_FieldMoveTestPrep },
-    { COMPOUND_STRING("WATERFALL: prep + Fly"),       DebugAction_Util_FieldMoveTestPrep },
-    { COMPOUND_STRING("DIVE: prep + Fly"),            DebugAction_Util_FieldMoveTestPrep },
-    { COMPOUND_STRING("FLASH: prep + Fly"),           DebugAction_Util_FieldMoveTestPrep },
+    { COMPOUND_STRING("CUT test warp"),               DebugAction_Util_FieldMoveCut },
+    { COMPOUND_STRING("ROCK SMASH test warp"),        DebugAction_Util_FieldMoveRockSmash },
+    { COMPOUND_STRING("STRENGTH test warp"),          DebugAction_Util_FieldMoveStrength },
+    { COMPOUND_STRING("SURF/FISH test warp"),         DebugAction_Util_FieldMoveSurfFish },
+    { COMPOUND_STRING("WATERFALL test warp"),         DebugAction_Util_FieldMoveWaterfall },
+    { COMPOUND_STRING("DIVE test warp"),              DebugAction_Util_FieldMoveDive },
+    { COMPOUND_STRING("FLASH test warp"),             DebugAction_Util_FieldMoveFlash },
     { COMPOUND_STRING("Wally Tutorial"),            DebugAction_ExecuteScript, Debug_EventScript_WallyTutorial },
     { COMPOUND_STRING("Steven Multi"),              DebugAction_ExecuteScript, Debug_EventScript_Steven_Multi },
     { NULL }
