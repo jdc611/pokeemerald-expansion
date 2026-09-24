@@ -3264,7 +3264,14 @@ static bool32 SpeciesHasAbilityForSettings(enum Species species, enum Ability ab
     u32 slot;
     if (species <= SPECIES_NONE || species >= NUM_SPECIES || !IsSpeciesEnabled(species) || species == SPECIES_EGG)
         return FALSE;
-    for (slot = 0; slot < NUM_ABILITY_SLOTS; slot++)
+
+    // Run Ability filters describe the ability a generated Pokémon starts with.
+    // Therefore only NORMAL ability slots are eligible here. Counting hidden
+    // slots made a filter match look legal during setup, then caused
+    // TrySetMonAbilityToActiveRunFilter to store slot 2 and the free Ability
+    // Changer correctly (but unexpectedly) treated that Pokémon as Hidden.
+    // Hidden abilities remain item-only and are never granted by a run filter.
+    for (slot = 0; slot < NUM_NORMAL_ABILITY_SLOTS; slot++)
     {
         enum Ability candidate = abilityMode == RUN_ABILITIES_RANDOM
                               ? GetRandomizedAbilityForSeed(species, slot, seed)
@@ -3642,7 +3649,10 @@ bool32 TrySetMonAbilityToActiveRunFilter(struct Pokemon *mon)
     if (requiredAbility == ABILITY_NONE || species == SPECIES_NONE || species == SPECIES_EGG)
         return TRUE;
 
-    for (slot = 0; slot < NUM_ABILITY_SLOTS; slot++)
+    // Ability filters must never silently grant a Hidden Ability. The setup
+    // eligibility scan uses the same normal-slot rule, so a legal generated
+    // Pokémon will have the requested ability in slot 0 or 1.
+    for (slot = 0; slot < NUM_NORMAL_ABILITY_SLOTS; slot++)
     {
         if (GetSpeciesAbility(species, slot) == requiredAbility)
         {
@@ -3651,13 +3661,10 @@ bool32 TrySetMonAbilityToActiveRunFilter(struct Pokemon *mon)
         }
     }
 
-    // A filtered run must never create a live Pokemon that fails its selected
-    // ability merely because this species' seeded random slots did not contain
-    // it. The filter is authoritative for generated/corrected Pokemon.
-    // Reserve the last ability slot as the run-filter override.
-    slot = NUM_ABILITY_SLOTS - 1;
-    SetMonData(mon, MON_DATA_ABILITY_NUM, &slot);
-    return GetMonAbility(mon) == requiredAbility;
+    // Do not use the last slot as a fake override: GetMonAbility resolves that
+    // slot through the species/randomized ability table, where it is genuinely
+    // a hidden slot. Callers can reject/regenerate an ineligible Pokémon.
+    return FALSE;
 }
 
 bool32 IsPlayerInPokemonCenter(void)
