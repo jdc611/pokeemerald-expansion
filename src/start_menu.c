@@ -1993,7 +1993,10 @@ static bool8 StartMenuGameRules(void)
     u8 windowId;
     ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
     RemoveStartMenuWindow();
-    windowId = AddGameOptionsWindow(9);
+    // Game Rules is a full-screen guide. Keep the window inside the 20-tile
+    // GBA screen height; AddGameOptionsWindow(9) creates a 20-tile window at
+    // y=1 and can overflow VRAM/window bounds.
+    windowId = AddGameOptionsWindow(8);
     DrawStdWindowFrame(windowId, FALSE);
     sGameRulesPage = 0;
     sGameRulesScroll = 0;
