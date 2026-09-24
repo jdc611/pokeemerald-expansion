@@ -1976,19 +1976,20 @@ static void DrawGameRules(void)
         break;
     }
 
-    PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("L/R PAGE   A/B BACK"), 137);
+    PrintGameInfoLineToWindow(windowId, COMPOUND_STRING("L/R PAGE   A/B BACK"), 105);
     PutWindowTilemap(windowId);
     CopyWindowToVram(windowId, COPYWIN_FULL);
 }
 
 static bool8 StartMenuGameRules(void)
 {
-    // Game Rules is an in-place detail view, just like Game Info.  Reusing the
-    // already-visible Game Options window avoids tearing down/recreating a
-    // window with a height derived from a fake action count (9 => 20 tiles),
-    // which exceeds the 18-tile field BG and produced a black screen at runtime.
-    ClearStdWindowAndFrame(GetStartMenuWindowId(), FALSE);
-    DrawStdWindowFrame(GetStartMenuWindowId(), FALSE);
+    // Match the proven Game Info lifecycle exactly.  Six actions produces a
+    // 14-tile-high window (112 px), which safely contains the rules content.
+    u8 windowId;
+    ClearStdWindowAndFrame(GetStartMenuWindowId(), TRUE);
+    RemoveStartMenuWindow();
+    windowId = AddGameOptionsWindow(6);
+    DrawStdWindowFrame(windowId, FALSE);
     sGameRulesPage = 0;
     DrawGameRules();
     gMenuCallback = HandleGameRulesInput;
