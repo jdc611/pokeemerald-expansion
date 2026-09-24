@@ -385,7 +385,7 @@ static const u8 sText_RunSetupSeedPage[] = _("4/4  SEED");
 static const u8 sText_RunSetupEnterSeed[] = _("PRESS A TO ENTER SEED");
 static const u8 sText_RunSetupPool[] = _("ELIGIBLE");
 static const u8 sText_RunSetupPoolLow[] = _("LOW");
-static const u8 sText_RunSetupPoolBlocked[] = _("TOO LOW - CHANGE SEED/FILTERS");
+static const u8 sText_RunSetupPoolBlocked[] = _("TOO LOW");
 
 #define MENU_LEFT 2
 #define MENU_TOP_WIN0 1
