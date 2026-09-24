@@ -260,7 +260,7 @@ EventScript_Text_AbilityChanged:
 EventScript_Text_AbilityNoAlternate:
     .string "This POKéMON has no other normal ability.$"
 EventScript_Text_AbilityHiddenItemOnly:
-    .string "Hidden Abilities require\\nthe proper item.$"
+    .string "Hidden Abilities require\nthe proper item.$"
 EventScript_Text_AbilityFilterBlocked:
     .string "That Ability doesn't match your current Ability Filter.$"
 
