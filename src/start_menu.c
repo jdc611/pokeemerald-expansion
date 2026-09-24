@@ -856,6 +856,7 @@ static bool8 HandleStartMenuInput(void)
             && gMenuCallback != StartMenuMoveRelearner
             && gMenuCallback != StartMenuGameOptions
             && gMenuCallback != StartMenuGameInfo
+            && gMenuCallback != StartMenuGameRules
             && gMenuCallback != StartMenuDexNavInfo
             && gMenuCallback != StartMenuBackGameOptions)
         {
