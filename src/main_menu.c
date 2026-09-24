@@ -2094,10 +2094,13 @@ static void RunSetup_BuildAbilityChoices(void)
 
     if (sRunSetupType != TYPE_NONE)
     {
-        args.arg1 = sRunSetupType;
+        // Do not pre-filter the generator by type here. Form-aware run-filter
+        // matching below is the source of truth for Type+Ability eligibility.
+        // The old type-filtered generator could collapse the ability list to
+        // ALL even when valid paired matches existed.
+        generator = scaled ? SPECIES_GENERATOR_SCALED_WILD : SPECIES_GENERATOR_NO_SUPERMONS;
         if (scaled)
-            args.arg2 = 0;
-        generator = scaled ? SPECIES_GENERATOR_SCALED_TYPE_FILTERED : SPECIES_GENERATOR_TYPE_FILTERED;
+            args.arg1 = 0;
     }
     else if (scaled)
     {
@@ -2118,6 +2121,11 @@ static void RunSetup_BuildAbilityChoices(void)
         u32 slot;
 
         if (!IsSpeciesEligibleRandomSpecies(generator, species, &args))
+            continue;
+        if (sRunSetupType != TYPE_NONE
+         && !DoesSpeciesOrReachableFormMatchRunFilterForSettings(species, RUN_FILTER_TYPE, sRunSetupType,
+                                                                 sRunSetupAbilityMode, sRunSetupEvolutions,
+                                                                 sRunSetupDifficulty, sRunSetupSeed))
             continue;
 
         if (sRunSetupAbilityMode == RUN_ABILITIES_RANDOM)
