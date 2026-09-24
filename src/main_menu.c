@@ -214,7 +214,6 @@ static EWRAM_DATA u8 sRunSetupAbilityEligibleCounts[ABILITIES_COUNT];
 static EWRAM_DATA u16 sRunSetupAbilityChoiceCount;
 static EWRAM_DATA u8 sRunSetupConfirmScroll;
 static EWRAM_DATA u32 sRunSetupFinalEligible;
-static EWRAM_DATA u32 sRunSetupFilterEligible;
 static EWRAM_DATA u8 sRunSetupNidokingSpriteId;
 static EWRAM_DATA u8 sRunSetupArcanineSpriteId;
 
@@ -2483,7 +2482,6 @@ static void RunSetup_Draw(u8 cursor)
     }
     else if (sRunSetupPage == RUN_SETUP_PAGE_FILTERS)
     {
-        u32 eligible = sRunSetupFilterEligible;
         const u8 *type = sRunSetupType == TYPE_NONE ? sText_RunSetupAll : gTypesInfo[sRunSetupType].name;
         const u8 *ability = sRunSetupAbility == ABILITY_NONE ? sText_RunSetupAll : gAbilitiesInfo[sRunSetupAbility].name;
 
@@ -2495,10 +2493,6 @@ static void RunSetup_Draw(u8 cursor)
         AddTextPrinterParameterized3(0, FONT_NORMAL, 12, 67, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupAbility);
         RunSetup_DrawWideChoice(type, 82, 39, 116, cursor == 0);
         RunSetup_DrawWideChoice(ability, 82, 64, 116, cursor == 1);
-        if (eligible < 3 && sRunSetupFilter != RUN_FILTER_NONE)
-            AddTextPrinterParameterized3(0, FONT_SMALL, 8, 89, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupNeedThree);
-        else if (eligible <= 5 && sRunSetupFilter != RUN_FILTER_NONE)
-            AddTextPrinterParameterized3(0, FONT_SMALL, 25, 91, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupLimitedPool);
         RunSetup_DrawChoice(sText_RunSetupBack, 52, 110, cursor == 2);
         RunSetup_DrawWideChoice(sText_RunSetupNext, 108, 110, 76, cursor == 3);
         if (cursor < 2)
@@ -2633,7 +2627,6 @@ static void Task_RunSetup_Input(u8 taskId)
                 sRunSetupType = RunSetup_PickerIndexToType(index);
                 sRunSetupAbilityChoiceCount = 0;
                 RunSetup_UpdateFilterMode();
-                sRunSetupFilterEligible = RunSetup_CountEligibleFilterMons();
                 *picker = 0;
                 RunSetup_Draw(*cursor);
                 PlaySE(SE_SELECT);
@@ -2663,7 +2656,6 @@ static void Task_RunSetup_Input(u8 taskId)
                 {
                     sRunSetupAbility = ABILITY_NONE;
                     RunSetup_UpdateFilterMode();
-                    sRunSetupFilterEligible = RunSetup_CountEligibleFilterMons();
                     *picker = 0;
                     RunSetup_Draw(*cursor);
                 }
@@ -2792,7 +2784,6 @@ static void Task_RunSetup_Input(u8 taskId)
         else if (JOY_NEW(A_BUTTON) && *cursor == 7)
         {
             sRunSetupPage = RUN_SETUP_PAGE_FILTERS;
-            sRunSetupFilterEligible = RunSetup_CountEligibleFilterMons();
             *cursor = 0;
         }
         else return;
