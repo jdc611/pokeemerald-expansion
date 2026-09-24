@@ -2304,6 +2304,34 @@ bool8 ScrCmd_checkfieldmove(struct ScriptContext *ctx)
         return FALSE;
 
     move = FieldMove_GetMoveId(fieldMove);
+
+    // Chaos HM QoL: once the corresponding HM has been acquired, field use is
+    // unlocked by the badge alone. A party Pokemon does not need to know the move.
+    // Use party slot 0 as the field-effect actor when available.
+    {
+        enum Item hmItem = ITEM_NONE;
+        switch (move)
+        {
+        case MOVE_CUT:        hmItem = ITEM_HM_CUT;        break;
+        case MOVE_FLY:        hmItem = ITEM_HM_FLY;        break;
+        case MOVE_SURF:       hmItem = ITEM_HM_SURF;       break;
+        case MOVE_STRENGTH:   hmItem = ITEM_HM_STRENGTH;   break;
+        case MOVE_FLASH:      hmItem = ITEM_HM_FLASH;      break;
+        case MOVE_ROCK_SMASH: hmItem = ITEM_HM_ROCK_SMASH; break;
+        case MOVE_WATERFALL:  hmItem = ITEM_HM_WATERFALL;  break;
+        case MOVE_DIVE:       hmItem = ITEM_HM_DIVE;       break;
+        }
+
+        if (hmItem != ITEM_NONE && CheckBagHasItem(hmItem, 1))
+        {
+            enum Species species = GetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_SPECIES);
+            gSpecialVar_Result = 0;
+            gSpecialVar_0x8004 = species;
+            return FALSE;
+        }
+    }
+
+    // Preserve the normal learned-move fallback for non-HM/custom field moves.
     for (u32 i = 0; i < PARTY_SIZE; i++)
     {
         enum Species species = GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_SPECIES);
