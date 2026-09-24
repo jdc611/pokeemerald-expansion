@@ -213,6 +213,7 @@ static EWRAM_DATA u16 sRunSetupAbilityChoices[ABILITIES_COUNT];
 static EWRAM_DATA u8 sRunSetupAbilityEligibleCounts[ABILITIES_COUNT];
 static EWRAM_DATA u16 sRunSetupAbilityChoiceCount;
 static EWRAM_DATA u8 sRunSetupConfirmScroll;
+static EWRAM_DATA u32 sRunSetupFinalEligible;
 static EWRAM_DATA u8 sRunSetupNidokingSpriteId;
 static EWRAM_DATA u8 sRunSetupArcanineSpriteId;
 
@@ -2343,10 +2344,22 @@ static void RunSetup_DrawConfirmLine(u8 row, u8 y)
         ConvertIntToDecimalStringN(gStringVar1, sRunSetupSeed, STR_CONV_MODE_LEFT_ALIGN, 8);
         value = gStringVar1;
         break;
+    case 11:
+        label = sText_RunSetupPool;
+        ConvertIntToDecimalStringN(gStringVar1, sRunSetupFinalEligible, STR_CONV_MODE_LEFT_ALIGN, 4);
+        value = gStringVar1;
+        break;
     }
 
     AddTextPrinterParameterized3(0, FONT_SMALL, 8, y, sTextColor_Headers, TEXT_SKIP_DRAW, label);
     AddTextPrinterParameterized3(0, FONT_SMALL, 105, y, sTextColor_Headers, TEXT_SKIP_DRAW, value);
+    if (row == 11 && sRunSetupFilter != RUN_FILTER_NONE)
+    {
+        if (sRunSetupFinalEligible < 3)
+            AddTextPrinterParameterized3(0, FONT_SMALL, 151, y, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupPoolBlocked);
+        else if (sRunSetupFinalEligible <= 5)
+            AddTextPrinterParameterized3(0, FONT_SMALL, 171, y, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupPoolLow);
+    }
 }
 
 static void RunSetup_Draw(u8 cursor)
@@ -2455,26 +2468,14 @@ static void RunSetup_Draw(u8 cursor)
     if (sRunSetupConfirm)
     {
         u8 row;
-        u32 eligible = RunSetup_CountFinalEligibleMons();
 
-        for (row = sRunSetupConfirmScroll; row < sRunSetupConfirmScroll + 5 && row < 11; row++)
+        for (row = sRunSetupConfirmScroll; row < sRunSetupConfirmScroll + 5 && row < 12; row++)
             RunSetup_DrawConfirmLine(row, 31 + 15 * (row - sRunSetupConfirmScroll));
 
         if (sRunSetupConfirmScroll > 0)
             AddTextPrinterParameterized3(0, FONT_SMALL, 198, 29, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupScrollUp);
-        if (sRunSetupConfirmScroll < 6)
+        if (sRunSetupConfirmScroll < 7)
             AddTextPrinterParameterized3(0, FONT_SMALL, 198, 91, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupScrollDown);
-
-        if (sRunSetupFilter != RUN_FILTER_NONE)
-        {
-            ConvertIntToDecimalStringN(gStringVar1, eligible, STR_CONV_MODE_LEFT_ALIGN, 4);
-            AddTextPrinterParameterized3(0, FONT_SMALL, 8, 96, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupPool);
-            AddTextPrinterParameterized3(0, FONT_SMALL, 66, 96, sTextColor_Headers, TEXT_SKIP_DRAW, gStringVar1);
-            if (eligible < 3)
-                AddTextPrinterParameterized3(0, FONT_SMALL, 101, 96, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupPoolBlocked);
-            else if (eligible <= 5)
-                AddTextPrinterParameterized3(0, FONT_SMALL, 151, 96, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupPoolLow);
-        }
 
         RunSetup_DrawWideChoice(sText_RunSetupBack, 18, 108, 78, cursor == 0);
         RunSetup_DrawWideChoice(sText_RunSetupStartJourney, 112, 108, 78, cursor == 1);
@@ -2806,7 +2807,7 @@ static void Task_RunSetup_Input(u8 taskId)
         }
         else if (JOY_NEW(DPAD_DOWN))
         {
-            if (sRunSetupConfirmScroll < 6)
+            if (sRunSetupConfirmScroll < 7)
                 sRunSetupConfirmScroll++;
         }
         else if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
@@ -2822,7 +2823,7 @@ static void Task_RunSetup_Input(u8 taskId)
         {
             // Final seed-dependent validation. A very small pool is allowed,
             // but fewer than three eligible species cannot support the run.
-            if (sRunSetupFilter != RUN_FILTER_NONE && RunSetup_CountFinalEligibleMons() < 3)
+            if (sRunSetupFilter != RUN_FILTER_NONE && sRunSetupFinalEligible < 3)
             {
                 PlaySE(SE_BOO);
                 RunSetup_Draw(*cursor);
@@ -2969,7 +2970,11 @@ static void Task_RunSetup_Input(u8 taskId)
                 return;
             }
             // The final confirmation is the first point where the chosen seed
-            // is authoritative, so seed-dependent pool viability is shown there.
+            // is authoritative. Compute the seed-dependent pool once here and
+            // cache it so menu redraws and input do not rescan the full dex.
+            sRunSetupFinalEligible = sRunSetupFilter == RUN_FILTER_NONE
+                                   ? NATIONAL_DEX_COUNT
+                                   : RunSetup_CountFinalEligibleMons();
             sRunSetupConfirm = TRUE;
             sRunSetupConfirmScroll = 0;
             *cursor = 1;
