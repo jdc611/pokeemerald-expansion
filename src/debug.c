@@ -402,6 +402,21 @@ static void DebugAction_Util_FieldMoveTestPrep(u8 taskId)
 static void DebugAction_Util_FieldMoveWarp(u8 taskId, u16 map, s16 x, s16 y)
 {
     u16 i;
+    struct Pokemon *mon;
+
+    // Make every field-move shortcut self-contained. Preserve the player's
+    // party, but put the full Emerald field-move test set on the first mon.
+    // checkfieldmove() looks for a party user; merely owning the HM is not enough.
+    if (gPlayerPartyCount == 0)
+    {
+        CreateMon(&gPlayerParty[0], SPECIES_MEW, 50, USE_RANDOM_IVS, FALSE, 0, OTID_PLAYER_ID, 0);
+        gPlayerPartyCount = 1;
+    }
+    mon = &gPlayerParty[0];
+    SetMonMoveSlot(mon, MOVE_CUT, 0);
+    SetMonMoveSlot(mon, MOVE_ROCK_SMASH, 1);
+    SetMonMoveSlot(mon, MOVE_STRENGTH, 2);
+    SetMonMoveSlot(mon, MOVE_SURF, 3);
 
     for (i = FLAG_BADGE01_GET; i <= FLAG_BADGE08_GET; i++)
         FlagSet(i);
@@ -409,6 +424,15 @@ static void DebugAction_Util_FieldMoveWarp(u8 taskId, u16 map, s16 x, s16 y)
     AddBagItem(ITEM_OLD_ROD, 1);
     AddBagItem(ITEM_GOOD_ROD, 1);
     AddBagItem(ITEM_SUPER_ROD, 1);
+
+    // Swap the fourth slot for the move needed by tests that cannot fit in the
+    // four-move core set. Each shortcut calls this common setup before warping.
+    if (map == MAP_ROUTE119)
+        SetMonMoveSlot(mon, MOVE_WATERFALL, 3);
+    else if (map == MAP_ROUTE124 && x == 32)
+        SetMonMoveSlot(mon, MOVE_DIVE, 3);
+    else if (map == MAP_GRANITE_CAVE_B1F)
+        SetMonMoveSlot(mon, MOVE_FLASH, 3);
 
     Debug_DestroyMenu_Full(taskId);
     SetWarpDestination(MAP_GROUP(map), MAP_NUM(map), WARP_ID_NONE, x, y);
@@ -682,7 +706,6 @@ static const struct DebugMenuOption sDebugMenu_Actions_FollowerNPCMenu[] =
 
 static const struct DebugMenuOption sDebugMenu_Actions_FieldMoveTests[] =
 {
-    { COMPOUND_STRING("Prepare only"),          DebugAction_Util_FieldMoveTestPrep },
     { COMPOUND_STRING("Cut"),                   DebugAction_Util_FieldMoveCut },
     { COMPOUND_STRING("Rock Smash"),            DebugAction_Util_FieldMoveRockSmash },
     { COMPOUND_STRING("Strength"),              DebugAction_Util_FieldMoveStrength },
