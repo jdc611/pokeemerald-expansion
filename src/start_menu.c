@@ -1920,13 +1920,13 @@ static void DrawGameInfo(void)
 }
 
 static const u8 sText_GameRulesTitle[] = _("GAME RULES");
-static const u8 sText_GameRulesPages[][256] =
+static const u8 sText_GameRulesPageTitles[][32] =
 {
-    _("1/5  DIFFICULTY\n\nEasy: forgiving rules.\nNormal: standard rules.\nHard: tougher challenge.\nNuzlocke: encounter/faint rules.\n\nR NEXT   A/B BACK"),
-    _("2/5  LEVEL CAPS / GRINDING\n\nCaps apply in every mode.\nMGM is optional.\nRare Candy cannot pass the cap.\nAt cap, valid evolutions may occur.\n\nL/R PAGE   A/B BACK"),
-    _("3/5  NUZLOCKE\n\nOne eligible encounter per area.\nGifts do not use the encounter.\nFainted Pokemon go to GRAVE.\nGRAVE Pokemon cannot be withdrawn.\nNuzlocke cannot be disabled mid-run.\n\nL/R PAGE   A/B BACK"),
-    _("4/5  RANDOMIZER / FILTERS\n\nSeed controls randomized results.\nType/Ability filters may be paired.\nFinal pool is checked after seed.\n3-5 requires start confirmation.\nFewer than 3 cannot start.\n\nL/R PAGE   A/B BACK"),
-    _("5/5  POKEMON / PARTY\n\nFiltered Pokemon cannot be used\noutside a Pokemon Center.\nAbility Changer swaps normal abilities.\nHidden abilities require their item.\nOnly one Mega may be used in a party.\n\nL PREV   A/B BACK"),
+    _("1/5  DIFFICULTY"),
+    _("2/5  LEVEL CAPS"),
+    _("3/5  NUZLOCKE"),
+    _("4/5  RANDOMIZER"),
+    _("5/5  POKEMON / PARTY"),
 };
 
 static void DrawGameRules(void)
@@ -1935,7 +1935,43 @@ static void DrawGameRules(void)
 
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
     PrintGameInfoLine(sText_GameRulesTitle, 9);
-    AddTextPrinterParameterized(windowId, FONT_SMALL, sText_GameRulesPages[sGameRulesPage], 8, 29, TEXT_SKIP_DRAW, NULL);
+    PrintGameInfoLine(sText_GameRulesPageTitles[sGameRulesPage], 25);
+
+    switch (sGameRulesPage)
+    {
+    case 0:
+        PrintGameInfoLine(COMPOUND_STRING("Easy: forgiving rules."), 41);
+        PrintGameInfoLine(COMPOUND_STRING("Normal: standard rules."), 57);
+        PrintGameInfoLine(COMPOUND_STRING("Hard: tougher challenge."), 73);
+        PrintGameInfoLine(COMPOUND_STRING("Nuzlocke: encounter/faint rules."), 89);
+        break;
+    case 1:
+        PrintGameInfoLine(COMPOUND_STRING("Caps apply in every mode."), 41);
+        PrintGameInfoLine(COMPOUND_STRING("MGM is optional."), 57);
+        PrintGameInfoLine(COMPOUND_STRING("Rare Candy cannot pass cap."), 73);
+        PrintGameInfoLine(COMPOUND_STRING("At cap, evolutions may occur."), 89);
+        break;
+    case 2:
+        PrintGameInfoLine(COMPOUND_STRING("One eligible encounter per area."), 41);
+        PrintGameInfoLine(COMPOUND_STRING("Gifts do not use encounter."), 57);
+        PrintGameInfoLine(COMPOUND_STRING("Fainted Pokemon go to GRAVE."), 73);
+        PrintGameInfoLine(COMPOUND_STRING("GRAVE Pokemon stay unavailable."), 89);
+        break;
+    case 3:
+        PrintGameInfoLine(COMPOUND_STRING("Seed controls random results."), 41);
+        PrintGameInfoLine(COMPOUND_STRING("Type + Ability may be paired."), 57);
+        PrintGameInfoLine(COMPOUND_STRING("Pool is checked after seed."), 73);
+        PrintGameInfoLine(COMPOUND_STRING("3-5 warns; below 3 blocks."), 89);
+        break;
+    case 4:
+        PrintGameInfoLine(COMPOUND_STRING("Filters apply outside Centers."), 41);
+        PrintGameInfoLine(COMPOUND_STRING("Changer swaps normal abilities."), 57);
+        PrintGameInfoLine(COMPOUND_STRING("Hidden ability needs its item."), 73);
+        PrintGameInfoLine(COMPOUND_STRING("Only one Mega per party."), 89);
+        break;
+    }
+
+    PrintGameInfoLine(COMPOUND_STRING("L/R PAGE   A/B BACK"), 137);
     PutWindowTilemap(windowId);
     CopyWindowToVram(windowId, COPYWIN_FULL);
 }
