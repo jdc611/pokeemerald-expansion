@@ -1735,6 +1735,10 @@ const u32 gItemIcon_ChaosDive[] = INCGFX_U32("graphics/items/icons/chaos_dive.pn
 const u16 gItemIconPalette_ChaosDive[] = INCGFX_U16("graphics/items/icons/chaos_dive.png", ".gbapal");
 const u32 gItemIcon_ChaosSurf[] = INCGFX_U32("graphics/items/icons/chaos_surf.png", ".4bpp.smol");
 const u16 gItemIconPalette_ChaosSurf[] = INCGFX_U16("graphics/items/icons/chaos_surf.png", ".gbapal");
+const u32 gItemIcon_ChaosSplash[] = INCGFX_U32("graphics/items/icons/chaos_splash.png", ".4bpp.smol");
+const u16 gItemIconPalette_ChaosSplash[] = INCGFX_U16("graphics/items/icons/chaos_splash.png", ".gbapal");
+const u32 gItemIcon_ChaosWaterfall[] = INCGFX_U32("graphics/items/icons/chaos_waterfall.png", ".4bpp.smol");
+const u16 gItemIconPalette_ChaosWaterfall[] = INCGFX_U16("graphics/items/icons/chaos_waterfall.png", ".gbapal");
 
 const u16 gItemIconPalette_NormalTMHM[] = INCGFX_U16("graphics/items/icon_palettes/normal_tm_hm.pal", ".gbapal");
 
