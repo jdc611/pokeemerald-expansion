@@ -1722,6 +1722,20 @@ const u32 gItemIcon_TM[] = INCGFX_U32("graphics/items/icons/tm.png", ".4bpp.smol
 
 const u32 gItemIcon_HM[] = INCGFX_U32("graphics/items/icons/hm.png", ".4bpp.smol");
 
+// Chaos field-move tool artwork (Cookie Softcore assets supplied by project owner)
+const u32 gItemIcon_ChaosCut[] = INCGFX_U32("graphics/items/icons/chaos_cut.png", ".4bpp.smol");
+const u16 gItemIconPalette_ChaosCut[] = INCGFX_U16("graphics/items/icons/chaos_cut.png", ".gbapal");
+const u32 gItemIcon_ChaosRockSmash[] = INCGFX_U32("graphics/items/icons/chaos_rock_smash.png", ".4bpp.smol");
+const u16 gItemIconPalette_ChaosRockSmash[] = INCGFX_U16("graphics/items/icons/chaos_rock_smash.png", ".gbapal");
+const u32 gItemIcon_ChaosStrength[] = INCGFX_U32("graphics/items/icons/chaos_strength.png", ".4bpp.smol");
+const u16 gItemIconPalette_ChaosStrength[] = INCGFX_U16("graphics/items/icons/chaos_strength.png", ".gbapal");
+const u32 gItemIcon_ChaosFlash[] = INCGFX_U32("graphics/items/icons/chaos_flash.png", ".4bpp.smol");
+const u16 gItemIconPalette_ChaosFlash[] = INCGFX_U16("graphics/items/icons/chaos_flash.png", ".gbapal");
+const u32 gItemIcon_ChaosDive[] = INCGFX_U32("graphics/items/icons/chaos_dive.png", ".4bpp.smol");
+const u16 gItemIconPalette_ChaosDive[] = INCGFX_U16("graphics/items/icons/chaos_dive.png", ".gbapal");
+const u32 gItemIcon_ChaosSurf[] = INCGFX_U32("graphics/items/icons/chaos_surf.png", ".4bpp.smol");
+const u16 gItemIconPalette_ChaosSurf[] = INCGFX_U16("graphics/items/icons/chaos_surf.png", ".gbapal");
+
 const u16 gItemIconPalette_NormalTMHM[] = INCGFX_U16("graphics/items/icon_palettes/normal_tm_hm.pal", ".gbapal");
 
 const u16 gItemIconPalette_FireTMHM[] = INCGFX_U16("graphics/items/icon_palettes/fire_tm_hm.pal", ".gbapal");
