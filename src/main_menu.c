@@ -234,6 +234,7 @@ static void MainMenu_FormatSavegameText(void);
 static void HighlightSelectedMainMenuItem(enum PartyMenuType, u8, s16);
 static void Task_HandleMainMenuInput(u8);
 static void Task_HandleMainMenuAPressed(u8);
+static void DebugQuickStartNewGame(u8 taskId);
 static void Task_HandleMainMenuBPressed(u8);
 static void Task_NewGameBirchSpeech_Init(u8);
 static void Task_DisplayMainMenuInvalidActionError(u8);
@@ -1022,11 +1023,42 @@ static void Task_HighlightSelectedMainMenuItem(u8 taskId)
     gTasks[taskId].func = Task_HandleMainMenuInput;
 }
 
+static void DebugQuickStartNewGame(u8 taskId)
+{
+    // Testing shortcut: bypass Birch/run setup with deterministic defaults.
+    gRunSetupRandomizerEnabled = FALSE;
+    gRunSetupSeedIsCustom = FALSE;
+    gRunSetupStarterMode = RUN_STARTER_HOENN;
+    gRunSetupWorldSeed = 1;
+    gRunSetupFilterMode = RUN_FILTER_NONE;
+    gRunSetupFilterValue = 0;
+    gRunSetupBstMode = RUN_BST_OFF;
+    gRunSetupAbilityMode = FALSE;
+    gRunSetupMinimalGrindingMode = FALSE;
+    gRunSetupDifficulty = RUN_DIFFICULTY_NORMAL;
+    gRunSetupMovesetMode = 0;
+    gRunSetupEvolutionMode = 0;
+
+    Sav2_ClearSetDefault();
+    gSaveBlock2Ptr->playerGender = MALE;
+    StringCopy(gSaveBlock2Ptr->playerName, COMPOUND_STRING("JACK"));
+
+    DestroyTask(taskId);
+    FreeAllWindowBuffers();
+    SetMainCallback2(CB2_NewGame);
+}
+
 static bool8 HandleMainMenuInput(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
 
-    if (JOY_NEW(A_BUTTON))
+    if (JOY_HELD(START_BUTTON | SELECT_BUTTON) == (START_BUTTON | SELECT_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        DebugQuickStartNewGame(taskId);
+        return FALSE;
+    }
+    else if (JOY_NEW(A_BUTTON))
     {
         PlaySE(SE_SELECT);
         IsWirelessAdapterConnected();   // why bother calling this here? debug? Task_HandleMainMenuAPressed will check too
