@@ -4,8 +4,7 @@ EventScript_CutTree::
 	checkfieldmove FIELD_MOVE_CUT, TRUE
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CheckTreeCantCut
 	setfieldeffectargument 0, VAR_RESULT
-	bufferplayername STR_VAR_1
-	buffermovename STR_VAR_2, MOVE_CUT
+		buffermovename STR_VAR_2, MOVE_CUT
 @ Direct-A QoL: interacting with a cuttable tree uses Cut immediately.
 	msgbox Text_MonUsedFieldMove, MSGBOX_DEFAULT
 	closemessage
@@ -48,7 +47,7 @@ Text_WantToCut:
 	.string "Would you like to CUT it?$"
 
 Text_MonUsedFieldMove:
-	.string "{STR_VAR_1} used {STR_VAR_2}!$"
+	.string "{PLAYER} used {STR_VAR_2}!$"
 
 Text_CantCut:
 	.string "This tree looks like it can be\n"
@@ -65,8 +64,7 @@ EventScript_RockSmash::
 	checkfieldmove FIELD_MOVE_ROCK_SMASH, TRUE
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CantSmashRock
 	setfieldeffectargument 0, VAR_RESULT
-	bufferplayername STR_VAR_1
-	buffermovename STR_VAR_2, MOVE_ROCK_SMASH
+		buffermovename STR_VAR_2, MOVE_ROCK_SMASH
 @ Direct-A QoL: interacting with a breakable rock uses Rock Smash immediately.
 	msgbox Text_MonUsedFieldMove, MSGBOX_DEFAULT
 	closemessage
@@ -310,7 +308,7 @@ Text_WantToWaterfall:
 	.string "Would you like to use WATERFALL?$"
 
 Text_MonUsedWaterfall:
-	.string "{STR_VAR_1} used WATERFALL.$"
+	.string "{PLAYER} used WATERFALL.$"
 
 EventScript_UseDive::
 	lockall
@@ -423,8 +421,7 @@ Text_FailSweetScent:
 
 EventScript_UseDefog::
 	lockall
-	bufferplayername STR_VAR_1
-	buffermovename STR_VAR_2, MOVE_DEFOG
+		buffermovename STR_VAR_2, MOVE_DEFOG
 	msgbox Text_MonUsedFieldMove, MSGBOX_DEFAULT
 	closemessage
 	isfollowerfieldmoveuser VAR_0x8004
