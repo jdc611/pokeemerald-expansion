@@ -168,7 +168,8 @@ const void *GetItemIconPic(enum Item itemId)
         case ITEM_HM_ROCK_SMASH: return gItemIcon_ChaosRockSmash;
         case ITEM_HM_STRENGTH:   return gItemIcon_ChaosStrength;
         case ITEM_HM_FLASH:      return gItemIcon_ChaosFlash;
-        case ITEM_HM_SURF:        return gItemIcon_ChaosSurf;
+        case ITEM_HM_SURF:        return gItemIcon_ChaosSplash;
+        case ITEM_HM_WATERFALL:   return gItemIcon_ChaosWaterfall;
         default: break;
         }
         if (GetItemTMHMIndex(itemId) > NUM_TECHNICAL_MACHINES)
@@ -193,7 +194,8 @@ const u16 *GetItemIconPalette(enum Item itemId)
         case ITEM_HM_ROCK_SMASH: return gItemIconPalette_ChaosRockSmash;
         case ITEM_HM_STRENGTH:   return gItemIconPalette_ChaosStrength;
         case ITEM_HM_FLASH:      return gItemIconPalette_ChaosFlash;
-        case ITEM_HM_SURF:        return gItemIconPalette_ChaosSurf;
+        case ITEM_HM_SURF:        return gItemIconPalette_ChaosSplash;
+        case ITEM_HM_WATERFALL:   return gItemIconPalette_ChaosWaterfall;
         default: break;
         }
         return gTypesInfo[GetMoveType(GetItemTMHMMoveId(itemId))].paletteTMHM;
