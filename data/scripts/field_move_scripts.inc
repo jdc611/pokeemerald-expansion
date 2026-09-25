@@ -4,6 +4,7 @@ EventScript_CutTree::
 	checkfieldmove FIELD_MOVE_CUT, TRUE
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CheckTreeCantCut
 	setfieldeffectargument 0, PARTY_SIZE
+	setfieldeffectargument 1, ITEM_HM_CUT
 	buffermovename STR_VAR_2, MOVE_CUT
 @ Direct-A QoL: interacting with a cuttable tree uses Cut immediately.
 	msgbox Text_MonUsedFieldMove, MSGBOX_DEFAULT
@@ -64,6 +65,7 @@ EventScript_RockSmash::
 	checkfieldmove FIELD_MOVE_ROCK_SMASH, TRUE
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CantSmashRock
 	setfieldeffectargument 0, PARTY_SIZE
+	setfieldeffectargument 1, ITEM_HM_ROCK_SMASH
 	buffermovename STR_VAR_2, MOVE_ROCK_SMASH
 @ Direct-A QoL: interacting with a breakable rock uses Rock Smash immediately.
 	msgbox Text_MonUsedFieldMove, MSGBOX_DEFAULT
@@ -223,6 +225,7 @@ EventScript_StrengthBoulder::
 	checkfieldmove FIELD_MOVE_STRENGTH, TRUE
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CantStrength
 	setfieldeffectargument 0, PARTY_SIZE
+	setfieldeffectargument 1, ITEM_HM_STRENGTH
 @ Direct-A QoL: activate Strength immediately when the boulder is examined.
 	closemessage
 	dofieldeffect FLDEFF_USE_STRENGTH
