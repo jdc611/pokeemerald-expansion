@@ -162,6 +162,16 @@ const void *GetItemIconPic(enum Item itemId)
         return gItemsInfo[0].iconPic;
     if (gItemsInfo[itemId].pocket == POCKET_TM_HM)
     {
+        switch (itemId)
+        {
+        case ITEM_HM_CUT:        return gItemIcon_ChaosCut;
+        case ITEM_HM_ROCK_SMASH: return gItemIcon_ChaosRockSmash;
+        case ITEM_HM_STRENGTH:   return gItemIcon_ChaosStrength;
+        case ITEM_HM_FLASH:      return gItemIcon_ChaosFlash;
+        case ITEM_HM_DIVE:       return gItemIcon_ChaosDive;
+        case ITEM_HM_SURF:        return gItemIcon_ChaosSurf;
+        default: break;
+        }
         if (GetItemTMHMIndex(itemId) > NUM_TECHNICAL_MACHINES)
             return gItemIcon_HM;
         return gItemIcon_TM;
@@ -177,7 +187,19 @@ const u16 *GetItemIconPalette(enum Item itemId)
     if (itemId >= ITEMS_COUNT)
         return gItemsInfo[0].iconPalette;
     if (gItemsInfo[itemId].pocket == POCKET_TM_HM)
+    {
+        switch (itemId)
+        {
+        case ITEM_HM_CUT:        return gItemIconPalette_ChaosCut;
+        case ITEM_HM_ROCK_SMASH: return gItemIconPalette_ChaosRockSmash;
+        case ITEM_HM_STRENGTH:   return gItemIconPalette_ChaosStrength;
+        case ITEM_HM_FLASH:      return gItemIconPalette_ChaosFlash;
+        case ITEM_HM_DIVE:       return gItemIconPalette_ChaosDive;
+        case ITEM_HM_SURF:        return gItemIconPalette_ChaosSurf;
+        default: break;
+        }
         return gTypesInfo[GetMoveType(GetItemTMHMMoveId(itemId))].paletteTMHM;
+    }
 
     return gItemsInfo[itemId].iconPalette;
 }
