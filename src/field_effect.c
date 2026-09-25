@@ -2939,6 +2939,17 @@ bool8 FldEff_FieldMoveShowMonInit(void)
     struct Pokemon *pokemon;
     bool32 noDucking = gFieldEffectArguments[0] & SHOW_MON_CRY_NO_DUCKING;
     pokemon = &gParties[B_TRAINER_PLAYER][(u8)gFieldEffectArguments[0]];
+
+    // Chaos HM QoL can use a field move without a Pokemon knowing it. If the
+    // supplied actor slot is empty, skip the Pokemon banner rather than showing
+    // the mystery/blank species. The HM-specific artwork is handled by the
+    // field-move presentation instead.
+    if (GetMonData(pokemon, MON_DATA_SPECIES) == SPECIES_NONE)
+    {
+        FieldEffectActiveListRemove(FLDEFF_FIELD_MOVE_SHOW_MON_INIT);
+        return FALSE;
+    }
+
     gFieldEffectArguments[0] = GetMonData(pokemon, MON_DATA_SPECIES);
     gFieldEffectArguments[1] = GetMonData(pokemon, MON_DATA_IS_SHINY);
     gFieldEffectArguments[2] = GetMonData(pokemon, MON_DATA_PERSONALITY);
