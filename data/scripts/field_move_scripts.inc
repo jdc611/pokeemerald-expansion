@@ -226,7 +226,9 @@ EventScript_StrengthBoulder::
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CantStrength
 	setfieldeffectargument 0, PARTY_SIZE
 	setfieldeffectargument 1, ITEM_HM_STRENGTH
-@ Direct-A QoL: activate Strength immediately when the boulder is examined.
+@ Direct-A QoL: match Cut/Rock Smash ordering: message first, then animation.
+	buffermovename STR_VAR_2, MOVE_STRENGTH
+	msgbox Text_MonUsedFieldMove, MSGBOX_DEFAULT
 	closemessage
 	dofieldeffect FLDEFF_USE_STRENGTH
 	waitstate
