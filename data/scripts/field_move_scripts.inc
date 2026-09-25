@@ -4,7 +4,7 @@ EventScript_CutTree::
 	checkfieldmove FIELD_MOVE_CUT, TRUE
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CheckTreeCantCut
 	setfieldeffectargument 0, VAR_RESULT
-	bufferpartymonnick STR_VAR_1, VAR_RESULT
+	bufferplayername STR_VAR_1
 	buffermovename STR_VAR_2, MOVE_CUT
 @ Direct-A QoL: interacting with a cuttable tree uses Cut immediately.
 	msgbox Text_MonUsedFieldMove, MSGBOX_DEFAULT
@@ -65,7 +65,7 @@ EventScript_RockSmash::
 	checkfieldmove FIELD_MOVE_ROCK_SMASH, TRUE
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CantSmashRock
 	setfieldeffectargument 0, VAR_RESULT
-	bufferpartymonnick STR_VAR_1, VAR_RESULT
+	bufferplayername STR_VAR_1
 	buffermovename STR_VAR_2, MOVE_ROCK_SMASH
 @ Direct-A QoL: interacting with a breakable rock uses Rock Smash immediately.
 	msgbox Text_MonUsedFieldMove, MSGBOX_DEFAULT
@@ -423,7 +423,7 @@ Text_FailSweetScent:
 
 EventScript_UseDefog::
 	lockall
-	bufferpartymonnick STR_VAR_1, VAR_RESULT
+	bufferplayername STR_VAR_1
 	buffermovename STR_VAR_2, MOVE_DEFOG
 	msgbox Text_MonUsedFieldMove, MSGBOX_DEFAULT
 	closemessage
