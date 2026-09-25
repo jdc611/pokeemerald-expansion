@@ -15,6 +15,7 @@
 #include "follower_npc.h"
 #include "gpu_regs.h"
 #include "main.h"
+#include "item_icon.h"
 #include "malloc.h"
 #include "mirage_tower.h"
 #include "menu.h"
@@ -194,6 +195,7 @@ static bool8 SlideIndoorBannerOnscreen(struct Task *);
 static bool8 SlideIndoorBannerOffscreen(struct Task *);
 
 static u8 InitFieldMoveMonSprite(enum Species, bool8, u32);
+static u8 InitFieldMoveHmSprite(enum Item);
 static void SpriteCB_FieldMoveMonSlideOnscreen(struct Sprite *);
 static void SpriteCB_FieldMoveMonWaitAfterCry(struct Sprite *);
 static void SpriteCB_FieldMoveMonSlideOffscreen(struct Sprite *);
@@ -2928,7 +2930,10 @@ bool8 FldEff_FieldMoveShowMon(void)
     else
         taskId = CreateTask(Task_FieldMoveShowMonIndoors, 0xff);
 
-    gTasks[taskId].tMonSpriteId = InitFieldMoveMonSprite(gFieldEffectArguments[0], gFieldEffectArguments[1], gFieldEffectArguments[2]);
+    if (gFieldEffectArguments[2] == 0x484D)
+        gTasks[taskId].tMonSpriteId = InitFieldMoveHmSprite(gFieldEffectArguments[1]);
+    else
+        gTasks[taskId].tMonSpriteId = InitFieldMoveMonSprite(gFieldEffectArguments[0], gFieldEffectArguments[1], gFieldEffectArguments[2]);
     return FALSE;
 }
 
@@ -2940,12 +2945,15 @@ bool8 FldEff_FieldMoveShowMonInit(void)
     bool32 noDucking = gFieldEffectArguments[0] & SHOW_MON_CRY_NO_DUCKING;
     pokemon = &gParties[B_TRAINER_PLAYER][(u8)gFieldEffectArguments[0]];
 
-    // Chaos HM QoL can use a field move without a Pokemon knowing it. If the
-    // supplied actor slot is empty, skip the Pokemon banner rather than showing
-    // the mystery/blank species. The HM-specific artwork is handled by the
-    // field-move presentation instead.
-    if (GetMonData(pokemon, MON_DATA_SPECIES) == SPECIES_NONE)
+    // Chaos HM QoL: PARTY_SIZE is a sentinel for a field move powered by the
+    // acquired HM rather than a party Pokemon. In that case show the HM item
+    // artwork in the normal field-move banner instead of a Pokemon sprite.
+    if ((u8)gFieldEffectArguments[0] == PARTY_SIZE)
     {
+        gFieldEffectArguments[0] = SPECIES_NONE;
+        // argument 1 is preloaded by the field script with the matching HM item
+        gFieldEffectArguments[2] = 0x484D; // "HM" presentation marker
+        FieldEffectStart(FLDEFF_FIELD_MOVE_SHOW_MON);
         FieldEffectActiveListRemove(FLDEFF_FIELD_MOVE_SHOW_MON_INIT);
         return FALSE;
     }
@@ -3291,6 +3299,22 @@ static bool8 SlideIndoorBannerOffscreen(struct Task *task)
 #undef tBgOffset
 #undef tMonSpriteId
 
+static u8 InitFieldMoveHmSprite(enum Item itemId)
+{
+    // Reuse the standard field-move banner, but populate it with the HM item
+    // icon. The item system supplies the HM artwork and move-type palette.
+    u8 spriteId = AddItemIconSprite(0xF100, 0xF101, itemId);
+    struct Sprite *sprite = &gSprites[spriteId];
+
+    sprite->x = 320;
+    sprite->y = 80;
+    sprite->callback = SpriteCallbackDummy;
+    sprite->oam.priority = 0;
+    sprite->sSpecies = SPECIES_NONE;
+    sprite->data[6] = TRUE; // suppress Pokemon cry
+    return spriteId;
+}
+
 static u8 InitFieldMoveMonSprite(enum Species species, bool8 isShiny, u32 personality)
 {
     bool16 noDucking;
@@ -3314,10 +3338,13 @@ static void SpriteCB_FieldMoveMonSlideOnscreen(struct Sprite *sprite)
         sprite->x = DISPLAY_WIDTH / 2;
         sprite->sOnscreenTimer = 30;
         sprite->callback = SpriteCB_FieldMoveMonWaitAfterCry;
-        if (sprite->data[6])
-            PlayCry_NormalNoDucking(sprite->sSpecies, 0, CRY_VOLUME_RS, CRY_PRIORITY_NORMAL);
-        else
-            PlayCry_Normal(sprite->sSpecies, 0);
+        if (sprite->sSpecies != SPECIES_NONE)
+        {
+            if (sprite->data[6])
+                PlayCry_NormalNoDucking(sprite->sSpecies, 0, CRY_VOLUME_RS, CRY_PRIORITY_NORMAL);
+            else
+                PlayCry_Normal(sprite->sSpecies, 0);
+        }
     }
 }
 
