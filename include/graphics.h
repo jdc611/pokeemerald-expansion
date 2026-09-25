@@ -1508,6 +1508,18 @@ extern const u16 gItemIconPalette_MarangaBerry[];
 // TMs/HMs
 extern const u32 gItemIcon_TM[];
 extern const u32 gItemIcon_HM[];
+extern const u32 gItemIcon_ChaosCut[];
+extern const u16 gItemIconPalette_ChaosCut[];
+extern const u32 gItemIcon_ChaosRockSmash[];
+extern const u16 gItemIconPalette_ChaosRockSmash[];
+extern const u32 gItemIcon_ChaosStrength[];
+extern const u16 gItemIconPalette_ChaosStrength[];
+extern const u32 gItemIcon_ChaosFlash[];
+extern const u16 gItemIconPalette_ChaosFlash[];
+extern const u32 gItemIcon_ChaosDive[];
+extern const u16 gItemIconPalette_ChaosDive[];
+extern const u32 gItemIcon_ChaosSurf[];
+extern const u16 gItemIconPalette_ChaosSurf[];
 extern const u16 gItemIconPalette_NormalTMHM[];
 extern const u16 gItemIconPalette_FireTMHM[];
 extern const u16 gItemIconPalette_WaterTMHM[];
