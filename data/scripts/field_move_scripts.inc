@@ -269,9 +269,8 @@ Text_WantToStrength:
 	.string "Would you like to use STRENGTH?$"
 
 Text_MonUsedStrength:
-	.string "{STR_VAR_1} used STRENGTH!\p"
-	.string "{STR_VAR_1}'s STRENGTH made it\n"
-	.string "possible to move boulders around!$"
+	.string "STRENGTH made it possible to move\n"
+	.string "boulders around!$"
 
 Text_CantStrength:
 	.string "It's a big boulder, but a POKéMON\n"
