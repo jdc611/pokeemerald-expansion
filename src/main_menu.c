@@ -1028,7 +1028,7 @@ static void DebugQuickStartNewGame(u8 taskId)
     // Testing shortcut: bypass Birch/run setup with deterministic defaults.
     gRunSetupRandomizerEnabled = FALSE;
     gRunSetupSeedIsCustom = FALSE;
-    gRunSetupStarterMode = RUN_STARTER_HOENN;
+    gRunSetupStarterMode = RUN_STARTER_NORMAL;
     gRunSetupWorldSeed = 1;
     gRunSetupFilterMode = RUN_FILTER_NONE;
     gRunSetupFilterValue = 0;
@@ -1039,7 +1039,6 @@ static void DebugQuickStartNewGame(u8 taskId)
     gRunSetupMovesetMode = 0;
     gRunSetupEvolutionMode = 0;
 
-    Sav2_ClearSetDefault();
     gSaveBlock2Ptr->playerGender = MALE;
     StringCopy(gSaveBlock2Ptr->playerName, COMPOUND_STRING("JACK"));
 
