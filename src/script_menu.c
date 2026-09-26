@@ -614,6 +614,13 @@ static void Task_HandleMultichoiceInput(u8 taskId)
                 else
                 {
                     gSpecialVar_Result = selection;
+
+                    // Remember only real water/rod choices. Cancel/B never
+                    // replaces the temporary default.
+                    if (tMultichoiceId == MULTI_SURF_FISH_BACK && selection < 2)
+                        sWaterActionDefault = selection;
+                    else if (tMultichoiceId == MULTI_FISHING_RODS && selection < 3)
+                        sFishingRodDefault = selection;
                 }
                 ClearToTransparentAndRemoveWindow(tWindowId);
                 DestroyTask(taskId);
@@ -718,10 +725,6 @@ static void Task_HandleMultichoiceGridInput(u8 taskId)
         break;
     default:
         gSpecialVar_Result = selection;
-        if (tMultichoiceId == MULTI_SURF_FISH_BACK && selection < 2)
-            sWaterActionDefault = selection;
-        else if (tMultichoiceId == MULTI_FISHING_RODS && selection < 3)
-            sFishingRodDefault = selection;
         break;
     }
 
