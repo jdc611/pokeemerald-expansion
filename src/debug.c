@@ -428,9 +428,11 @@ static void DebugAction_Util_FieldMoveSurfFish(u8 taskId)
 
 static void DebugAction_Util_FieldMoveWaterfall(u8 taskId)
 {
-    // Upper Route 119 river: place the player immediately below the Waterfall
-    // approach instead of the unrelated lower-river coordinate used previously.
-    DebugAction_Util_FieldMoveWarp(taskId, MAP_ROUTE119, 18, 34);
+    // Waterfall can only activate while the player is already surfing north.
+    // Reuse the Surf/Fish shoreline test point so the tester enters the water
+    // normally first, then travels to a waterfall in the real surfing state.
+    // This avoids debug-warping directly onto water as a walking avatar.
+    DebugAction_Util_FieldMoveWarp(taskId, MAP_ROUTE124, 70, 49);
 }
 
 static void DebugAction_Util_FieldMoveDive(u8 taskId)
