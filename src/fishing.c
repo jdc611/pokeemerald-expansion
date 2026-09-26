@@ -40,6 +40,7 @@ static void AlignFishingAnimationFrames(void);
 static bool32 DoesFishingMinigameAllowCancel(void);
 static bool32 Fishing_DoesFirstMonInPartyHaveSuctionCupsOrStickyHold(void);
 static bool32 Fishing_RollForBite(u32, bool32);
+static void Task_StartFishingFromWaterMenu(u8);
 static u32 CalculateFishingBiteOdds(u32, bool32);
 static u32 CalculateFishingFollowerBoost(void);
 static u32 CalculateFishingProximityBoost(void);
@@ -148,16 +149,38 @@ void StartFishing(u8 rod)
     Task_Fishing(taskId);
 }
 
-// Used by the Surf / Fish / Back water interaction. Prefer the best rod the
-// player owns; if no rod is owned, simply return control without starting.
+// Used by the Surf / Fish / Back water interaction. Do not start the fishing
+// state machine from inside the event script's native call: doing that lets the
+// script/menu cleanup and Fishing_Init fight over field-control/window state.
+// Queue fishing for the next field frame, after releaseall + end have completed.
 void StartFishingWithBestOwnedRod(void)
 {
+    enum FishingRod rod;
+
     if (CheckBagHasItem(ITEM_SUPER_ROD, 1))
-        StartFishing(SUPER_ROD);
+        rod = SUPER_ROD;
     else if (CheckBagHasItem(ITEM_GOOD_ROD, 1))
-        StartFishing(GOOD_ROD);
+        rod = GOOD_ROD;
     else if (CheckBagHasItem(ITEM_OLD_ROD, 1))
-        StartFishing(OLD_ROD);
+        rod = OLD_ROD;
+    else
+        return;
+
+    u8 taskId = CreateTask(Task_StartFishingFromWaterMenu, 80);
+    gTasks[taskId].data[0] = rod;
+    gTasks[taskId].data[1] = 0;
+}
+
+static void Task_StartFishingFromWaterMenu(u8 taskId)
+{
+    // One full frame is enough for the multichoice/event-script window and
+    // script contexts to tear down before fishing claims field control.
+    if (gTasks[taskId].data[1]++ == 0)
+        return;
+
+    enum FishingRod rod = gTasks[taskId].data[0];
+    DestroyTask(taskId);
+    StartFishing(rod);
 }
 
 static void Task_Fishing(u8 taskId)
