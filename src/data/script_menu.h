@@ -1139,6 +1139,13 @@ static const struct MenuAction MultichoiceList_Gender[] =
     {COMPOUND_STRING("FEMALE")},
 };
 
+static const struct MenuAction MultichoiceList_SurfFishBack[] =
+{
+    {COMPOUND_STRING("SURF")},
+    {COMPOUND_STRING("FISH")},
+    {COMPOUND_STRING("BACK")},
+};
+
 static const struct MultichoiceListStruct sMultichoiceLists[] =
 {
     [MULTI_BRINEY_ON_DEWFORD]          = MULTICHOICE(MultichoiceList_BrineyOnDewford),
@@ -1301,6 +1308,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_EGGS_VICTORIES_QUIT]                        = MULTICHOICE(sMultichoiceList_Eggs_Victories_Quit),
     [MULTI_HOF_EGGS_VICTORIES_QUIT]                    = MULTICHOICE(sMultichoiceList_HOF_Eggs_Victories_Quit),
     [MULTI_GENDER]                                     = MULTICHOICE(MultichoiceList_Gender),
+    [MULTI_SURF_FISH_BACK]                             = MULTICHOICE(MultichoiceList_SurfFishBack),
 };
 
 const u8 *const gStdStrings[] =
