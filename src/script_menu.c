@@ -51,6 +51,11 @@ static u8 sLilycoveSSTidalSelections[SSTIDAL_SELECTION_COUNT];
 
 static void FreeListMenuItems(struct ListMenuItem *items, u32 count);
 static void Task_HandleScrollingMultichoiceInput(u8 taskId);
+
+// Chaos water QoL: these are deliberately RAM-only. They are not written to
+// the save block, so a fresh boot resets both defaults.
+static u8 sWaterActionDefault;
+static u8 sFishingRodDefault;
 static void Task_HandleMultichoiceInput(u8 taskId);
 static void Task_HandleYesNoInput(u8 taskId);
 static void Task_HandleMultichoiceGridInput(u8 taskId);
@@ -122,14 +127,21 @@ bool8 ScriptMenu_MultichoiceDynamic(u8 left, u8 top, u8 argc, struct ListMenuIte
 
 bool8 ScriptMenu_Multichoice(u8 left, u8 top, u8 multichoiceId, bool8 ignoreBPress)
 {
+    u8 cursorPos = 0;
+
     if (FuncIsActiveTask(Task_HandleMultichoiceInput) == TRUE)
     {
         return FALSE;
     }
     else
     {
+        if (multichoiceId == MULTI_SURF_FISH_BACK)
+            cursorPos = sWaterActionDefault;
+        else if (multichoiceId == MULTI_FISHING_RODS)
+            cursorPos = sFishingRodDefault;
+
         gSpecialVar_Result = 0xFF;
-        DrawMultichoiceMenu(left, top, multichoiceId, ignoreBPress, 0);
+        DrawMultichoiceMenu(left, top, multichoiceId, ignoreBPress, cursorPos);
         return TRUE;
     }
 }
@@ -706,6 +718,10 @@ static void Task_HandleMultichoiceGridInput(u8 taskId)
         break;
     default:
         gSpecialVar_Result = selection;
+        if (tMultichoiceId == MULTI_SURF_FISH_BACK && selection < 2)
+            sWaterActionDefault = selection;
+        else if (tMultichoiceId == MULTI_FISHING_RODS && selection < 3)
+            sFishingRodDefault = selection;
         break;
     }
 
