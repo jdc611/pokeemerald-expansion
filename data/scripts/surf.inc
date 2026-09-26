@@ -17,12 +17,30 @@ EventScript_UseSurfSelected::
 	goto EventScript_ReleaseUseSurf
 
 EventScript_UseFishSelected::
-	@ Fully tear down the water interaction before fishing takes ownership.
-	@ StartFishingWithBestOwnedRod deliberately queues fishing for the next
-	@ field frame so the multichoice window/script cannot overlap its dialog.
+	@ Let the player explicitly choose an owned rod.
+	multichoice 0, 0, MULTI_FISHING_RODS, FALSE
+	switch VAR_RESULT
+	case 0, EventScript_FishOldRod
+	case 1, EventScript_FishGoodRod
+	case 2, EventScript_FishSuperRod
+	goto EventScript_ReleaseUseSurf
+
+EventScript_FishOldRod::
 	closemessage
 	releaseall
-	callnative StartFishingWithSelectedRod
+	callnative StartFishingOldRodFromWaterMenu
+	end
+
+EventScript_FishGoodRod::
+	closemessage
+	releaseall
+	callnative StartFishingGoodRodFromWaterMenu
+	end
+
+EventScript_FishSuperRod::
+	closemessage
+	releaseall
+	callnative StartFishingSuperRodFromWaterMenu
 	end
 
 EventScript_ReleaseUseSurf::
