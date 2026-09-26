@@ -328,7 +328,11 @@ static bool32 Fishing_GotBite(struct Task *task)
 {
     AlignFishingAnimationFrames();
     AddTextPrinterParameterized(0, FONT_NORMAL, sText_OhABite, 0, 17, 0, NULL);
-    task->tStep = FISHING_CHANGE_MINIGAME;
+
+    // Chaos QoL: a successful bite hooks automatically. Keep the normal cast,
+    // wait, bite odds, hook presentation, and encounter; remove only the
+    // reaction-time A-press / repeated-dot minigame.
+    task->tStep = FISHING_MON_ON_HOOK;
     task->tFrameCounter = 0;
     return FALSE;
 }
