@@ -9,6 +9,8 @@ EventScript_AutoUseFlash::
 	lockall
 	setfieldeffectargument 0, PARTY_SIZE
 	setfieldeffectargument 1, ITEM_HM_FLASH
+	// This marker tells the completed raw HM banner to resume this script.
+	setfieldeffectargument 3, 0x1234
 	msgbox Text_AutoUsedFlash, MSGBOX_DEFAULT
 	closemessage
 	dofieldeffect FLDEFF_FIELD_MOVE_SHOW_MON_INIT
