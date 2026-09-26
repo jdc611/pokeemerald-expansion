@@ -155,7 +155,7 @@ void StartFishing(u8 rod)
 // Queue fishing for the next field frame, after releaseall + end have completed.
 void StartFishingWithBestOwnedRod(void)
 {
-    enum FishingRod rod;
+    u8 rod;
 
     if (CheckBagHasItem(ITEM_SUPER_ROD, 1))
         rod = SUPER_ROD;
@@ -178,7 +178,7 @@ static void Task_StartFishingFromWaterMenu(u8 taskId)
     if (gTasks[taskId].data[1]++ == 0)
         return;
 
-    enum FishingRod rod = gTasks[taskId].data[0];
+    u8 rod = gTasks[taskId].data[0];
     DestroyTask(taskId);
     StartFishing(rod);
 }
