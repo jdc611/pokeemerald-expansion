@@ -13,10 +13,8 @@ EventScript_AutoUseFlash::
 	closemessage
 	dofieldeffect FLDEFF_FIELD_MOVE_SHOW_MON_INIT
 	waitstate
-	setvar VAR_0x8004, 1
-	animateflash 1
-	setflashlevel VAR_0x8004
 	setflag FLAG_SYS_USE_FLASH
+	goto EventScript_UseFlash
 	releaseall
 	end
 
