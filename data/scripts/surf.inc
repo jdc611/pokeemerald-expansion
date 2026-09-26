@@ -17,6 +17,10 @@ EventScript_UseSurfSelected::
 	goto EventScript_ReleaseUseSurf
 
 EventScript_UseFishSelected::
+	@ Fully tear down the water interaction before fishing takes ownership.
+	@ StartFishingWithBestOwnedRod deliberately queues fishing for the next
+	@ field frame so the multichoice window/script cannot overlap its dialog.
+	closemessage
 	releaseall
 	callnative StartFishingWithBestOwnedRod
 	end
