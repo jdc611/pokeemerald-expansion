@@ -3092,7 +3092,18 @@ static void FieldMoveShowMonOutdoorsEffect_End(struct Task *task)
     LoadWordFromTwoHalfwords((u16 *)&task->data[13], (u32 *)&callback);
     SetVBlankCallback(callback);
     InitTextBoxGfxAndPrinters();
-    FreeResourcesAndDestroySprite(&gSprites[task->tMonSpriteId], task->tMonSpriteId);
+    if (gSprites[task->tMonSpriteId].sSpecies == SPECIES_NONE)
+    {
+        // HM banners are item sprites, not Pokemon sprites. Using the Pokemon
+        // cleanup here corrupts field text graphics after the banner closes.
+        FreeSpriteTilesByTag(gSprites[task->tMonSpriteId].template->tileTag);
+        FreeSpritePaletteByTag(gSprites[task->tMonSpriteId].template->paletteTag);
+        DestroySprite(&gSprites[task->tMonSpriteId]);
+    }
+    else
+    {
+        FreeResourcesAndDestroySprite(&gSprites[task->tMonSpriteId], task->tMonSpriteId);
+    }
     FieldEffectActiveListRemove(FLDEFF_FIELD_MOVE_SHOW_MON);
     DestroyTask(FindTaskIdByFunc(Task_FieldMoveShowMonOutdoors));
 }
@@ -3221,7 +3232,18 @@ static void FieldMoveShowMonIndoorsEffect_End(struct Task *task)
     LoadWordFromTwoHalfwords((u16 *)&task->data[13], (u32 *)&intrCallback);
     SetVBlankCallback(intrCallback);
     InitTextBoxGfxAndPrinters();
-    FreeResourcesAndDestroySprite(&gSprites[task->tMonSpriteId], task->tMonSpriteId);
+    if (gSprites[task->tMonSpriteId].sSpecies == SPECIES_NONE)
+    {
+        // HM banners are item sprites, not Pokemon sprites. Using the Pokemon
+        // cleanup here corrupts field text graphics after the banner closes.
+        FreeSpriteTilesByTag(gSprites[task->tMonSpriteId].template->tileTag);
+        FreeSpritePaletteByTag(gSprites[task->tMonSpriteId].template->paletteTag);
+        DestroySprite(&gSprites[task->tMonSpriteId]);
+    }
+    else
+    {
+        FreeResourcesAndDestroySprite(&gSprites[task->tMonSpriteId], task->tMonSpriteId);
+    }
     FieldEffectActiveListRemove(FLDEFF_FIELD_MOVE_SHOW_MON);
     DestroyTask(FindTaskIdByFunc(Task_FieldMoveShowMonIndoors));
 }
