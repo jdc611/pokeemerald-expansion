@@ -300,6 +300,7 @@ static void DebugAction_Util_FieldMoveSurfFish(u8 taskId);
 static void DebugAction_Util_FieldMoveWaterfall(u8 taskId);
 static void DebugAction_Util_FieldMoveDive(u8 taskId);
 static void DebugAction_Util_FieldMoveFlash(u8 taskId);
+static void DebugAction_Util_MirageTowerWarp(u8 taskId);
 
 static void DebugAction_TimeMenu_ChangeTimeOfDay(u8 taskId);
 static void DebugAction_TimeMenu_ChangeWeekdays(u8 taskId);
@@ -399,6 +400,13 @@ static void DebugAction_Util_FieldMoveWarp(u8 taskId, u16 map, s16 x, s16 y)
     SetWarpDestination(MAP_GROUP(map), MAP_NUM(map), WARP_ID_NONE, x, y);
     DoWarp();
     ResetInitialPlayerAvatarState();
+}
+
+static void DebugAction_Util_MirageTowerWarp(u8 taskId)
+{
+    // Temporary test shortcut: enter Mirage Tower directly without Route 111 progression checks.
+    // Spawn one tile north of the 1F exit warp so the player does not immediately leave again.
+    DebugAction_Util_FieldMoveWarp(taskId, MAP_MIRAGE_TOWER_1F, 10, 13);
 }
 
 static void DebugAction_Util_FieldMoveCut(u8 taskId)
@@ -677,6 +685,7 @@ static const struct DebugMenuOption sDebugMenu_Actions_FieldMoveTests[] =
     { COMPOUND_STRING("Waterfall"),             DebugAction_Util_FieldMoveWaterfall },
     { COMPOUND_STRING("Dive / Surface"),        DebugAction_Util_FieldMoveDive },
     { COMPOUND_STRING("Flash / Darkness"),      DebugAction_Util_FieldMoveFlash },
+    { COMPOUND_STRING("Mirage Tower Warp"),      DebugAction_Util_MirageTowerWarp },
     { NULL }
 };
 
