@@ -429,7 +429,7 @@ static void DebugAction_Util_FieldMoveSurfFish(u8 taskId)
 static void DebugAction_Util_FieldMoveWaterfall(u8 taskId)
 {
     // Route 119 contains the overworld waterfall and gives a quick Waterfall test.
-    DebugAction_Util_FieldMoveWarp(taskId, MAP_ROUTE119, 8, 39);
+    DebugAction_Util_FieldMoveWarp(taskId, MAP_ROUTE119, 8, 56);
 }
 
 static void DebugAction_Util_FieldMoveDive(u8 taskId)
