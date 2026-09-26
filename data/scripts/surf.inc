@@ -1,8 +1,8 @@
 EventScript_UseSurf::
-	checkfieldmove FIELD_MOVE_SURF
+	checkfieldmove FIELD_MOVE_SURF, TRUE
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_EndUseSurf
-	bufferpartymonnick STR_VAR_1, VAR_RESULT
-	setfieldeffectargument 0, VAR_RESULT
+	setfieldeffectargument 0, PARTY_SIZE
+	setfieldeffectargument 1, ITEM_HM_SURF
 	lockall
 	msgbox gText_WantToUseSurf, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_ReleaseUseSurf

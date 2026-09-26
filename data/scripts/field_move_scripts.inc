@@ -282,10 +282,10 @@ Text_StrengthActivated:
 
 EventScript_UseWaterfall::
 	lockall
-	checkfieldmove FIELD_MOVE_WATERFALL
+	checkfieldmove FIELD_MOVE_WATERFALL, TRUE
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CantWaterfall
-	bufferpartymonnick STR_VAR_1, VAR_RESULT
-	setfieldeffectargument 0, VAR_RESULT
+	setfieldeffectargument 0, PARTY_SIZE
+	setfieldeffectargument 1, ITEM_HM_WATERFALL
 @ Direct interaction: valid waterfall uses Waterfall immediately.
 	msgbox Text_MonUsedWaterfall, MSGBOX_DEFAULT
 	hidefollowernpc
@@ -316,18 +316,16 @@ Text_MonUsedWaterfall:
 
 EventScript_UseDive::
 	lockall
-	checkfieldmove FIELD_MOVE_DIVE
+	checkfieldmove FIELD_MOVE_DIVE, TRUE
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CantDive
-	copyvar 0x8004 VAR_RESULT
-	bufferpartymonnick STR_VAR_1, VAR_RESULT
-	setfieldeffectargument 0, VAR_RESULT
-	setfieldeffectargument 1, 1
+	setfieldeffectargument 0, PARTY_SIZE
+	setfieldeffectargument 1, ITEM_HM_DIVE
 	msgbox Text_WantToDive, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_EndDive
 	msgbox Text_MonUsedDive, MSGBOX_DEFAULT
 	hidefollowernpc
-	setfieldeffectargument 0, VAR_0x8004
-	setfieldeffectargument 1, 1
+	setfieldeffectargument 0, PARTY_SIZE
+	setfieldeffectargument 1, ITEM_HM_DIVE
 	dofieldeffect FLDEFF_USE_DIVE
 	goto EventScript_EndDive
 	end
@@ -343,11 +341,10 @@ EventScript_EndDive::
 
 EventScript_UseDiveUnderwater::
 	lockall
-	checkfieldmove FIELD_MOVE_DIVE
+	checkfieldmove FIELD_MOVE_DIVE, TRUE
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CantSurface
-	bufferpartymonnick STR_VAR_1, VAR_RESULT
-	setfieldeffectargument 0, VAR_RESULT
-	setfieldeffectargument 1, 1
+	setfieldeffectargument 0, PARTY_SIZE
+	setfieldeffectargument 1, ITEM_HM_DIVE
 	msgbox Text_WantToSurface, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_NoSurface
 	msgbox Text_MonUsedDive, MSGBOX_DEFAULT
@@ -406,7 +403,7 @@ Text_WantToDive:
 	.string "Would you like to use DIVE?$"
 
 Text_MonUsedDive:
-	.string "{STR_VAR_1} used DIVE.$"
+	.string "{PLAYER} used DIVE!$"
 
 Text_CantSurface:
 	.string "Light is filtering down from above.\n"

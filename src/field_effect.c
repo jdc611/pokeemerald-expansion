@@ -2085,6 +2085,8 @@ static bool8 WaterfallFieldEffect_ShowMon(struct Task *task, struct ObjectEvent 
     {
         ObjectEventClearHeldMovementIfFinished(objectEvent);
         gFieldEffectArguments[0] = task->tMonId;
+        if (task->tMonId == PARTY_SIZE)
+            gFieldEffectArguments[1] = ITEM_HM_WATERFALL;
         FieldEffectStart(FLDEFF_FIELD_MOVE_SHOW_MON_INIT);
         task->tState++;
     }
@@ -2156,6 +2158,8 @@ static bool8 DiveFieldEffect_ShowMon(struct Task *task)
 {
     LockPlayerFieldControls();
     gFieldEffectArguments[0] = task->data[15];
+    if (task->data[15] == PARTY_SIZE)
+        gFieldEffectArguments[1] = ITEM_HM_DIVE;
     FieldEffectStart(FLDEFF_FIELD_MOVE_SHOW_MON_INIT);
     task->data[0]++;
     return FALSE;
@@ -3426,7 +3430,9 @@ static void SurfFieldEffect_ShowMon(struct Task *task)
     objectEvent = &gObjectEvents[gPlayerAvatar.objectEventId];
     if (ObjectEventCheckHeldMovementStatus(objectEvent))
     {
-        gFieldEffectArguments[0] = task->tMonId | SHOW_MON_CRY_NO_DUCKING;
+        gFieldEffectArguments[0] = task->tMonId == PARTY_SIZE ? PARTY_SIZE : task->tMonId | SHOW_MON_CRY_NO_DUCKING;
+        if (task->tMonId == PARTY_SIZE)
+            gFieldEffectArguments[1] = ITEM_HM_SURF;
         FieldEffectStart(FLDEFF_FIELD_MOVE_SHOW_MON_INIT);
         task->tState++;
     }
