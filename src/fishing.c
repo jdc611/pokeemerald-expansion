@@ -149,32 +149,36 @@ void StartFishing(u8 rod)
     Task_Fishing(taskId);
 }
 
-// Used by the Surf / Fish / Back water interaction. Do not start the fishing
-// state machine from inside the event script's native call: doing that lets the
-// script/menu cleanup and Fishing_Init fight over field-control/window state.
-// Queue fishing for the next field frame, after releaseall + end have completed.
-void StartFishingWithBestOwnedRod(void)
+// Used by the Surf / Fish / Back water interaction. The script chooses the
+// rod explicitly; this helper only queues that chosen rod until the menu/script
+// has fully released field control.
+void StartFishingFromWaterMenu(u8 rod)
 {
-    u8 rod;
-
-    if (CheckBagHasItem(ITEM_SUPER_ROD, 1))
-        rod = SUPER_ROD;
-    else if (CheckBagHasItem(ITEM_GOOD_ROD, 1))
-        rod = GOOD_ROD;
-    else if (CheckBagHasItem(ITEM_OLD_ROD, 1))
-        rod = OLD_ROD;
-    else
-        return;
-
     u8 taskId = CreateTask(Task_StartFishingFromWaterMenu, 80);
     gTasks[taskId].data[0] = rod;
     gTasks[taskId].data[1] = 0;
 }
 
+void StartFishingOldRodFromWaterMenu(void)
+{
+    if (CheckBagHasItem(ITEM_OLD_ROD, 1))
+        StartFishingFromWaterMenu(OLD_ROD);
+}
+
+void StartFishingGoodRodFromWaterMenu(void)
+{
+    if (CheckBagHasItem(ITEM_GOOD_ROD, 1))
+        StartFishingFromWaterMenu(GOOD_ROD);
+}
+
+void StartFishingSuperRodFromWaterMenu(void)
+{
+    if (CheckBagHasItem(ITEM_SUPER_ROD, 1))
+        StartFishingFromWaterMenu(SUPER_ROD);
+}
+
 static void Task_StartFishingFromWaterMenu(u8 taskId)
 {
-    // One full frame is enough for the multichoice/event-script window and
-    // script contexts to tear down before fishing claims field control.
     if (gTasks[taskId].data[1]++ == 0)
         return;
 
