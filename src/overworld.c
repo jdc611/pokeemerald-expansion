@@ -1107,7 +1107,9 @@ void SetDefaultFlashLevel(void)
     if (!gMapHeader.cave)
         gSaveBlock1Ptr->flashLevel = 0;
     else if (FlagGet(FLAG_SYS_USE_FLASH))
-        gSaveBlock1Ptr->flashLevel = 1;
+        // Chaos QoL: once Flash has been used, keep every connected dark-cave
+        // floor fully lit instead of rebuilding the vanilla radius after warps.
+        gSaveBlock1Ptr->flashLevel = 0;
     else
         gSaveBlock1Ptr->flashLevel = gMaxFlashLevel - 1;
 }
