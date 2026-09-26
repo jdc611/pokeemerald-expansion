@@ -1146,6 +1146,14 @@ static const struct MenuAction MultichoiceList_SurfFishBack[] =
     {COMPOUND_STRING("BACK")},
 };
 
+static const struct MenuAction MultichoiceList_FishingRods[] =
+{
+    {COMPOUND_STRING("OLD ROD")},
+    {COMPOUND_STRING("GOOD ROD")},
+    {COMPOUND_STRING("SUPER ROD")},
+    {COMPOUND_STRING("BACK")},
+};
+
 static const struct MultichoiceListStruct sMultichoiceLists[] =
 {
     [MULTI_BRINEY_ON_DEWFORD]          = MULTICHOICE(MultichoiceList_BrineyOnDewford),
@@ -1308,6 +1316,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_EGGS_VICTORIES_QUIT]                        = MULTICHOICE(sMultichoiceList_Eggs_Victories_Quit),
     [MULTI_HOF_EGGS_VICTORIES_QUIT]                    = MULTICHOICE(sMultichoiceList_HOF_Eggs_Victories_Quit),
     [MULTI_GENDER]                                     = MULTICHOICE(MultichoiceList_Gender),
+    [MULTI_FISHING_RODS]               = MULTICHOICE(MultichoiceList_FishingRods),
     [MULTI_SURF_FISH_BACK]                             = MULTICHOICE(MultichoiceList_SurfFishBack),
 };
 
