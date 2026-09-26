@@ -13,8 +13,11 @@ EventScript_AutoUseFlash::
 	closemessage
 	dofieldeffect FLDEFF_FIELD_MOVE_SHOW_MON_INIT
 	waitstate
+	// Flash level 0 is full brightness. Run the animation directly here and
+	// let its native wait task re-enable the script when the transition ends.
+	animateflash 0
+	setflashlevel 0
 	setflag FLAG_SYS_USE_FLASH
-	goto EventScript_UseFlash
 	releaseall
 	end
 
