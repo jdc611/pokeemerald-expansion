@@ -1143,7 +1143,7 @@ static const struct MenuAction MultichoiceList_SurfFishBack[] =
 {
     {COMPOUND_STRING("SURF")},
     {COMPOUND_STRING("FISH")},
-    {COMPOUND_STRING("BACK")},
+    {COMPOUND_STRING("CANCEL")},
 };
 
 static const struct MenuAction MultichoiceList_FishingRods[] =
@@ -1151,7 +1151,7 @@ static const struct MenuAction MultichoiceList_FishingRods[] =
     {COMPOUND_STRING("OLD ROD")},
     {COMPOUND_STRING("GOOD ROD")},
     {COMPOUND_STRING("SUPER ROD")},
-    {COMPOUND_STRING("BACK")},
+    {COMPOUND_STRING("CANCEL")},
 };
 
 static const struct MultichoiceListStruct sMultichoiceLists[] =
