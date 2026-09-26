@@ -22,6 +22,9 @@
 #include "fldeff_misc.h"
 #include "follower_npc.h"
 #include "item_menu.h"
+#include "item.h"
+#include "constants/items.h"
+#include "constants/flags.h"
 #include "link.h"
 #include "match_call.h"
 #include "metatile_behavior.h"
@@ -702,6 +705,13 @@ static bool32 TrySetupDiveEmergeScript(void)
 
 bool8 TryStartStepBasedScript(struct MapPosition *position, u16 metatileBehavior, enum Direction direction)
 {
+    // Light eligible dark caves automatically once Flash HM and badge are owned.
+    if (gMapHeader.cave && !FlagGet(FLAG_SYS_USE_FLASH)
+     && IsFieldMoveUnlocked(FIELD_MOVE_FLASH) && CheckBagHasItem(ITEM_HM_FLASH, 1))
+    {
+        ScriptContext_SetupScript(EventScript_AutoUseFlash);
+        return TRUE;
+    }
     if (TryStartCoordEventScript(position) == TRUE)
         return TRUE;
     if (TryStartWarpEventScript(position, metatileBehavior) == TRUE)
