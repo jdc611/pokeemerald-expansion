@@ -3104,6 +3104,14 @@ static void FieldMoveShowMonOutdoorsEffect_End(struct Task *task)
     {
         FreeResourcesAndDestroySprite(&gSprites[task->tMonSpriteId], task->tMonSpriteId);
     }
+    // A raw HM banner normally has no field-move wrapper to resume a script
+    // stopped by waitstate. Auto Flash marks its banner explicitly so the
+    // script resumes only after the banner has completely restored the field.
+    if (gFieldEffectArguments[2] == 0x484D && gFieldEffectArguments[3] == 0x1234)
+    {
+        gFieldEffectArguments[3] = 0;
+        ScriptContext_Enable();
+    }
     FieldEffectActiveListRemove(FLDEFF_FIELD_MOVE_SHOW_MON);
     DestroyTask(FindTaskIdByFunc(Task_FieldMoveShowMonOutdoors));
 }
@@ -3243,6 +3251,14 @@ static void FieldMoveShowMonIndoorsEffect_End(struct Task *task)
     else
     {
         FreeResourcesAndDestroySprite(&gSprites[task->tMonSpriteId], task->tMonSpriteId);
+    }
+    // A raw HM banner normally has no field-move wrapper to resume a script
+    // stopped by waitstate. Auto Flash marks its banner explicitly so the
+    // script resumes only after the banner has completely restored the field.
+    if (gFieldEffectArguments[2] == 0x484D && gFieldEffectArguments[3] == 0x1234)
+    {
+        gFieldEffectArguments[3] = 0;
+        ScriptContext_Enable();
     }
     FieldEffectActiveListRemove(FLDEFF_FIELD_MOVE_SHOW_MON);
     DestroyTask(FindTaskIdByFunc(Task_FieldMoveShowMonIndoors));
