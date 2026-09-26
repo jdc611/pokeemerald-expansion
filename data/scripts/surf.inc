@@ -22,7 +22,7 @@ EventScript_UseFishSelected::
 	@ field frame so the multichoice window/script cannot overlap its dialog.
 	closemessage
 	releaseall
-	callnative StartFishingWithBestOwnedRod
+	callnative StartFishingWithSelectedRod
 	end
 
 EventScript_ReleaseUseSurf::
