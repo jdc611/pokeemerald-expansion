@@ -4,6 +4,7 @@
 #include "fieldmap.h"
 #include "field_effect_helpers.h"
 #include "field_player_avatar.h"
+#include "item.h"
 #include "menu.h"
 #include "metatile_behavior.h"
 #include "random.h"
@@ -14,6 +15,7 @@
 #include "tv.h"
 #include "wild_encounter.h"
 #include "config/fishing.h"
+#include "constants/items.h"
 
 static void Task_Fishing(u8);
 static bool32 Fishing_Init(struct Task *);
@@ -144,6 +146,18 @@ void StartFishing(u8 rod)
 
     gTasks[taskId].tFishingRod = rod;
     Task_Fishing(taskId);
+}
+
+// Used by the Surf / Fish / Back water interaction. Prefer the best rod the
+// player owns; if no rod is owned, simply return control without starting.
+void StartFishingWithBestOwnedRod(void)
+{
+    if (CheckBagHasItem(ITEM_SUPER_ROD, 1))
+        StartFishing(SUPER_ROD);
+    else if (CheckBagHasItem(ITEM_GOOD_ROD, 1))
+        StartFishing(GOOD_ROD);
+    else if (CheckBagHasItem(ITEM_OLD_ROD, 1))
+        StartFishing(OLD_ROD);
 }
 
 static void Task_Fishing(u8 taskId)
