@@ -970,7 +970,11 @@ static void UpdateFlashLevelEffect(u8 taskId)
         SetFlashScanlineEffectWindowBoundaries(gScanlineEffectRegBuffers[gScanlineEffect.srcBuffer], tFlashCenterX, tFlashCenterY, tCurFlashRadius);
         tState = 0;
         tCurFlashRadius += tFlashRadiusDelta;
-        if (tCurFlashRadius > tDestFlashRadius)
+        // Flash can expand (positive delta) or contract (negative delta).
+        // The original one-sided completion test never terminates a
+        // contraction to level 0, leaving the wait task/script locked forever.
+        if ((tFlashRadiusDelta > 0 && tCurFlashRadius > tDestFlashRadius)
+         || (tFlashRadiusDelta < 0 && tCurFlashRadius < tDestFlashRadius))
         {
             if (tClearScanlineEffect == 1)
             {
