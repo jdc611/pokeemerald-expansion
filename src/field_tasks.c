@@ -839,7 +839,11 @@ static void CrackedFloorPerStepCallback(u8 taskId)
     tPrevY = y;
     if (MetatileBehavior_IsCrackedFloor(behavior))
     {
-        if (GetPlayerSpeed() != PLAYER_SPEED_FASTEST)
+        // Mirage Tower's cracked-floor puzzle normally requires Mach Bike speed.
+        // On emulators this is awkward and timing-sensitive, so allow normal movement
+        // there only. Other cracked-floor puzzles keep their vanilla speed requirement.
+        if (GetPlayerSpeed() != PLAYER_SPEED_FASTEST
+         && gMapHeader.regionMapSectionId != MAPSEC_MIRAGE_TOWER)
             VarSet(VAR_ICE_STEP_COUNT, 0); // this var does double duty
 
         if (tFloor1Delay == 0)
