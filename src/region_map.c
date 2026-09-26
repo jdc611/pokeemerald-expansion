@@ -84,6 +84,7 @@ static bool32 sDrawFlyDestTextWindow;
 
 static u8 ProcessRegionMapInput_Full(void);
 static u8 MoveRegionMapCursor_Full(void);
+static bool32 CycleFlyMapDestination(s8 direction);
 static u8 ProcessRegionMapInput_Zoomed(void);
 static u8 MoveRegionMapCursor_Zoomed(void);
 static void CalcZoomScrollParams(s16 scrollX, s16 scrollY, s16 c, s16 d, u16 e, u16 f, u8 rotation);
@@ -843,6 +844,39 @@ u8 DoRegionMapInputCallback(void)
     return sRegionMap->inputCallback();
 }
 
+static bool32 CycleFlyMapDestination(s8 direction)
+{
+    s32 mapSecId = sRegionMap->mapSecId;
+    s32 i;
+
+    // L/R is a fast town selector only on the Fly/PokeRider map. D-pad
+    // movement remains unchanged for precise cursor control.
+    for (i = 0; i < MAPSEC_NONE; i++)
+    {
+        mapSecId += direction;
+        if (mapSecId < 0)
+            mapSecId = MAPSEC_NONE - 1;
+        else if (mapSecId >= MAPSEC_NONE)
+            mapSecId = 0;
+
+        if (GetMapsecType(mapSecId) == MAPSECTYPE_CITY_CANFLY
+         || GetMapsecType(mapSecId) == MAPSECTYPE_BATTLE_FRONTIER)
+        {
+            sRegionMap->mapSecId = mapSecId;
+            sRegionMap->mapSecType = GetMapsecType(mapSecId);
+            sRegionMap->cursorPosX = gRegionMapEntries[mapSecId].x + MAPCURSOR_X_MIN;
+            sRegionMap->cursorPosY = gRegionMapEntries[mapSecId].y + MAPCURSOR_Y_MIN;
+            sRegionMap->cursorSprite->x = 8 * sRegionMap->cursorPosX + 4;
+            sRegionMap->cursorSprite->y = 8 * sRegionMap->cursorPosY + 4;
+            GetMapName(sRegionMap->mapSecName, mapSecId, MAP_NAME_LENGTH);
+            GetPositionOfCursorWithinMapSec();
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 static u8 ProcessRegionMapInput_Full(void)
 {
     u8 input;
@@ -893,7 +927,17 @@ static u8 ProcessRegionMapInput_Full(void)
         sRegionMap->cursorDeltaX = +1;
         input = MAP_INPUT_MOVE_START;
     }
-    if (JOY_NEW(A_BUTTON))
+    if (sFlyMap != NULL && JOY_NEW(L_BUTTON))
+    {
+        if (CycleFlyMapDestination(-1))
+            input = MAP_INPUT_MOVE_END;
+    }
+    else if (sFlyMap != NULL && JOY_NEW(R_BUTTON))
+    {
+        if (CycleFlyMapDestination(1))
+            input = MAP_INPUT_MOVE_END;
+    }
+    else if (JOY_NEW(A_BUTTON))
     {
         input = MAP_INPUT_A_BUTTON;
     }
