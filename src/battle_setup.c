@@ -1512,10 +1512,10 @@ static void SetBattledTrainersFlags(void)
     if (TRAINER_BATTLE_PARAM.opponentB != 0)
     {
         FlagSet(GetTrainerBFlag());
-        ChallengeReset_RecordTrainer(TRAINER_BATTLE_PARAM.opponentB);
+        ChallengeReset_RecordTrainerFlag(GetTrainerBFlag());
     }
     FlagSet(GetTrainerAFlag());
-    ChallengeReset_RecordTrainer(TRAINER_BATTLE_PARAM.opponentA);
+    ChallengeReset_RecordTrainerFlag(GetTrainerAFlag());
 }
 
 static void UNUSED SetBattledTrainerFlag(void)
