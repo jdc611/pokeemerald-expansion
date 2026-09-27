@@ -209,6 +209,7 @@ static const u32 sHiddenMonIconGfx[] = INCGFX_U32("graphics/dexnav/hidden.png", 
 
 // strings
 static const u8 sText_DexNav_NoInfo[] = _("--------");
+static const u8 sText_DexNav_NuzlockeSearchBlocked[] = _("DexNav encounters cannot be forced\nduring a Nuzlocke.");
 static const u8 sText_DexNav_CaptureToSee[] = _("Capture first!");
 static const u8 sText_DexNav_PressRToRegister[] = _("R TO REGISTER!");
 static const u8 sText_DexNav_SearchForRegisteredSpecies[] = _("Search {STR_VAR_1}");
@@ -1001,6 +1002,14 @@ static void RevealHiddenSearch(void)
 bool32 TryStartDexNavSearch(void)
 {
     u16 val = VarGet(DN_VAR_SPECIES);
+
+    // Nuzlocke keeps DexNav as a scouting tool, but selected encounters may
+    // not be forced. Registered one-button searches are blocked here too.
+    if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE)
+    {
+        ShowFieldMessage(sText_DexNav_NuzlockeSearchBlocked);
+        return FALSE;
+    }
 
     if (FlagGet(DN_FLAG_SEARCHING) && sDexNavSearchDataPtr->hiddenSearch)
     {
@@ -2559,6 +2568,14 @@ static void Task_DexNavMain(u8 taskId)
     }
     else if (JOY_NEW(A_BUTTON))
     {
+        // Species/route information remains visible in Nuzlocke, but A may
+        // not turn that information into a chosen encounter.
+        if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE)
+        {
+            PlaySE(SE_FAILURE);
+            return;
+        }
+
         species = DexNavGetSpecies();
         if (species == SPECIES_NONE)
         {
@@ -2585,6 +2602,15 @@ static void Task_DexNavMain(u8 taskId)
 bool32 TryFindHiddenPokemon(void)
 {
     u16 *stepPtr = GetVarPointer(DN_VAR_STEP_COUNTER);
+
+    // Automatic/hidden DexNav spawns would bypass the first-random-encounter
+    // rule, so disable them entirely while Nuzlocke is active.
+    if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE)
+    {
+        if (stepPtr != NULL)
+            (*stepPtr) = 0;
+        return FALSE;
+    }
 
     if (DEXNAV_ENABLED == 0
             || sDexNavSearchDataPtr == NULL
