@@ -1521,6 +1521,7 @@ static void SetBattledTrainersFlags(void)
 static void UNUSED SetBattledTrainerFlag(void)
 {
     FlagSet(GetTrainerAFlag());
+    ChallengeReset_RecordTrainerFlag(GetTrainerAFlag());
 }
 
 bool8 HasTrainerBeenFought(u16 trainerId)
