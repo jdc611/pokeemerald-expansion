@@ -711,6 +711,7 @@ void WarpIntoMap(void)
                                    gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y);
     ApplyCurrentWarp();
     LoadCurrentMapData();
+    ChallengeReset_OnMapLoaded();
     SetPlayerCoordsFromWarp();
 }
 
