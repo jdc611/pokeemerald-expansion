@@ -145,10 +145,18 @@ static void NuzlockeAccountStandardEncounter(void)
     if (species == SPECIES_NONE)
         return;
 
-    // Shiny Clause and Species Clause are always free and do not consume the
-    // named area's normal encounter.
-    if (NuzlockeMonIsShiny(&gParties[B_TRAINER_OPPONENT_A][0]) || NuzlockeSpeciesWasCaught(species))
+    // Shiny Clause is always free and catchable, regardless of area state.
+    if (NuzlockeMonIsShiny(&gParties[B_TRAINER_OPPONENT_A][0]))
         return;
+
+    // Species Clause makes a previously caught species a skippable encounter,
+    // not a free extra catch. It does not spend an unused area's encounter,
+    // but the duplicate itself cannot be caught.
+    if (NuzlockeSpeciesWasCaught(species))
+    {
+        gSaveBlock3Ptr->nuzlockeCurrentEncounterCatchable = FALSE;
+        return;
+    }
 
     // A non-duplicate, non-shiny wild mon is catchable only if this named area
     // still has its encounter. Spend it as soon as that valid battle begins so
