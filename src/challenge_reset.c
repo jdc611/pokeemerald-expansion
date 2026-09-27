@@ -5,6 +5,7 @@
 #include "run_settings.h"
 #include "constants/flags.h"
 #include "constants/map_types.h"
+#include "constants/maps.h"
 
 #define MAX_CHALLENGE_TRAINERS 64
 
@@ -21,9 +22,44 @@ static bool8 ChallengeResetEnabled(void)
         || gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE;
 }
 
+static bool8 IsCaveCompleted(mapsec_u16_t section)
+{
+    if (section >= 256)
+        return FALSE;
+    return (gSaveBlock3Ptr->challengeCaveCompleted[section >> 3] & (1 << (section & 7))) != 0;
+}
+
+static void MarkCaveCompleted(mapsec_u16_t section)
+{
+    if (section < 256)
+        gSaveBlock3Ptr->challengeCaveCompleted[section >> 3] |= (1 << (section & 7));
+}
+
 static bool8 IsChallengeMap(const struct MapHeader *map)
 {
-    return map->cave || map->battleType == MAP_BATTLE_SCENE_GYM;
+    if (map->battleType == MAP_BATTLE_SCENE_GYM)
+        return TRUE;
+    return map->cave && !IsCaveCompleted(map->regionMapSectionId);
+}
+
+// Only the intended progression-side exit completes a cave challenge.
+// Coordinates are the source warp tile, so backing out through the entrance,
+// Escape Rope/Dig/whiteout, and alternate exits cannot accidentally complete it.
+static bool8 IsCaveCompletionExit(mapsec_u16_t section, u16 fromMap, s16 x, s16 y)
+{
+    switch (section)
+    {
+    case MAPSEC_RUSTURF_TUNNEL:
+        return fromMap == MAP_RUSTURF_TUNNEL && x == 29 && y == 16;
+    case MAPSEC_FIERY_PATH:
+        return fromMap == MAP_FIERY_PATH && x == 26 && y == 4;
+    case MAPSEC_METEOR_FALLS:
+        return fromMap == MAP_METEOR_FALLS_1F_1R && x == 6 && y == 39;
+    case MAPSEC_VICTORY_ROAD:
+        return fromMap == MAP_VICTORY_ROAD_1F && x == 39 && y == 5;
+    default:
+        return FALSE;
+    }
 }
 
 static u8 CountBadges(void)
@@ -67,7 +103,7 @@ void ChallengeReset_RecordTrainer(u16 trainerId)
         sChallengeTrainers[sChallengeTrainerCount++] = trainerId;
 }
 
-void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct MapHeader *to)
+void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct MapHeader *to, u16 fromMap, s16 x, s16 y)
 {
     u8 i;
     bool8 stayingInChallenge;
@@ -88,6 +124,16 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
 
     if (stayingInChallenge)
         return;
+
+    // A cave only becomes permanently complete through its designated
+    // progression exit. Once complete, its trainer flags are left alone on
+    // all future visits.
+    if (!sChallengeIsGym && IsCaveCompletionExit(sChallengeMapSection, fromMap, x, y))
+    {
+        MarkCaveCompleted(sChallengeMapSection);
+        ClearChallengeState();
+        return;
+    }
 
     // If a badge was earned during this gym visit, the gym is complete and
     // its defeated trainers stay defeated. If the badge script runs after the
