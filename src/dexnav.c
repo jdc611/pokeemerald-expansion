@@ -37,6 +37,7 @@
 #include "random.h"
 #include "region_map.h"
 #include "rtc.h"
+#include "run_settings.h"
 #include "scanline_effect.h"
 #include "script.h"
 #include "script_pokemon_util.h"
