@@ -293,6 +293,10 @@ struct SaveBlock3
     // shares one encounter. 256 section IDs fit in 32 bytes.
     u8 nuzlockeEncounterUsed[32];
     bool8 nuzlockeCurrentEncounterCatchable;
+
+    // Hard/Nuzlocke cave challenges persist by named map section. A cave is
+    // marked complete only after its designated progression exit is used.
+    u8 challengeCaveCompleted[32];
 }; /* max size 1624 bytes */
 
 extern struct SaveBlock3 *gSaveBlock3Ptr;
