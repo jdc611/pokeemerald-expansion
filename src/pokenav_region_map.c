@@ -1,5 +1,7 @@
 #include "global.h"
 #include "bg.h"
+#include "battle_setup.h"
+#include "run_settings.h"
 #include "decompress.h"
 #include "landmark.h"
 #include "event_data.h"
@@ -83,6 +85,8 @@ extern const u32 gRegionMapCityZoomText_Gfx[];
 
 static const u16 sMapSecInfoWindow_Pal[] = INCGFX_U16("graphics/pokenav/region_map/info_window.pal", ".gbapal");
 static const u32 sRegionMapCityZoomTiles_Gfx[] = INCGFX_U32("graphics/pokenav/region_map/zoom_tiles.png", ".4bpp.smol");
+static const u8 sText_NuzlockeEncounterAvailable[] = _("Encounter: AVAILABLE");
+static const u8 sText_NuzlockeEncounterUsed[] = _("Encounter: USED");
 
 #include "data/region_map/city_map_tilemaps.h"
 
@@ -560,12 +564,18 @@ static bool32 TryFreeTempTileDataBuffers(void)
 static void UpdateMapSecInfoWindow(struct Pokenav_RegionMapGfx *state)
 {
     struct RegionMap *regionMap = GetSubstructPtr(POKENAV_SUBSTRUCT_REGION_MAP);
+    const u8 *encounterText = NULL;
+
+    if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE && regionMap->mapSecType != MAPSECTYPE_NONE)
+        encounterText = NuzlockeMapSectionEncounterUsed(regionMap->mapSecId) ? sText_NuzlockeEncounterUsed : sText_NuzlockeEncounterAvailable;
     switch (regionMap->mapSecType)
     {
     case MAPSECTYPE_CITY_CANFLY:
         FillWindowPixelBuffer(state->infoWindowId, PIXEL_FILL(1));
         PutWindowRectTilemap(state->infoWindowId, 0, 0, 12, 2);
         AddTextPrinterParameterized(state->infoWindowId, FONT_NARROW, regionMap->mapSecName, 0, 1, TEXT_SKIP_DRAW, NULL);
+        if (encounterText != NULL)
+            AddTextPrinterParameterized(state->infoWindowId, FONT_NARROW, encounterText, 0, 17, TEXT_SKIP_DRAW, NULL);
         DrawCityMap(state, regionMap->mapSecId, regionMap->posWithinMapSec);
         CopyWindowToVram(state->infoWindowId, COPYWIN_FULL);
         SetCityZoomTextInvisibility(FALSE);
@@ -574,6 +584,8 @@ static void UpdateMapSecInfoWindow(struct Pokenav_RegionMapGfx *state)
         FillWindowPixelBuffer(state->infoWindowId, PIXEL_FILL(1));
         PutWindowRectTilemap(state->infoWindowId, 0, 0, 12, 2);
         AddTextPrinterParameterized(state->infoWindowId, FONT_NARROW, regionMap->mapSecName, 0, 1, TEXT_SKIP_DRAW, NULL);
+        if (encounterText != NULL)
+            AddTextPrinterParameterized(state->infoWindowId, FONT_NARROW, encounterText, 0, 17, TEXT_SKIP_DRAW, NULL);
         FillBgTilemapBufferRect(1, 0x1041, 17, 6, 12, 11, 17);
         CopyWindowToVram(state->infoWindowId, COPYWIN_FULL);
         SetCityZoomTextInvisibility(TRUE);
@@ -583,6 +595,8 @@ static void UpdateMapSecInfoWindow(struct Pokenav_RegionMapGfx *state)
         FillWindowPixelBuffer(state->infoWindowId, PIXEL_FILL(1));
         PutWindowTilemap(state->infoWindowId);
         AddTextPrinterParameterized(state->infoWindowId, FONT_NARROW, regionMap->mapSecName, 0, 1, TEXT_SKIP_DRAW, NULL);
+        if (encounterText != NULL)
+            AddTextPrinterParameterized(state->infoWindowId, FONT_NARROW, encounterText, 0, 17, TEXT_SKIP_DRAW, NULL);
         PrintLandmarkNames(state, regionMap->mapSecId, regionMap->posWithinMapSec);
         CopyWindowToVram(state->infoWindowId, COPYWIN_FULL);
         SetCityZoomTextInvisibility(TRUE);
