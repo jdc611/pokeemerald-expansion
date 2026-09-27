@@ -110,7 +110,7 @@ static bool8 NuzlockeMonIsShiny(struct Pokemon *mon)
     return IsMonShiny(mon);
 }
 
-static bool8 NuzlockeAreaEncounterUsed(void)
+bool8 NuzlockeAreaEncounterUsed(void)
 {
     u16 section = gMapHeader.regionMapSectionId;
     if (section >= 256)
