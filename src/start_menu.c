@@ -196,6 +196,7 @@ static void SaveGameTask(u8 taskId);
 static void Task_SaveAfterLinkBattle(u8 taskId);
 static void Task_WaitForBattleTowerLinkSave(u8 taskId);
 static bool8 FieldCB_ReturnToFieldStartMenu(void);
+static void Task_ShowBlockedStartMenuMessage(u8 taskId);
 
 static const u8 sText_ExitPage1[] = _("EXIT  1/2");
 static const u8 sText_ExitPage2[] = _("EXIT  2/2");
@@ -1716,14 +1717,34 @@ static bool8 StartMenuDexNavCallback(void)
     return TRUE;
 }
 
+
+static void Task_ShowBlockedStartMenuMessage(u8 taskId)
+{
+    // ShowFieldMessage owns printing, but start-menu callbacks have no script
+    // waiting behind them to dismiss the box. Give these messages a small
+    // field task that closes them on A/B and returns normal field control.
+    if (GetFieldMessageBoxMode() == FIELD_MESSAGE_BOX_NORMAL
+     && JOY_NEW(A_BUTTON | B_BUTTON))
+    {
+        HideFieldMessageBox();
+        DestroyTask(taskId);
+    }
+}
+
+static void ShowBlockedStartMenuMessage(const u8 *text)
+{
+    RemoveExtraStartMenuWindows();
+    HideStartMenu();
+    ShowFieldMessage(text);
+    CreateTask(Task_ShowBlockedStartMenuMessage, 0x50);
+}
+
 static bool8 StartMenu_PCStorage(void)
 {
     if (ChallengeReset_BlocksRecoveryTools())
     {
         static const u8 sText_ChallengeBlocksRecovery[] = _("The PC can't be used during\nthis challenge.");
-        RemoveExtraStartMenuWindows();
-        HideStartMenu();
-        ShowFieldMessage(sText_ChallengeBlocksRecovery);
+        ShowBlockedStartMenuMessage(sText_ChallengeBlocksRecovery);
         return TRUE;
     }
 
@@ -2129,9 +2150,7 @@ static bool8 StartMenuPokeRider(void)
     if (!Overworld_MapTypeAllowsTeleportAndFly(gMapHeader.mapType))
     {
         static const u8 sText_PokeRiderBlocked[] = _("PokéRider can only be used\noutdoors.");
-        RemoveExtraStartMenuWindows();
-        HideStartMenu();
-        ShowFieldMessage(sText_PokeRiderBlocked);
+        ShowBlockedStartMenuMessage(sText_PokeRiderBlocked);
         return TRUE;
     }
 
