@@ -11,7 +11,6 @@
 
 EWRAM_DATA static u16 sChallengeTrainers[MAX_CHALLENGE_TRAINERS] = {0};
 EWRAM_DATA static u8 sChallengeTrainerCount = 0;
-EWRAM_DATA static u8 sChallengeBadgeCountAtStart = 0;
 EWRAM_DATA static mapsec_u16_t sChallengeMapSection = 0;
 EWRAM_DATA static bool8 sChallengeIsGym = FALSE;
 EWRAM_DATA static bool8 sChallengeActive = FALSE;
@@ -96,14 +95,20 @@ static bool8 IsCaveCompletionExit(mapsec_u16_t section, u16 fromMap, s16 x, s16 
     }
 }
 
-static u8 CountBadges(void)
+static bool8 IsGymBadgeEarned(mapsec_u16_t section)
 {
-    u8 count = 0;
-    u16 flag;
-    for (flag = FLAG_BADGE01_GET; flag <= FLAG_BADGE08_GET; flag++)
-        if (FlagGet(flag))
-            count++;
-    return count;
+    switch (section)
+    {
+    case MAPSEC_RUSTBORO_CITY: return FlagGet(FLAG_BADGE01_GET);
+    case MAPSEC_DEWFORD_TOWN: return FlagGet(FLAG_BADGE02_GET);
+    case MAPSEC_MAUVILLE_CITY: return FlagGet(FLAG_BADGE03_GET);
+    case MAPSEC_LAVARIDGE_TOWN: return FlagGet(FLAG_BADGE04_GET);
+    case MAPSEC_PETALBURG_CITY: return FlagGet(FLAG_BADGE05_GET);
+    case MAPSEC_FORTREE_CITY: return FlagGet(FLAG_BADGE06_GET);
+    case MAPSEC_MOSSDEEP_CITY: return FlagGet(FLAG_BADGE07_GET);
+    case MAPSEC_SOOTOPOLIS_CITY: return FlagGet(FLAG_BADGE08_GET);
+    default: return FALSE;
+    }
 }
 
 static void ClearChallengeState(void)
@@ -125,7 +130,6 @@ void ChallengeReset_RecordTrainer(u16 trainerId)
         sChallengeActive = TRUE;
         sChallengeMapSection = gMapHeader.regionMapSectionId;
         sChallengeIsGym = (gMapHeader.battleType == MAP_BATTLE_SCENE_GYM);
-        sChallengeBadgeCountAtStart = CountBadges();
         sChallengeTrainerCount = 0;
     }
 
@@ -169,21 +173,13 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
         return;
     }
 
-    // If a badge was earned during this gym visit, the gym is complete and
-    // its defeated trainers stay defeated. If the badge script runs after the
-    // exit transition, defer the decision until the next map transition so the
-    // post-battle script has had a chance to award the badge.
-    if (sChallengeIsGym)
+    // Gym completion is authoritative: each gym's own badge flag is set by
+    // the leader's post-battle script before the player can leave. Completed
+    // gyms keep their trainer flags; unfinished gyms are reset below.
+    if (sChallengeIsGym && IsGymBadgeEarned(sChallengeMapSection))
     {
-        if (CountBadges() > sChallengeBadgeCountAtStart)
-        {
-            ClearChallengeState();
-            return;
-        }
-
-        // If the player leaves an unfinished gym, reset its defeated trainers
-        // immediately. A legitimately completed gym already returned above
-        // because its badge count increased before the player can exit.
+        ClearChallengeState();
+        return;
     }
 
     for (i = 0; i < sChallengeTrainerCount; i++)
