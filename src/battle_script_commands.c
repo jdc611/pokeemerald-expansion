@@ -76,6 +76,7 @@
 #include "test/battle.h"
 #include "follower_npc.h"
 #include "load_save.h"
+#include "run_settings.h"
 
 // Helper for accessing command arguments and advancing gBattlescriptCurrInstr.
 //
@@ -8246,6 +8247,27 @@ static void Cmd_handleballthrow(void)
         BtlController_EmitBallThrowAnim(gBattlerAttacker, B_COMM_TO_CONTROLLER, BALL_3_SHAKES_SUCCESS);
         MarkBattlerForControllerExec(gBattlerAttacker);
         gBattlescriptCurrInstr = BattleScript_WallyBallThrow;
+    }
+    else if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE
+          && !(gBattleTypeFlags & (BATTLE_TYPE_LEGENDARY | BATTLE_TYPE_ROAMER))
+          && NuzlockeAreaEncounterUsed()
+          && !IsMonShiny(&gParties[B_TRAINER_OPPONENT_A][GetBattlerPartyIndex(gBattlerTarget)])
+          && GetSetPokedexFlag(SpeciesToNationalPokedexNum(gBattleMons[gBattlerTarget].species), FLAG_GET_CAUGHT))
+    {
+        // Duplicate species remain catchable under Species Clause even after
+        // this area's normal encounter has been spent.
+        SetBallThrowShakes();
+    }
+    else if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE
+          && !(gBattleTypeFlags & (BATTLE_TYPE_LEGENDARY | BATTLE_TYPE_ROAMER))
+          && NuzlockeAreaEncounterUsed()
+          && !IsMonShiny(&gParties[B_TRAINER_OPPONENT_A][GetBattlerPartyIndex(gBattlerTarget)]))
+    {
+        // A normal encounter cannot be caught after this named area's slot is
+        // spent. Shiny and scripted/static encounters are exempt.
+        BtlController_EmitBallThrowAnim(gBattlerAttacker, B_COMM_TO_CONTROLLER, BALL_TRAINER_BLOCK);
+        MarkBattlerForControllerExec(gBattlerAttacker);
+        gBattlescriptCurrInstr = BattleScript_TrainerBallBlock;
     }
     else
     {
