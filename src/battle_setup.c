@@ -129,19 +129,31 @@ static void NuzlockeAccountStandardEncounter(void)
 {
     enum Species species;
 
+    // Default open outside Nuzlocke. Scripted/static battles never call this
+    // helper, so their normal capture behavior is unchanged.
+    gSaveBlock3Ptr->nuzlockeCurrentEncounterCatchable = TRUE;
     if (gSaveBlock3Ptr->runDifficulty != RUN_DIFFICULTY_NUZLOCKE)
         return;
 
-    // Scripted/static encounters use a different battle entry point and are
-    // intentionally free. This hook is only called by ordinary wild battles.
     species = GetMonData(&gParties[B_TRAINER_OPPONENT_A][0], MON_DATA_SPECIES);
-    if (species == SPECIES_NONE || NuzlockeSpeciesWasCaught(species) || NuzlockeMonIsShiny(&gParties[B_TRAINER_OPPONENT_A][0]))
+    if (species == SPECIES_NONE)
         return;
 
-    // The first valid encounter spends the named area immediately. Catching,
-    // KOing, or running therefore all have the same result.
-    if (!NuzlockeAreaEncounterUsed())
-        NuzlockeMarkAreaEncounterUsed();
+    // Shiny Clause and Species Clause are always free and do not consume the
+    // named area's normal encounter.
+    if (NuzlockeMonIsShiny(&gParties[B_TRAINER_OPPONENT_A][0]) || NuzlockeSpeciesWasCaught(species))
+        return;
+
+    // A non-duplicate, non-shiny wild mon is catchable only if this named area
+    // still has its encounter. Spend it as soon as that valid battle begins so
+    // catching, KOing, and running all consume the same slot.
+    if (NuzlockeAreaEncounterUsed())
+    {
+        gSaveBlock3Ptr->nuzlockeCurrentEncounterCatchable = FALSE;
+        return;
+    }
+
+    NuzlockeMarkAreaEncounterUsed();
 }
 
 EWRAM_DATA static bool8 sShouldCheckTrainerBScript = FALSE;
