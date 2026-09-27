@@ -173,10 +173,24 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
     u8 i;
     bool8 stayingInChallenge;
 
-    if (!sChallengeActive || !ChallengeResetEnabled())
+    if (!ChallengeResetEnabled())
     {
-        if (!ChallengeResetEnabled())
-            ClearChallengeState();
+        ClearChallengeState();
+        return;
+    }
+
+    // Start the challenge when the player ENTERS the gym/cave, not when a
+    // trainer battle happens. This guarantees the later exit is authoritative
+    // even if a battle-end path never registered a trainer.
+    if (!sChallengeActive)
+    {
+        if (IsChallengeMap(to))
+        {
+            sChallengeActive = TRUE;
+            sChallengeMapSection = to->regionMapSectionId;
+            sChallengeIsGym = (to->battleType == MAP_BATTLE_SCENE_GYM);
+            sChallengeTrainerCount = 0;
+        }
         return;
     }
 
