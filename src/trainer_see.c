@@ -1,4 +1,5 @@
 #include "global.h"
+#include "challenge_reset.h"
 #include "battle_setup.h"
 #include "event_data.h"
 #include "event_object_movement.h"
@@ -558,7 +559,10 @@ static u8 CheckTrainer(u8 objectEventId)
     }
     else if (trainerBattlePtr)
     {
-        if (GetTrainerFlagFromScriptPointer(trainerBattlePtr))
+        if (GetTrainerFlagFromScriptPointer(trainerBattlePtr)
+         && !ChallengeReset_ShouldIgnoreTrainerFlag(
+                TRAINER_FLAGS_START
+              + ((TrainerBattleParameter *)(trainerBattlePtr + TRAINERBATTLE_OPCODE_OFFSET))->params.opponentA))
         {
             //If there is a rematch, we want to trigger the approach sequence
             if (I_VS_SEEKER_CHARGING && GetRematchFromScriptPointer(trainerBattlePtr))
