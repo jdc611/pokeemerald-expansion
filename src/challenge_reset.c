@@ -181,11 +181,9 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
             return;
         }
 
-        // Gym scripts award badges after the leader battle returns to the
-        // field. Do not clear trainer flags on the same transition as that
-        // sequence; retain the visit until the following transition.
-        if (from->battleType == MAP_BATTLE_SCENE_GYM)
-            return;
+        // If the player leaves an unfinished gym, reset its defeated trainers
+        // immediately. A legitimately completed gym already returned above
+        // because its badge count increased before the player can exit.
     }
 
     for (i = 0; i < sChallengeTrainerCount; i++)
