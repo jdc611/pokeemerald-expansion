@@ -23,6 +23,7 @@ static bool8 ChallengeResetEnabled(void)
 }
 
 static bool8 IsCaveCompleted(mapsec_u16_t section);
+static bool8 IsSupportedChallengeCave(mapsec_u16_t section);
 
 bool8 ChallengeReset_BlocksRecoveryTools(void)
 {
