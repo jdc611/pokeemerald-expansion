@@ -112,12 +112,16 @@ static bool8 NuzlockeMonIsShiny(struct Pokemon *mon)
     return IsMonShiny(mon);
 }
 
-bool8 NuzlockeAreaEncounterUsed(void)
+bool8 NuzlockeMapSectionEncounterUsed(u16 section)
 {
-    u16 section = gMapHeader.regionMapSectionId;
     if (section >= 256)
         return FALSE;
     return (gSaveBlock3Ptr->nuzlockeEncounterUsed[section >> 3] & (1 << (section & 7))) != 0;
+}
+
+bool8 NuzlockeAreaEncounterUsed(void)
+{
+    return NuzlockeMapSectionEncounterUsed(gMapHeader.regionMapSectionId);
 }
 
 static void NuzlockeMarkAreaEncounterUsed(void)
