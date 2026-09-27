@@ -199,6 +199,16 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
         return;
     }
 
+    // Make gym reset authoritative on ENTRY. If the player has not earned
+    // this gym's badge, its regular trainers are fresh every time the gym is
+    // entered. Once the badge exists, their defeated flags are preserved.
+    if (to->battleType == MAP_BATTLE_SCENE_GYM
+     && from->battleType != MAP_BATTLE_SCENE_GYM)
+    {
+        if (!IsGymBadgeEarned(to->regionMapSectionId))
+            ClearGymTrainerFlags(to->regionMapSectionId);
+    }
+
     // Gym resets are intentionally stateless. Every transition directly from
     // a gym to a non-gym map is authoritative: without that gym's badge,
     // restore its regular trainers; with the badge, preserve completion.
