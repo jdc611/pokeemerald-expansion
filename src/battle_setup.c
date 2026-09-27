@@ -59,6 +59,7 @@
 #include "constants/trainers.h"
 #include "constants/trainer_hill.h"
 #include "constants/weather.h"
+#include "constants/pokedex.h"
 
 enum TransitionType
 {
@@ -97,6 +98,52 @@ static void DoTrainerBattle(void);
 EWRAM_DATA TrainerBattleParameter gTrainerBattleParameter = {0};
 EWRAM_DATA u16 gPartnerTrainerId = 0;
 EWRAM_DATA static u8 *sTrainerBattleEndScript = NULL;
+
+static bool8 NuzlockeSpeciesWasCaught(enum Species species)
+{
+    enum NationalDexOrder dexNum = SpeciesToNationalPokedexNum(species);
+    return dexNum != NATIONAL_DEX_NONE && GetSetPokedexFlag(dexNum, FLAG_GET_CAUGHT);
+}
+
+static bool8 NuzlockeMonIsShiny(struct Pokemon *mon)
+{
+    return IsMonShiny(mon);
+}
+
+static bool8 NuzlockeAreaEncounterUsed(void)
+{
+    u16 section = gMapHeader.regionMapSectionId;
+    if (section >= 256)
+        return FALSE;
+    return (gSaveBlock3Ptr->nuzlockeEncounterUsed[section >> 3] & (1 << (section & 7))) != 0;
+}
+
+static void NuzlockeMarkAreaEncounterUsed(void)
+{
+    u16 section = gMapHeader.regionMapSectionId;
+    if (section < 256)
+        gSaveBlock3Ptr->nuzlockeEncounterUsed[section >> 3] |= 1 << (section & 7);
+}
+
+static void NuzlockeAccountStandardEncounter(void)
+{
+    enum Species species;
+
+    if (gSaveBlock3Ptr->runDifficulty != RUN_DIFFICULTY_NUZLOCKE)
+        return;
+
+    // Scripted/static encounters use a different battle entry point and are
+    // intentionally free. This hook is only called by ordinary wild battles.
+    species = GetMonData(&gParties[B_TRAINER_OPPONENT_A][0], MON_DATA_SPECIES);
+    if (species == SPECIES_NONE || NuzlockeSpeciesWasCaught(species) || NuzlockeMonIsShiny(&gParties[B_TRAINER_OPPONENT_A][0]))
+        return;
+
+    // The first valid encounter spends the named area immediately. Catching,
+    // KOing, or running therefore all have the same result.
+    if (!NuzlockeAreaEncounterUsed())
+        NuzlockeMarkAreaEncounterUsed();
+}
+
 EWRAM_DATA static bool8 sShouldCheckTrainerBScript = FALSE;
 EWRAM_DATA static u8 sNoOfPossibleTrainerRetScripts = 0;
 
@@ -388,6 +435,7 @@ void BattleSetup_StartBattlePikeWildBattle(void)
 
 static void DoStandardWildBattle(bool32 isDouble)
 {
+    NuzlockeAccountStandardEncounter();
     LockPlayerFieldControls();
     FreezeObjectEvents();
     StopPlayerAvatar();
