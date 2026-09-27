@@ -188,6 +188,21 @@ void ChallengeReset_RecordTrainerFlag(u16 trainerFlag)
         sChallengeTrainerFlags[sChallengeTrainerCount++] = trainerFlag;
 }
 
+void ChallengeReset_OnMapLoaded(void)
+{
+    if (!ChallengeResetEnabled())
+        return;
+
+    // This is the authoritative gym reset point. LoadCurrentMapData has
+    // already installed the destination as gMapHeader, so there is no
+    // transition/destination ambiguity. Unfinished Hard/Nuzlocke gyms begin
+    // every visit with their regular trainer flags clear; earned badges make
+    // that completion permanent.
+    if (gMapHeader.battleType == MAP_BATTLE_SCENE_GYM
+     && !IsGymBadgeEarned(gMapHeader.regionMapSectionId))
+        ClearGymTrainerFlags(gMapHeader.regionMapSectionId);
+}
+
 void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct MapHeader *to, u16 fromMap, s16 x, s16 y)
 {
     u8 i;
@@ -208,15 +223,8 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
         if (!IsGymBadgeEarned(to->regionMapSectionId))
         {
             ClearGymTrainerFlags(to->regionMapSectionId);
-            // Temporary one-test diagnostic: 1 = reset branch ran with badge
-            // clear. Removed after the Roxanne re-entry test.
-            gSpecialVar_Result = 1;
         }
-        else
-        {
-            // 2 = gym entry detected, but its badge flag was already set.
-            gSpecialVar_Result = 2;
-        }
+
     }
 
     // Gym resets are intentionally stateless. Every transition directly from
