@@ -210,7 +210,7 @@ static const u32 sHiddenMonIconGfx[] = INCGFX_U32("graphics/dexnav/hidden.png", 
 
 // strings
 static const u8 sText_DexNav_NoInfo[] = _("--------");
-static const u8 sText_DexNav_NuzlockeSearchBlocked[] = _("DexNav encounters cannot be forced\nduring a Nuzlocke.");
+static const u8 sText_DexNav_NuzlockeSearchBlocked[] = _("NUZLOCKE: VIEW ONLY");
 static const u8 sText_DexNav_CaptureToSee[] = _("Capture first!");
 static const u8 sText_DexNav_PressRToRegister[] = _("R TO REGISTER!");
 static const u8 sText_DexNav_SearchForRegisteredSpecies[] = _("Search {STR_VAR_1}");
@@ -1007,10 +1007,7 @@ bool32 TryStartDexNavSearch(void)
     // Nuzlocke keeps DexNav as a scouting tool, but selected encounters may
     // not be forced. Registered one-button searches are blocked here too.
     if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE)
-    {
-        ShowFieldMessage(sText_DexNav_NuzlockeSearchBlocked);
         return FALSE;
-    }
 
     if (FlagGet(DN_FLAG_SEARCHING) && sDexNavSearchDataPtr->hiddenSearch)
     {
@@ -2573,7 +2570,17 @@ static void Task_DexNavMain(u8 taskId)
         // not turn that information into a chosen encounter.
         if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE)
         {
+            // Stay entirely inside DexNav's own window system. A field message
+            // here survives the DexNav callback transition and corrupts the
+            // overworld/start-menu textbox state.
             PlaySE(SE_FAILURE);
+            FillWindowPixelBuffer(WINDOW_REGISTERED, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
+            PutWindowTilemap(WINDOW_REGISTERED);
+            AddTextPrinterParameterized3(WINDOW_REGISTERED, FONT_NORMAL, 0, 0,
+                                         sFontColor_White, TEXT_SKIP_DRAW,
+                                         sText_DexNav_NuzlockeSearchBlocked);
+            PrintMapName();
+            CopyWindowToVram(WINDOW_REGISTERED, COPYWIN_FULL);
             return;
         }
 
