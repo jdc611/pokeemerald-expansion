@@ -1720,7 +1720,7 @@ static bool8 StartMenu_PCStorage(void)
 {
     if (ChallengeReset_BlocksRecoveryTools())
     {
-        static const u8 sText_ChallengeBlocksRecovery[] = _("PC and PokéVial can't be used during this challenge.");
+        static const u8 sText_ChallengeBlocksRecovery[] = _("The PC can't be used during\\nthis challenge.");
         RemoveExtraStartMenuWindows();
         HideStartMenu();
         ShowFieldMessage(sText_ChallengeBlocksRecovery);
@@ -1741,7 +1741,7 @@ static bool8 StartMenuPokeVial(void)
 {
     if (ChallengeReset_BlocksRecoveryTools())
     {
-        static const u8 sText_ChallengeBlocksRecovery[] = _("PC and PokéVial can't be used during this challenge.");
+        static const u8 sText_ChallengeBlocksRecovery[] = _("PokéVial can't be used during\\nthis challenge.");
         RemoveExtraStartMenuWindows();
         HideStartMenu();
         ShowFieldMessage(sText_ChallengeBlocksRecovery);
@@ -2128,8 +2128,11 @@ static bool8 StartMenuPokeRider(void)
     // it may only launch from outdoor maps where Fly is legal.
     if (!Overworld_MapTypeAllowsTeleportAndFly(gMapHeader.mapType))
     {
-        gMenuCallback = HandleStartMenuInput;
-        return FALSE;
+        static const u8 sText_PokeRiderBlocked[] = _("PokéRider can only be used\\noutdoors.");
+        RemoveExtraStartMenuWindows();
+        HideStartMenu();
+        ShowFieldMessage(sText_PokeRiderBlocked);
+        return TRUE;
     }
 
     if (!gPaletteFade.active)
