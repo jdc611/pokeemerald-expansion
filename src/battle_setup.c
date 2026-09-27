@@ -6,6 +6,7 @@
 #include "battle_pike.h"
 #include "battle_pyramid.h"
 #include "battle_setup.h"
+#include "challenge_reset.h"
 #include "battle_partner.h"
 #include "battle_tower.h"
 #include "battle_transition.h"
@@ -1500,8 +1501,12 @@ bool8 GetTrainerFlag(void)
 static void SetBattledTrainersFlags(void)
 {
     if (TRAINER_BATTLE_PARAM.opponentB != 0)
+    {
         FlagSet(GetTrainerBFlag());
+        ChallengeReset_RecordTrainer(TRAINER_BATTLE_PARAM.opponentB);
+    }
     FlagSet(GetTrainerAFlag());
+    ChallengeReset_RecordTrainer(TRAINER_BATTLE_PARAM.opponentA);
 }
 
 static void UNUSED SetBattledTrainerFlag(void)
