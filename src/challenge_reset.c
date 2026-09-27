@@ -9,7 +9,7 @@
 
 #define MAX_CHALLENGE_TRAINERS 64
 
-EWRAM_DATA static u16 sChallengeTrainers[MAX_CHALLENGE_TRAINERS] = {0};
+EWRAM_DATA static u16 sChallengeTrainerFlags[MAX_CHALLENGE_TRAINERS] = {0};
 EWRAM_DATA static u8 sChallengeTrainerCount = 0;
 EWRAM_DATA static mapsec_u16_t sChallengeMapSection = 0;
 EWRAM_DATA static bool8 sChallengeIsGym = FALSE;
@@ -118,7 +118,7 @@ static void ClearChallengeState(void)
     sChallengeIsGym = FALSE;
 }
 
-void ChallengeReset_RecordTrainer(u16 trainerId)
+void ChallengeReset_RecordTrainerFlag(u16 trainerFlag)
 {
     u8 i;
 
@@ -134,11 +134,11 @@ void ChallengeReset_RecordTrainer(u16 trainerId)
     }
 
     for (i = 0; i < sChallengeTrainerCount; i++)
-        if (sChallengeTrainers[i] == trainerId)
+        if (sChallengeTrainerFlags[i] == trainerFlag)
             return;
 
     if (sChallengeTrainerCount < MAX_CHALLENGE_TRAINERS)
-        sChallengeTrainers[sChallengeTrainerCount++] = trainerId;
+        sChallengeTrainerFlags[sChallengeTrainerCount++] = trainerFlag;
 }
 
 void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct MapHeader *to, u16 fromMap, s16 x, s16 y)
@@ -183,7 +183,7 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
     }
 
     for (i = 0; i < sChallengeTrainerCount; i++)
-        ClearTrainerFlag(sChallengeTrainers[i]);
+        FlagClear(sChallengeTrainerFlags[i]);
 
     ClearChallengeState();
 }
