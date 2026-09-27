@@ -60,6 +60,7 @@ bool8 Nuzlocke_ProcessBattleDeaths(void);
 bool8 Nuzlocke_RebuildPartyFromStorage(void);
 bool8 Nuzlocke_HasLivingPokemon(void);
 bool8 Nuzlocke_IsGraveBox(u8 boxId);
+void Nuzlocke_InitializeGraveBox(void);
 
 void ResetWaldaWallpaper(void);
 void SetWaldaWallpaperLockedOrUnlocked(bool32 unlocked);
