@@ -3,6 +3,7 @@
 
 bool8 ChallengeReset_BlocksRecoveryTools(void);
 void ChallengeReset_RecordTrainerFlag(u16 trainerFlag);
+void ChallengeReset_OnMapLoaded(void);
 void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct MapHeader *to, u16 fromMap, s16 x, s16 y);
 
 #endif
