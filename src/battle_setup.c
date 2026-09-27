@@ -1317,7 +1317,9 @@ static void BattleSetup_ConfigureTrainerBattle(TrainerBattleParameter *battlePar
     PUSH_IF_SET(EventSnippet_FacePlayer, battleParams->params.facePlayer)
     PUSH       (EventSnippet_RevealTrainer)
 
-    bool32 isTrainerDefeated = !battleParams->params.skipFlagCheck && GetTrainerFlag();
+    bool32 isTrainerDefeated = !battleParams->params.skipFlagCheck
+                            && GetTrainerFlag()
+                            && !ChallengeReset_ShouldIgnoreTrainerFlag(GetTrainerAFlag());
 
     if ((isTrainerDefeated && !battleParams->params.isRematch)
     || (!IsTrainerReadyForRematch() && battleParams->params.isRematch)) {
