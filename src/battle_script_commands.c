@@ -8250,21 +8250,11 @@ static void Cmd_handleballthrow(void)
     }
     else if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE
           && !(gBattleTypeFlags & (BATTLE_TYPE_LEGENDARY | BATTLE_TYPE_ROAMER))
-          && NuzlockeAreaEncounterUsed()
-          && !IsMonShiny(&gParties[B_TRAINER_OPPONENT_A][GetBattlerPartyIndex(gBattlerTarget)])
-          && GetSetPokedexFlag(SpeciesToNationalPokedexNum(gBattleMons[gBattlerTarget].species), FLAG_GET_CAUGHT))
+          && !gSaveBlock3Ptr->nuzlockeCurrentEncounterCatchable)
     {
-        // Duplicate species remain catchable under Species Clause even after
-        // this area's normal encounter has been spent.
-        SetBallThrowShakes();
-    }
-    else if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE
-          && !(gBattleTypeFlags & (BATTLE_TYPE_LEGENDARY | BATTLE_TYPE_ROAMER))
-          && NuzlockeAreaEncounterUsed()
-          && !IsMonShiny(&gParties[B_TRAINER_OPPONENT_A][GetBattlerPartyIndex(gBattlerTarget)]))
-    {
-        // A normal encounter cannot be caught after this named area's slot is
-        // spent. Shiny and scripted/static encounters are exempt.
+        // This ordinary wild battle began after the named area's encounter was
+        // already spent. Shiny/duplicate exemptions were resolved at battle
+        // start, so only genuinely ineligible encounters reach this branch.
         BtlController_EmitBallThrowAnim(gBattlerAttacker, B_COMM_TO_CONTROLLER, BALL_TRAINER_BLOCK);
         MarkBattlerForControllerExec(gBattlerAttacker);
         gBattlescriptCurrInstr = BattleScript_TrainerBallBlock;
