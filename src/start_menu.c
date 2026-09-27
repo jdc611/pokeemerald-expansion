@@ -849,6 +849,7 @@ static bool8 HandleStartMenuInput(void)
             && gMenuCallback != StartMenuBattlePyramidRetireCallback
             && gMenuCallback != StartMenu_PCStorage
             && gMenuCallback != StartMenuPokeVial
+            && gMenuCallback != StartMenuPokeRider
             && gMenuCallback != StartMenuChangeNature
             && gMenuCallback != StartMenuChangeGender
             && gMenuCallback != StartMenuChangeAbility
@@ -1719,8 +1720,11 @@ static bool8 StartMenu_PCStorage(void)
 {
     if (ChallengeReset_BlocksRecoveryTools())
     {
-        gMenuCallback = HandleStartMenuInput;
-        return FALSE;
+        static const u8 sText_ChallengeBlocksRecovery[] = _("PC and PokéVial can't be used during this challenge.");
+        RemoveExtraStartMenuWindows();
+        HideStartMenu();
+        ShowFieldMessage(sText_ChallengeBlocksRecovery);
+        return TRUE;
     }
 
     if (!gPaletteFade.active)
@@ -1737,8 +1741,11 @@ static bool8 StartMenuPokeVial(void)
 {
     if (ChallengeReset_BlocksRecoveryTools())
     {
-        gMenuCallback = HandleStartMenuInput;
-        return FALSE;
+        static const u8 sText_ChallengeBlocksRecovery[] = _("PC and PokéVial can't be used during this challenge.");
+        RemoveExtraStartMenuWindows();
+        HideStartMenu();
+        ShowFieldMessage(sText_ChallengeBlocksRecovery);
+        return TRUE;
     }
 
     if (!gPaletteFade.active)
