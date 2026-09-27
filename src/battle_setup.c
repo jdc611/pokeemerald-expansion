@@ -30,6 +30,8 @@
 #include "metatile_behavior.h"
 #include "mirage_tower.h"
 #include "palette.h"
+#include "pokedex.h"
+#include "pokemon.h"
 #include "random.h"
 #include "safari_zone.h"
 #include "script.h"
