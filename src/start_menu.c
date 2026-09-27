@@ -1720,9 +1720,12 @@ static bool8 StartMenuDexNavCallback(void)
 
 static void Task_ShowBlockedStartMenuMessage(u8 taskId)
 {
-    // ShowFieldMessage owns printing, but start-menu callbacks have no script
-    // waiting behind them to dismiss the box. Give these messages a small
-    // field task that closes them on A/B and returns normal field control.
+    // While text is printing, A/B may only finish the text. Once the field
+    // printer reports completion (message mode becomes hidden), the next
+    // distinct A/B press closes the visible box.
+    if (!IsFieldMessageBoxHidden())
+        return;
+
     if (JOY_NEW(A_BUTTON | B_BUTTON))
     {
         HideFieldMessageBox();
