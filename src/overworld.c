@@ -1,4 +1,5 @@
 #include "global.h"
+#include "challenge_reset.h"
 #include "overworld.h"
 #include "battle_pyramid.h"
 #include "battle_setup.h"
@@ -704,6 +705,8 @@ static void SetPlayerCoordsFromWarp(void)
 
 void WarpIntoMap(void)
 {
+    const struct MapHeader *destination = GetDestinationWarpMapHeader();
+    ChallengeReset_OnMapTransition(&gMapHeader, destination);
     ApplyCurrentWarp();
     LoadCurrentMapData();
     SetPlayerCoordsFromWarp();
@@ -878,6 +881,7 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     if (gMapHeader.regionMapSectionId != MAPSEC_BATTLE_FRONTIER)
         TransitionMapMusic();
 
+    ChallengeReset_OnMapTransition(&gMapHeader, GetDestinationWarpMapHeader());
     ApplyCurrentWarp();
     LoadCurrentMapData();
     LoadObjEventTemplatesFromHeader();
