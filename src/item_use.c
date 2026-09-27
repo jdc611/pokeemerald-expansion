@@ -1,6 +1,7 @@
 #include "global.h"
 #include "item_use.h"
 #include "battle.h"
+#include "challenge_reset.h"
 #include "battle_anim.h"
 #include "battle_stat_change.h"
 #include "battle_pyramid.h"
@@ -737,6 +738,13 @@ static void Task_OpenRegisteredPokeblockCase(u8 taskId)
 
 void ItemUseOutOfBattle_PokemonBoxLink(u8 taskId)
 {
+    if (ChallengeReset_BlocksRecoveryTools())
+    {
+        static const u8 sText_ChallengeBlocksPC[] = _("The PC can't be used during this challenge.{PAUSE_UNTIL_PRESS}");
+        DisplayCannotUseItemMessage(taskId, gTasks[taskId].tUsingRegisteredKeyItem, sText_ChallengeBlocksPC);
+        return;
+    }
+
     sItemUseOnFieldCB = Task_AccessPokemonBoxLink;
     SetUpItemUseOnFieldCallback(taskId);
 }
