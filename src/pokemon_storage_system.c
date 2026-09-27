@@ -1626,6 +1626,7 @@ static void Task_PCMainMenu(u8 taskId)
 
 void ShowPokemonStorageSystemPC(void)
 {
+    Nuzlocke_InitializeGraveBox();
     u8 taskId = CreateTask(Task_PCMainMenu, 80);
     gTasks[taskId].tState = 0;
     gTasks[taskId].tSelectedOption = 0;
@@ -9570,7 +9571,7 @@ bool8 Nuzlocke_IsGraveBox(u8 boxId)
         && boxId == NUZLOCKE_GRAVE_BOX;
 }
 
-static void Nuzlocke_NameGraveBox(void)
+void Nuzlocke_InitializeGraveBox(void)
 {
     static const u8 sGraveName[] = _("GRAVE");
     if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE)
@@ -9585,7 +9586,7 @@ bool8 Nuzlocke_ProcessBattleDeaths(void)
     if (gSaveBlock3Ptr->runDifficulty != RUN_DIFFICULTY_NUZLOCKE)
         return FALSE;
 
-    Nuzlocke_NameGraveBox();
+    Nuzlocke_InitializeGraveBox();
 
     // Work backwards so CompactPartySlots cannot make us skip a fainted mon.
     for (i = PARTY_SIZE - 1; i >= 0; i--)
