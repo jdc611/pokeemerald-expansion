@@ -46,6 +46,7 @@
 #include "constants/pokemon_icon.h"
 #include "chooseboxmon.h"
 #include "party_menu.h"
+#include "run_settings.h"
 
 /*
     NOTE: This file is large. Some general groups of functions have
@@ -6903,6 +6904,9 @@ static bool8 IsRemovingLastPartyMon(void)
 
 static bool8 CanPlaceMon(void)
 {
+    if (sCursorArea == CURSOR_AREA_IN_BOX && Nuzlocke_IsGraveBox(StorageGetCurrentBox()))
+        return FALSE;
+
     if (sIsMonBeingMoved)
     {
         if (sCursorArea == CURSOR_AREA_IN_PARTY && GetMonData(&gParties[B_TRAINER_PLAYER][sCursorPosition], MON_DATA_SPECIES) == SPECIES_NONE)
@@ -7776,6 +7780,17 @@ static u8 SetSelectionMenuTexts(void)
 static bool8 SetMenuTexts_Mon(void)
 {
     enum Species species = GetSpeciesAtCursorPosition();
+
+    // GRAVE is a permanent record in Nuzlocke: mons can be viewed but never
+    // withdrawn, moved, released, or otherwise returned to active storage.
+    if (sCursorArea == CURSOR_AREA_IN_BOX
+     && Nuzlocke_IsGraveBox(StorageGetCurrentBox())
+     && species != SPECIES_NONE)
+    {
+        SetMenuText(MENU_SUMMARY);
+        SetMenuText(MENU_CANCEL);
+        return TRUE;
+    }
 
     switch (sStorage->boxOption)
     {
@@ -9536,6 +9551,122 @@ static void SpriteCB_ItemIcon_HideParty(struct Sprite *sprite)
 #undef sCursorArea
 #undef sCursorPos
 
+
+
+#define NUZLOCKE_GRAVE_BOX (TOTAL_BOXES_COUNT - 1)
+
+bool8 Nuzlocke_IsGraveBox(u8 boxId)
+{
+    return gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE
+        && boxId == NUZLOCKE_GRAVE_BOX;
+}
+
+static void Nuzlocke_NameGraveBox(void)
+{
+    static const u8 sGraveName[] = _("GRAVE");
+    if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE)
+        StringCopy(gPokemonStoragePtr->boxNames[NUZLOCKE_GRAVE_BOX], sGraveName);
+}
+
+bool8 Nuzlocke_ProcessBattleDeaths(void)
+{
+    s32 i;
+    bool8 movedAny = FALSE;
+
+    if (gSaveBlock3Ptr->runDifficulty != RUN_DIFFICULTY_NUZLOCKE)
+        return FALSE;
+
+    Nuzlocke_NameGraveBox();
+
+    // Work backwards so CompactPartySlots cannot make us skip a fainted mon.
+    for (i = PARTY_SIZE - 1; i >= 0; i--)
+    {
+        enum Species species = GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_SPECIES);
+        if (species != SPECIES_NONE
+         && !GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_IS_EGG)
+         && GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_HP) == 0)
+        {
+            s16 gravePos = GetFirstFreeBoxSpot(NUZLOCKE_GRAVE_BOX);
+            if (gravePos < 0)
+                continue;
+
+            SetBoxMonAt(NUZLOCKE_GRAVE_BOX, gravePos, &gParties[B_TRAINER_PLAYER][i].box);
+            ZeroMonData(&gParties[B_TRAINER_PLAYER][i]);
+            movedAny = TRUE;
+        }
+    }
+
+    if (movedAny)
+    {
+        CompactPartySlots();
+        CalculatePlayerPartyCount();
+    }
+    return movedAny;
+}
+
+bool8 Nuzlocke_HasLivingPokemon(void)
+{
+    u32 i, box, pos;
+
+    if (gSaveBlock3Ptr->runDifficulty != RUN_DIFFICULTY_NUZLOCKE)
+        return TRUE;
+
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_SPECIES) != SPECIES_NONE
+         && !GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_IS_EGG)
+         && GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_HP) != 0)
+            return TRUE;
+    }
+
+    for (box = 0; box < TOTAL_BOXES_COUNT; box++)
+    {
+        if (box == NUZLOCKE_GRAVE_BOX)
+            continue;
+        for (pos = 0; pos < IN_BOX_COUNT; pos++)
+        {
+            if (GetBoxMonDataAt(box, pos, MON_DATA_SPECIES) != SPECIES_NONE
+             && !GetBoxMonDataAt(box, pos, MON_DATA_IS_EGG))
+                return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+bool8 Nuzlocke_RebuildPartyFromStorage(void)
+{
+    u32 box, pos;
+
+    if (gSaveBlock3Ptr->runDifficulty != RUN_DIFFICULTY_NUZLOCKE)
+        return FALSE;
+
+    Nuzlocke_ProcessBattleDeaths();
+
+    for (box = 0; box < TOTAL_BOXES_COUNT && CalculatePlayerPartyCount() < PARTY_SIZE; box++)
+    {
+        if (box == NUZLOCKE_GRAVE_BOX)
+            continue;
+
+        for (pos = 0; pos < IN_BOX_COUNT && CalculatePlayerPartyCount() < PARTY_SIZE; pos++)
+        {
+            struct Pokemon mon;
+            u8 partyPos;
+
+            if (GetBoxMonDataAt(box, pos, MON_DATA_SPECIES) == SPECIES_NONE
+             || GetBoxMonDataAt(box, pos, MON_DATA_IS_EGG))
+                continue;
+
+            BoxMonAtToMon(box, pos, &mon);
+            HealPokemon(&mon);
+            partyPos = CalculatePlayerPartyCount();
+            gParties[B_TRAINER_PLAYER][partyPos] = mon;
+            ZeroBoxMonAt(box, pos);
+        }
+    }
+
+    CalculatePlayerPartyCount();
+    return CalculatePlayerPartyCount() != 0;
+}
 
 //------------------------------------------------------------------------------
 //  SECTION: General utility
