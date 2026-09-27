@@ -287,6 +287,11 @@ struct SaveBlock3
     u8 runDifficulty;
     u8 movesetMode;
     u8 evolutionMode;
+
+    // Nuzlocke encounter accounting is keyed by regionMapSectionId so every
+    // map sharing the same displayed area name (for example cave floors)
+    // shares one encounter. 256 section IDs fit in 32 bytes.
+    u8 nuzlockeEncounterUsed[32];
 }; /* max size 1624 bytes */
 
 extern struct SaveBlock3 *gSaveBlock3Ptr;
