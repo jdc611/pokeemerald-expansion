@@ -706,7 +706,9 @@ static void SetPlayerCoordsFromWarp(void)
 void WarpIntoMap(void)
 {
     const struct MapHeader *destination = GetDestinationWarpMapHeader();
-    ChallengeReset_OnMapTransition(&gMapHeader, destination);
+    ChallengeReset_OnMapTransition(&gMapHeader, destination,
+                                   (gSaveBlock1Ptr->location.mapGroup << 8) | (u8)gSaveBlock1Ptr->location.mapNum,
+                                   gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y);
     ApplyCurrentWarp();
     LoadCurrentMapData();
     SetPlayerCoordsFromWarp();
@@ -881,7 +883,9 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     if (gMapHeader.regionMapSectionId != MAPSEC_BATTLE_FRONTIER)
         TransitionMapMusic();
 
-    ChallengeReset_OnMapTransition(&gMapHeader, GetDestinationWarpMapHeader());
+    ChallengeReset_OnMapTransition(&gMapHeader, GetDestinationWarpMapHeader(),
+                                   (gSaveBlock1Ptr->location.mapGroup << 8) | (u8)gSaveBlock1Ptr->location.mapNum,
+                                   gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y);
     ApplyCurrentWarp();
     LoadCurrentMapData();
     LoadObjEventTemplatesFromHeader();
