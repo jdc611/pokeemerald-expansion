@@ -6,6 +6,8 @@
 #include "gpu_regs.h"
 #include "palette.h"
 #include "party_menu.h"
+#include "battle_setup.h"
+#include "run_settings.h"
 #include "trig.h"
 #include "overworld.h"
 #include "event_data.h"
@@ -81,6 +83,8 @@ static EWRAM_DATA struct {
 } *sFlyMap = NULL;
 
 static bool32 sDrawFlyDestTextWindow;
+static const u8 sText_NuzlockeEncounterAvailable[] = _("Encounter: AVAILABLE");
+static const u8 sText_NuzlockeEncounterUsed[] = _("Encounter: USED");
 
 static u8 ProcessRegionMapInput_Full(void);
 static u8 MoveRegionMapCursor_Full(void);
@@ -2163,6 +2167,17 @@ static void DrawFlyDestTextWindow(void)
                 FillWindowPixelBuffer(WIN_MAPSEC_NAME, PIXEL_FILL(1));
             }
             AddTextPrinterParameterized(WIN_MAPSEC_NAME, FONT_NORMAL, sFlyMap->regionMap.mapSecName, 0, 1, 0, NULL);
+            if (gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE)
+            {
+                const u8 *encounterText = NuzlockeMapSectionEncounterUsed(sFlyMap->regionMap.mapSecId)
+                                        ? sText_NuzlockeEncounterUsed
+                                        : sText_NuzlockeEncounterAvailable;
+                ClearStdWindowAndFrameToTransparent(WIN_MAPSEC_NAME, FALSE);
+                DrawStdFrameWithCustomTileAndPalette(WIN_MAPSEC_NAME_TALL, FALSE, 101, 13);
+                AddTextPrinterParameterized(WIN_MAPSEC_NAME_TALL, FONT_NORMAL, sFlyMap->regionMap.mapSecName, 0, 1, 0, NULL);
+                AddTextPrinterParameterized(WIN_MAPSEC_NAME_TALL, FONT_NARROW, encounterText, 0, 17, 0, NULL);
+                sDrawFlyDestTextWindow = TRUE;
+            }
             ScheduleBgCopyTilemapToVram(0);
             sDrawFlyDestTextWindow = FALSE;
         }
