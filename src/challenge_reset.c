@@ -34,7 +34,9 @@ bool8 ChallengeReset_BlocksRecoveryTools(void)
     if (gMapHeader.battleType == MAP_BATTLE_SCENE_GYM)
         return TRUE;
 
-    return gMapHeader.cave && !IsCaveCompleted(gMapHeader.regionMapSectionId);
+    return gMapHeader.cave
+        && IsSupportedChallengeCave(gMapHeader.regionMapSectionId)
+        && !IsCaveCompleted(gMapHeader.regionMapSectionId);
 }
 
 static bool8 IsCaveCompleted(mapsec_u16_t section)
@@ -50,11 +52,27 @@ static void MarkCaveCompleted(mapsec_u16_t section)
         gSaveBlock3Ptr->challengeCaveCompleted[section >> 3] |= (1 << (section & 7));
 }
 
+static bool8 IsSupportedChallengeCave(mapsec_u16_t section)
+{
+    switch (section)
+    {
+    case MAPSEC_RUSTURF_TUNNEL:
+    case MAPSEC_FIERY_PATH:
+    case MAPSEC_METEOR_FALLS:
+    case MAPSEC_VICTORY_ROAD:
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
 static bool8 IsChallengeMap(const struct MapHeader *map)
 {
     if (map->battleType == MAP_BATTLE_SCENE_GYM)
         return TRUE;
-    return map->cave && !IsCaveCompleted(map->regionMapSectionId);
+    return map->cave
+        && IsSupportedChallengeCave(map->regionMapSectionId)
+        && !IsCaveCompleted(map->regionMapSectionId);
 }
 
 // Only the intended progression-side exit completes a cave challenge.
