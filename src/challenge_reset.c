@@ -67,6 +67,26 @@ static bool8 IsSupportedChallengeCave(mapsec_u16_t section)
     }
 }
 
+static bool8 IsHoennGymMap(u16 mapId)
+{
+    switch (mapId)
+    {
+    case MAP_RUSTBORO_CITY_GYM:
+    case MAP_DEWFORD_TOWN_GYM:
+    case MAP_MAUVILLE_CITY_GYM:
+    case MAP_LAVARIDGE_TOWN_GYM_1F:
+    case MAP_LAVARIDGE_TOWN_GYM_B1F:
+    case MAP_PETALBURG_CITY_GYM:
+    case MAP_FORTREE_CITY_GYM:
+    case MAP_MOSSDEEP_CITY_GYM:
+    case MAP_SOOTOPOLIS_CITY_GYM_1F:
+    case MAP_SOOTOPOLIS_CITY_GYM_B1F:
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
 static bool8 IsChallengeMap(const struct MapHeader *map)
 {
     if (map->battleType == MAP_BATTLE_SCENE_GYM)
@@ -182,8 +202,7 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
     // Gym resets are intentionally stateless. Every transition directly from
     // a gym to a non-gym map is authoritative: without that gym's badge,
     // restore its regular trainers; with the badge, preserve completion.
-    if (from->battleType == MAP_BATTLE_SCENE_GYM
-     && to->battleType != MAP_BATTLE_SCENE_GYM)
+    if (IsHoennGymMap(fromMap) && to->battleType != MAP_BATTLE_SCENE_GYM)
     {
         if (!IsGymBadgeEarned(from->regionMapSectionId))
             ClearGymTrainerFlags(from->regionMapSectionId);
