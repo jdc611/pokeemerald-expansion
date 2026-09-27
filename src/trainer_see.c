@@ -457,7 +457,7 @@ bool8 CheckForTrainersWantingBattle(void)
     }
 
     // Sorts array by localId
-    for (i = 1; i <= trainerObjectsCount; i++)
+    for (i = 1; i < trainerObjectsCount; i++)
     {
         u8 x = trainerObjects[i];
         u8 j = i;
@@ -469,7 +469,7 @@ bool8 CheckForTrainersWantingBattle(void)
         trainerObjects[j] = x;
     }
 
-    for (i = 0; i <= trainerObjectsCount; i++)
+    for (i = 0; i < trainerObjectsCount; i++)
     {
         u8 numTrainers;
         numTrainers = CheckTrainer(trainerObjects[i]);
