@@ -22,6 +22,21 @@ static bool8 ChallengeResetEnabled(void)
         || gSaveBlock3Ptr->runDifficulty == RUN_DIFFICULTY_NUZLOCKE;
 }
 
+static bool8 IsCaveCompleted(mapsec_u16_t section);
+
+bool8 ChallengeReset_BlocksRecoveryTools(void)
+{
+    if (!ChallengeResetEnabled())
+        return FALSE;
+
+    // Recovery tools are unavailable throughout Hard/Nuzlocke gyms and active
+    // cave challenges. Completed caves return to normal on later visits.
+    if (gMapHeader.battleType == MAP_BATTLE_SCENE_GYM)
+        return TRUE;
+
+    return gMapHeader.cave && !IsCaveCompleted(gMapHeader.regionMapSectionId);
+}
+
 static bool8 IsCaveCompleted(mapsec_u16_t section)
 {
     if (section >= 256)
