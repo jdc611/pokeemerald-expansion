@@ -2104,6 +2104,11 @@ static bool8 HandleGameInfoInput(void)
 
 static bool8 StartMenuPokeRider(void)
 {
+    // PokéRider is a Fly replacement, so it obeys the same field-use rule:
+    // it may only launch from outdoor maps where Fly is legal.
+    if (!Overworld_MapTypeAllowsTeleportAndFly(gMapHeader.mapType))
+        return FALSE;
+
     if (!gPaletteFade.active)
     {
         RemoveExtraStartMenuWindows();
