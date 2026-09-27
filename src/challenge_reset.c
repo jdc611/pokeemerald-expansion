@@ -206,7 +206,17 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
      && from->battleType != MAP_BATTLE_SCENE_GYM)
     {
         if (!IsGymBadgeEarned(to->regionMapSectionId))
+        {
             ClearGymTrainerFlags(to->regionMapSectionId);
+            // Temporary one-test diagnostic: 1 = reset branch ran with badge
+            // clear. Removed after the Roxanne re-entry test.
+            gSpecialVar_Result = 1;
+        }
+        else
+        {
+            // 2 = gym entry detected, but its badge flag was already set.
+            gSpecialVar_Result = 2;
+        }
     }
 
     // Gym resets are intentionally stateless. Every transition directly from
