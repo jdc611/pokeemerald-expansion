@@ -55,6 +55,12 @@ bool32 CheckBoxMonSanityAt(u32 boxId, u32 boxPosition);
 u32 CountStorageNonEggMons(void);
 bool32 AnyStorageMonWithMove(enum Move move);
 
+// Nuzlocke lifecycle helpers. The final PC box is reserved as GRAVE.
+bool8 Nuzlocke_ProcessBattleDeaths(void);
+bool8 Nuzlocke_RebuildPartyFromStorage(void);
+bool8 Nuzlocke_HasLivingPokemon(void);
+bool8 Nuzlocke_IsGraveBox(u8 boxId);
+
 void ResetWaldaWallpaper(void);
 void SetWaldaWallpaperLockedOrUnlocked(bool32 unlocked);
 bool32 IsWaldaWallpaperUnlocked(void);
