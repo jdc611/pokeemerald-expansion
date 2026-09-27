@@ -165,6 +165,25 @@ static void ClearChallengeState(void)
     sChallengeIsGym = FALSE;
 }
 
+bool8 ChallengeReset_ShouldIgnoreTrainerFlag(u16 trainerFlag)
+{
+    u8 i;
+
+    if (!ChallengeResetEnabled()
+     || gMapHeader.battleType != MAP_BATTLE_SCENE_GYM
+     || IsGymBadgeEarned(gMapHeader.regionMapSectionId))
+        return FALSE;
+
+    // A defeated flag from a previous unfinished gym visit must not suppress
+    // trainer sight. Trainers defeated during THIS visit remain defeated until
+    // the player leaves, because RecordTrainerFlag stores them in this list.
+    for (i = 0; i < sChallengeTrainerCount; i++)
+        if (sChallengeTrainerFlags[i] == trainerFlag)
+            return FALSE;
+
+    return TRUE;
+}
+
 void ChallengeReset_RecordTrainerFlag(u16 trainerFlag)
 {
     u8 i;
