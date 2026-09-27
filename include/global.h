@@ -297,6 +297,10 @@ struct SaveBlock3
     // Hard/Nuzlocke cave challenges persist by named map section. A cave is
     // marked complete only after its designated progression exit is used.
     u8 challengeCaveCompleted[32];
+
+    // Nuzlocke lifecycle record. Incremented when no living party or boxed
+    // Pokémon remain and the run reaches a true failure state.
+    u16 nuzlockeFailureCount;
 }; /* max size 1624 bytes */
 
 extern struct SaveBlock3 *gSaveBlock3Ptr;
