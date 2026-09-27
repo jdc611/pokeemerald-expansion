@@ -33,6 +33,7 @@
 #include "palette.h"
 #include "pokedex.h"
 #include "pokemon.h"
+#include "pokemon_storage_system.h"
 #include "random.h"
 #include "safari_zone.h"
 #include "script.h"
@@ -750,6 +751,10 @@ static void DowngradeBadPoison(void)
 
 static void CB2_EndWildBattle(void)
 {
+    Nuzlocke_ProcessBattleDeaths();
+    if (IsPlayerDefeated(gBattleOutcome))
+        Nuzlocke_RebuildPartyFromStorage();
+
     CpuFill16(0, (void *)(BG_PLTT), BG_PLTT_SIZE);
     ResetOamRange(0, 128);
 
@@ -776,6 +781,10 @@ static void CB2_EndWildBattle(void)
 
 static void CB2_EndScriptedWildBattle(void)
 {
+    Nuzlocke_ProcessBattleDeaths();
+    if (IsPlayerDefeated(gBattleOutcome))
+        Nuzlocke_RebuildPartyFromStorage();
+
     CpuFill16(0, (void *)(BG_PLTT), BG_PLTT_SIZE);
     ResetOamRange(0, 128);
 
@@ -1660,6 +1669,9 @@ static void HandleBattleVariantEndParty(void)
 static void CB2_EndTrainerBattle(void)
 {
     HandleBattleVariantEndParty();
+    Nuzlocke_ProcessBattleDeaths();
+    if (IsPlayerDefeated(gBattleOutcome))
+        Nuzlocke_RebuildPartyFromStorage();
 
     gIsDebugBattle = FALSE;
     if (FollowerNPCIsBattlePartner())
@@ -1720,6 +1732,10 @@ static void CB2_EndTrainerBattle(void)
 
 static void CB2_EndRematchBattle(void)
 {
+    Nuzlocke_ProcessBattleDeaths();
+    if (IsPlayerDefeated(gBattleOutcome))
+        Nuzlocke_RebuildPartyFromStorage();
+
     if (TRAINER_BATTLE_PARAM.opponentA == TRAINER_SECRET_BASE)
     {
         DowngradeBadPoison();
