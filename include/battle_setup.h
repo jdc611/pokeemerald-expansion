@@ -144,4 +144,5 @@ u8 GetRivalBattleFlags(void);
 
 void CreateNPCTrainerPartyFromTrainer(struct Pokemon *party, const struct Trainer *trainer);
 
+bool8 NuzlockeAreaEncounterUsed(void);
 #endif // GUARD_BATTLE_SETUP_H
