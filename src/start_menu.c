@@ -6,6 +6,7 @@
 #include "battle_pyramid_bag.h"
 #include "bg.h"
 #include "debug.h"
+#include "challenge_reset.h"
 #include "event_data.h"
 #include "event_object_movement.h"
 #include "event_object_lock.h"
@@ -1716,6 +1717,12 @@ static bool8 StartMenuDexNavCallback(void)
 
 static bool8 StartMenu_PCStorage(void)
 {
+    if (ChallengeReset_BlocksRecoveryTools())
+    {
+        gMenuCallback = HandleStartMenuInput;
+        return FALSE;
+    }
+
     if (!gPaletteFade.active)
     {
         RemoveExtraStartMenuWindows();
@@ -1728,6 +1735,12 @@ static bool8 StartMenu_PCStorage(void)
 
 static bool8 StartMenuPokeVial(void)
 {
+    if (ChallengeReset_BlocksRecoveryTools())
+    {
+        gMenuCallback = HandleStartMenuInput;
+        return FALSE;
+    }
+
     if (!gPaletteFade.active)
     {
         RemoveExtraStartMenuWindows();
@@ -2107,7 +2120,10 @@ static bool8 StartMenuPokeRider(void)
     // PokéRider is a Fly replacement, so it obeys the same field-use rule:
     // it may only launch from outdoor maps where Fly is legal.
     if (!Overworld_MapTypeAllowsTeleportAndFly(gMapHeader.mapType))
+    {
+        gMenuCallback = HandleStartMenuInput;
         return FALSE;
+    }
 
     if (!gPaletteFade.active)
     {
