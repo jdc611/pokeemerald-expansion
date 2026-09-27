@@ -179,6 +179,18 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
         return;
     }
 
+    // Gym resets are intentionally stateless. Every transition directly from
+    // a gym to a non-gym map is authoritative: without that gym's badge,
+    // restore its regular trainers; with the badge, preserve completion.
+    if (from->battleType == MAP_BATTLE_SCENE_GYM
+     && to->battleType != MAP_BATTLE_SCENE_GYM)
+    {
+        if (!IsGymBadgeEarned(from->regionMapSectionId))
+            ClearGymTrainerFlags(from->regionMapSectionId);
+        ClearChallengeState();
+        return;
+    }
+
     // Start the challenge when the player ENTERS the gym/cave, not when a
     // trainer battle happens. This guarantees the later exit is authoritative
     // even if a battle-end path never registered a trainer.
