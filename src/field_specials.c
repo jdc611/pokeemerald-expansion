@@ -222,6 +222,9 @@ static bool32 ChaosFieldItemIsProtected(enum Item item)
 void ChaosRandomizeOverworldItem(void)
 {
     enum Item original = gSpecialVar_Result;
+
+    if (!gSaveBlock3Ptr->itemRandomization)
+        return;
     u32 seed;
     u32 roll;
 
