@@ -287,6 +287,7 @@ struct SaveBlock3
     u8 runDifficulty;
     u8 movesetMode;
     u8 evolutionMode;
+    bool8 itemRandomization;
 
     // Nuzlocke encounter accounting is keyed by regionMapSectionId so every
     // map sharing the same displayed area name (for example cave floors)
