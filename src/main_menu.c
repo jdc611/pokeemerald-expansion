@@ -192,6 +192,7 @@ EWRAM_DATA bool8 gRunSetupMinimalGrindingMode;
 EWRAM_DATA u8 gRunSetupDifficulty;
 EWRAM_DATA u8 gRunSetupMovesetMode;
 EWRAM_DATA u8 gRunSetupEvolutionMode;
+EWRAM_DATA bool8 gRunSetupItemRandomization;
 static EWRAM_DATA u8 sRunSetupRandomizer;
 static EWRAM_DATA u8 sRunSetupStarter;
 static EWRAM_DATA bool8 sRunSetupCustom;
@@ -206,6 +207,7 @@ static EWRAM_DATA u8 sRunSetupMovesets;
 static EWRAM_DATA u8 sRunSetupEvolutions;
 static EWRAM_DATA u8 sRunSetupBstMode;
 static EWRAM_DATA u8 sRunSetupAbilityMode;
+static EWRAM_DATA bool8 sRunSetupItemRandomization;
 static EWRAM_DATA u8 sRunSetupFilter;
 static EWRAM_DATA u8 sRunSetupType;
 static EWRAM_DATA u16 sRunSetupAbility;
@@ -382,6 +384,7 @@ static const u8 sText_RunSetupMovesets[] = _("MOVESETS");
 static const u8 sText_RunSetupEvolutions[] = _("EVOLUTIONS");
 static const u8 sText_RunSetupBst[] = _("BST");
 static const u8 sText_RunSetupAbilities[] = _("ABILITIES");
+static const u8 sText_RunSetupItems[] = _("ITEMS");
 static const u8 sText_RunSetupShuffle[] = _("SHUFFLE");
 static const u8 sText_RunSetupFiltersPage[] = _("3/4  FILTERS");
 static const u8 sText_RunSetupSeedPage[] = _("4/4  SEED");
@@ -2434,7 +2437,7 @@ static void RunSetup_Draw(u8 cursor)
 
     if (sRunSetupPage == RUN_SETUP_PAGE_RANDOMIZER && !sRunSetupConfirm)
     {
-        u8 firstRow = cursor >= 5 ? 1 : 0;
+        u8 firstRow = cursor >= 5 ? 2 : 0;
         u8 row;
 
         FillWindowPixelBuffer(0, PIXEL_FILL(0xA));
@@ -2442,7 +2445,7 @@ static void RunSetup_Draw(u8 cursor)
         AddTextPrinterParameterized3(0, FONT_NORMAL, titleX, 3, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupRandomizerPage);
         FillWindowPixelRect(0, PIXEL_FILL(TEXT_DYNAMIC_COLOR_3), 48, 25, 112, 1);
 
-        for (row = firstRow; row < firstRow + 5; row++)
+        for (row = firstRow; row < firstRow + 5 && row < 7; row++)
         {
             u8 y = 31 + 16 * (row - firstRow);
 
@@ -2479,11 +2482,17 @@ static void RunSetup_Draw(u8 cursor)
                 RunSetup_DrawWideChoice(sText_RunSetupShuffle, 112, y - 2, 52, sRunSetupBstMode == RUN_BST_SHUFFLE);
                 RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 166, y - 2, sRunSetupBstMode == RUN_BST_RANDOM);
             }
-            else
+            else if (row == 5)
             {
                 AddTextPrinterParameterized3(0, FONT_SMALL, 12, y, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupAbilities);
                 RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 99, y - 2, sRunSetupAbilityMode == RUN_ABILITIES_NORMAL);
                 RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 141, y - 2, sRunSetupAbilityMode == RUN_ABILITIES_RANDOM);
+            }
+            else
+            {
+                AddTextPrinterParameterized3(0, FONT_SMALL, 12, y, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupItems);
+                RunSetup_DrawNarrowChoice(sText_RunSetupNormal, 99, y - 2, !sRunSetupItemRandomization);
+                RunSetup_DrawNarrowChoice(sText_RunSetupRandom, 141, y - 2, sRunSetupItemRandomization);
             }
 
             if (cursor == row)
@@ -2492,10 +2501,10 @@ static void RunSetup_Draw(u8 cursor)
 
         if (firstRow != 0)
             AddTextPrinterParameterized3(0, FONT_SMALL, 198, 29, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupScrollUp);
-        if (firstRow + 5 < 6)
+        if (firstRow + 5 < 7)
             AddTextPrinterParameterized3(0, FONT_SMALL, 198, 95, sTextColor_Headers, TEXT_SKIP_DRAW, sText_RunSetupScrollDown);
 
-        RunSetup_DrawWideChoice(sText_RunSetupBack, 18, 112, 78, cursor == 6);
+        RunSetup_DrawWideChoice(sText_RunSetupBack, 18, 112, 78, cursor == 8);
         RunSetup_DrawWideChoice(sText_RunSetupNext, 112, 112, 78, cursor == 7);
         PutWindowTilemap(0);
         CopyWindowToVram(0, COPYWIN_FULL);
@@ -2762,10 +2771,10 @@ static void Task_RunSetup_Input(u8 taskId)
             *cursor = 2;
         }
         else if (JOY_NEW(DPAD_UP))
-            *cursor = *cursor == 0 ? 7 : *cursor - 1;
+            *cursor = *cursor == 0 ? 8 : *cursor - 1;
         else if (JOY_NEW(DPAD_DOWN))
-            *cursor = *cursor == 7 ? 0 : *cursor + 1;
-        else if (JOY_NEW(DPAD_LEFT) && *cursor < 6)
+            *cursor = *cursor == 8 ? 0 : *cursor + 1;
+        else if (JOY_NEW(DPAD_LEFT) && *cursor < 7)
         {
             if (*cursor == 0) sRunSetupRandomizer = sRunSetupRandomizer == RUN_WILD_NORMAL ? RUN_WILD_SCALED : sRunSetupRandomizer - 1;
             else if (*cursor == 1)
@@ -2780,9 +2789,10 @@ static void Task_RunSetup_Input(u8 taskId)
             else if (*cursor == 2) sRunSetupMovesets ^= 1;
             else if (*cursor == 3) sRunSetupEvolutions ^= 1;
             else if (*cursor == 4) sRunSetupBstMode = sRunSetupBstMode == RUN_BST_OFF ? RUN_BST_RANDOM : sRunSetupBstMode - 1;
-            else sRunSetupAbilityMode ^= 1;
+            else if (*cursor == 5) sRunSetupAbilityMode ^= 1;
+            else sRunSetupItemRandomization ^= 1;
         }
-        else if (JOY_NEW(DPAD_RIGHT) && *cursor < 6)
+        else if (JOY_NEW(DPAD_RIGHT) && *cursor < 7)
         {
             if (*cursor == 0) sRunSetupRandomizer = sRunSetupRandomizer == RUN_WILD_SCALED ? RUN_WILD_NORMAL : sRunSetupRandomizer + 1;
             else if (*cursor == 1)
@@ -2797,9 +2807,10 @@ static void Task_RunSetup_Input(u8 taskId)
             else if (*cursor == 2) sRunSetupMovesets ^= 1;
             else if (*cursor == 3) sRunSetupEvolutions ^= 1;
             else if (*cursor == 4) sRunSetupBstMode = sRunSetupBstMode == RUN_BST_RANDOM ? RUN_BST_OFF : sRunSetupBstMode + 1;
-            else sRunSetupAbilityMode ^= 1;
+            else if (*cursor == 5) sRunSetupAbilityMode ^= 1;
+            else sRunSetupItemRandomization ^= 1;
         }
-        else if (JOY_NEW(A_BUTTON) && *cursor < 6)
+        else if (JOY_NEW(A_BUTTON) && *cursor < 7)
         {
             if (*cursor == 0) sRunSetupRandomizer = (sRunSetupRandomizer + 1) % 3;
             else if (*cursor == 1)
@@ -2814,13 +2825,14 @@ static void Task_RunSetup_Input(u8 taskId)
             else if (*cursor == 2) sRunSetupMovesets ^= 1;
             else if (*cursor == 3) sRunSetupEvolutions ^= 1;
             else if (*cursor == 4) sRunSetupBstMode = sRunSetupBstMode == RUN_BST_RANDOM ? RUN_BST_OFF : sRunSetupBstMode + 1;
-            else sRunSetupAbilityMode ^= 1;
+            else if (*cursor == 5) sRunSetupAbilityMode ^= 1;
+            else sRunSetupItemRandomization ^= 1;
         }
-        else if (JOY_NEW(DPAD_LEFT) && *cursor == 7)
-            *cursor = 6;
-        else if (JOY_NEW(DPAD_RIGHT) && *cursor == 6)
+        else if (JOY_NEW(DPAD_LEFT) && *cursor == 8)
+            *cursor = 8;
+        else if (JOY_NEW(DPAD_RIGHT) && *cursor == 7)
             *cursor = 7;
-        else if (JOY_NEW(A_BUTTON) && *cursor == 6)
+        else if (JOY_NEW(A_BUTTON) && *cursor == 8)
         {
             sRunSetupPage = RUN_SETUP_PAGE_PLAY_STYLE;
             *cursor = 2;
@@ -2887,6 +2899,7 @@ static void Task_RunSetup_Input(u8 taskId)
             gRunSetupDifficulty = sRunSetupDifficulty;
             gRunSetupMovesetMode = sRunSetupMovesets;
             gRunSetupEvolutionMode = sRunSetupEvolutions;
+            gRunSetupItemRandomization = sRunSetupItemRandomization;
             gRunSetupFilterValue = sRunSetupFilter == RUN_FILTER_TYPE ? sRunSetupType
                                  : sRunSetupFilter == RUN_FILTER_ABILITY ? sRunSetupAbility
                                  : sRunSetupFilter == RUN_FILTER_TYPE_ABILITY ? (sRunSetupAbility << 5) | sRunSetupType
