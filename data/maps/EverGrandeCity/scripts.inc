@@ -48,8 +48,8 @@ EverGrandeCity_Movement_JackApproaches:
 	step_end
 
 EverGrandeCity_Text_JackLeagueIntro:
-	.string "Oh—hey! Hope you've enjoyed the\n"
-	.string "chaos so far…\p"
+	.string "Oh--hey! Hope you've enjoyed the\n"
+	.string "chaos so far...\p"
 	.string "So before you head in there, I want\n"
 	.string "to see what kind of chaos you came\n"
 	.string "up with.\p"
