@@ -207,6 +207,23 @@ void ChallengeReset_RecordTrainerFlag(u16 trainerFlag)
         sChallengeTrainerFlags[sChallengeTrainerCount++] = trainerFlag;
 }
 
+void ChallengeReset_ForceCurrentGymFresh(void)
+{
+    if (!ChallengeResetEnabled()
+     || gMapHeader.battleType != MAP_BATTLE_SCENE_GYM
+     || IsGymBadgeEarned(gMapHeader.regionMapSectionId))
+        return;
+
+    // Script-level gym-entry fallback. MAP_SCRIPT_ON_TRANSITION runs on the
+    // actual destination map before the player can move, so this does not
+    // depend on the overworld warp lifecycle hooks that proved unreliable.
+    ClearGymTrainerFlags(gMapHeader.regionMapSectionId);
+    sChallengeTrainerCount = 0;
+    sChallengeActive = TRUE;
+    sChallengeMapSection = gMapHeader.regionMapSectionId;
+    sChallengeIsGym = TRUE;
+}
+
 void ChallengeReset_OnMapLoaded(void)
 {
     if (!ChallengeResetEnabled())
