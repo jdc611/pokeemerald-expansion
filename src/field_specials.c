@@ -189,6 +189,126 @@ static const u8 sText_Winona[] = _("WINONA");
 static const u8 sText_Phoebe[] = _("PHOEBE");
 static const u8 sText_Glacia[] = _("GLACIA");
 
+
+// Chaos overworld item randomizer.
+// Called after the vanilla item-ball template has populated VAR_RESULT / VAR_0x8009.
+// The mapping is deterministic for a map + original item, so retrying a full-bag
+// pickup cannot reroll the reward. Progression/key items and HMs are preserved.
+static u32 ChaosFieldItemHash(u32 value)
+{
+    value ^= value >> 16;
+    value *= 0x7FEB352D;
+    value ^= value >> 15;
+    value *= 0x846CA68B;
+    value ^= value >> 16;
+    return value;
+}
+
+static bool32 ChaosFieldItemIsProtected(enum Item item)
+{
+    if (item >= ITEM_HM01 && item <= ITEM_HM08)
+        return TRUE;
+    if (item >= ITEM_VENUSAURITE && item <= ITEM_DIANCITE)
+        return TRUE;
+    if (item >= ITEM_CLEFABLITE && item <= ITEM_GLIMMORANITE)
+        return TRUE;
+    if (item >= ITEM_HELIX_FOSSIL && item <= ITEM_FOSSILIZED_DINO)
+        return TRUE;
+    if (GetItemPocket(item) == POCKET_KEY_ITEMS)
+        return TRUE;
+    return FALSE;
+}
+
+void ChaosRandomizeOverworldItem(void)
+{
+    enum Item original = gSpecialVar_Result;
+    u32 seed;
+    u32 roll;
+
+    if (original == ITEM_NONE || ChaosFieldItemIsProtected(original))
+        return;
+
+    seed = ((u32)gSaveBlock1Ptr->location.mapGroup << 24)
+         ^ ((u32)gSaveBlock1Ptr->location.mapNum << 16)
+         ^ ((u32)original << 1)
+         ^ 0x4348414F; // "CHAO"
+    roll = ChaosFieldItemHash(seed);
+
+    // TM spots always remain TM spots. HMs are protected above.
+    if (original >= ITEM_TM01 && original <= ITEM_TM100)
+    {
+        gSpecialVar_Result = ITEM_TM01 + (roll % 100);
+        return;
+    }
+
+    // Weighted pools: useful basics are common; strong held items are deliberately rare.
+    switch (roll % 100)
+    {
+    case 0 ... 39:
+    {
+        static const u16 sCommon[] =
+        {
+            ITEM_POTION, ITEM_SUPER_POTION, ITEM_HYPER_POTION,
+            ITEM_ANTIDOTE, ITEM_PARALYZE_HEAL, ITEM_BURN_HEAL,
+            ITEM_ICE_HEAL, ITEM_AWAKENING, ITEM_FULL_HEAL,
+            ITEM_ETHER, ITEM_REPEL, ITEM_SUPER_REPEL, ITEM_ESCAPE_ROPE,
+            ITEM_POKE_BALL, ITEM_GREAT_BALL, ITEM_ULTRA_BALL,
+            ITEM_ORAN_BERRY, ITEM_SITRUS_BERRY, ITEM_LEPPA_BERRY,
+            ITEM_CHERI_BERRY, ITEM_CHESTO_BERRY, ITEM_PECHA_BERRY,
+            ITEM_RAWST_BERRY, ITEM_ASPEAR_BERRY, ITEM_PERSIM_BERRY
+        };
+        gSpecialVar_Result = sCommon[(roll >> 8) % ARRAY_COUNT(sCommon)];
+        break;
+    }
+    case 40 ... 69:
+    {
+        static const u16 sUseful[] =
+        {
+            ITEM_MAX_POTION, ITEM_FULL_RESTORE, ITEM_MAX_ETHER,
+            ITEM_ELIXIR, ITEM_MAX_ELIXIR, ITEM_MAX_REPEL,
+            ITEM_QUICK_BALL, ITEM_TIMER_BALL, ITEM_DUSK_BALL,
+            ITEM_LUM_BERRY, ITEM_FIGY_BERRY, ITEM_WIKI_BERRY,
+            ITEM_MAGO_BERRY, ITEM_AGUAV_BERRY, ITEM_IAPAPA_BERRY,
+            ITEM_FIRE_STONE, ITEM_WATER_STONE, ITEM_THUNDER_STONE,
+            ITEM_LEAF_STONE, ITEM_SUN_STONE, ITEM_MOON_STONE,
+            ITEM_HEART_SCALE
+        };
+        gSpecialVar_Result = sUseful[(roll >> 8) % ARRAY_COUNT(sUseful)];
+        break;
+    }
+    case 70 ... 89:
+    {
+        static const u16 sValuable[] =
+        {
+            ITEM_HP_UP, ITEM_PROTEIN, ITEM_IRON, ITEM_CALCIUM,
+            ITEM_ZINC, ITEM_CARBOS, ITEM_PP_UP,
+            ITEM_NUGGET, ITEM_STAR_PIECE,
+            ITEM_CHARCOAL, ITEM_MYSTIC_WATER, ITEM_MAGNET,
+            ITEM_MIRACLE_SEED, ITEM_BLACK_BELT, ITEM_SOFT_SAND,
+            ITEM_SHARP_BEAK, ITEM_TWISTED_SPOON, ITEM_HARD_STONE,
+            ITEM_SPELL_TAG, ITEM_DRAGON_FANG, ITEM_BLACK_GLASSES,
+            ITEM_METAL_COAT, ITEM_QUICK_CLAW, ITEM_SCOPE_LENS,
+            ITEM_SHELL_BELL
+        };
+        gSpecialVar_Result = sValuable[(roll >> 8) % ARRAY_COUNT(sValuable)];
+        break;
+    }
+    default:
+    {
+        static const u16 sRare[] =
+        {
+            ITEM_CHOICE_BAND, ITEM_CHOICE_SPECS, ITEM_CHOICE_SCARF,
+            ITEM_LEFTOVERS, ITEM_LIFE_ORB, ITEM_FOCUS_BAND,
+            ITEM_FOCUS_SASH, ITEM_EXPERT_BELT, ITEM_ASSAULT_VEST,
+            ITEM_ROCKY_HELMET, ITEM_EVIOLITE, ITEM_WIDE_LENS,
+            ITEM_MUSCLE_BAND, ITEM_WISE_GLASSES, ITEM_RAZOR_CLAW
+        };
+        gSpecialVar_Result = sRare[(roll >> 8) % ARRAY_COUNT(sRare)];
+        break;
+    }
+    }
+}
+
 void Special_ShowDiploma(void)
 {
     SetMainCallback2(CB2_ShowDiploma);
