@@ -19,14 +19,20 @@ EverGrandeCity_EventScript_PokemonLeagueSign::
 	end
 
 
+EverGrandeCity_EventScript_JackObject::
+	end
+
 EverGrandeCity_EventScript_JackLeagueGate::
 	lockall
-	goto_if_set TRAINER_FLAGS_START + TRAINER_JACK, EverGrandeCity_EventScript_JackLeagueGateDone
+	goto_if_set FLAG_HIDE_JACK_LEAGUE, EverGrandeCity_EventScript_JackLeagueGateDone
 	applymovement OBJ_EVENT_ID_PLAYER, EverGrandeCity_Movement_JackStopsPlayer
+	waitmovement 0
+	applymovement 1, EverGrandeCity_Movement_JackApproaches
 	waitmovement 0
 	msgbox EverGrandeCity_Text_JackLeagueIntro, MSGBOX_DEFAULT
 	trainerbattle_no_intro TRAINER_JACK, EverGrandeCity_Text_JackDefeat
 	msgbox EverGrandeCity_Text_JackAfterBattle, MSGBOX_DEFAULT
+	removeobject 1
 EverGrandeCity_EventScript_JackLeagueGateDone:
 	setvar VAR_TEMP_2, 1
 	releaseall
@@ -36,19 +42,23 @@ EverGrandeCity_Movement_JackStopsPlayer:
 	walk_down
 	step_end
 
+EverGrandeCity_Movement_JackApproaches:
+	walk_down
+	walk_down
+	step_end
+
 EverGrandeCity_Text_JackLeagueIntro:
-	.string "Hold up.\p"
-	.string "You weren't really going in there\n"
-	.string "without battling me first, were you?\p"
-	.string "We've both come too far for that.\p"
-	.string "One more battle. No excuses.\n"
-	.string "Show me you're ready.$"
+	.string "Oh—hey! Hope you've enjoyed the\n"
+	.string "chaos so far…\p"
+	.string "So before you head in there, I want\n"
+	.string "to see what kind of chaos you came\n"
+	.string "up with.\p"
+	.string "How about one last battle?$"
 
 EverGrandeCity_Text_JackDefeat:
-	.string "Yeah... you're ready.$"
+	.string "Now that's some chaos.$"
 
 EverGrandeCity_Text_JackAfterBattle:
-	.string "That's what I needed to see.\p"
 	.string "Go finish this.$"
 
 EverGrandeCity_EventScript_SetVisitedEverGrande::
