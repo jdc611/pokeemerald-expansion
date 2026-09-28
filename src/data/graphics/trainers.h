@@ -271,6 +271,9 @@ const u16 gTrainerPalette_PikeQueenLucy[] = INCGFX_U16("graphics/trainers/front_
 const u32 gTrainerFrontPic_PyramidKingBrandon[] = INCGFX_U32("graphics/trainers/front_pics/pyramid_king_brandon.png", ".4bpp.smol");
 const u16 gTrainerPalette_PyramidKingBrandon[] = INCGFX_U16("graphics/trainers/front_pics/pyramid_king_brandon.png", ".gbapal");
 
+const u32 gTrainerFrontPic_Jack[] = INCGFX_U32("graphics/trainers/front_pics/jack.png", ".4bpp.smol");
+const u16 gTrainerPalette_Jack[] = INCGFX_U16("graphics/trainers/front_pics/jack.png", ".gbapal");
+
 const u32 gTrainerFrontPic_Red[] = INCGFX_U32("graphics/trainers/front_pics/red.png", ".4bpp.smol");
 const u16 gTrainerPalette_Red[] = INCGFX_U16("graphics/trainers/front_pics/red.png", ".gbapal");
 
@@ -1225,5 +1228,9 @@ const struct TrainerPicInfo gTrainerPicInfo[TRAINER_PIC_COUNT] =
     [TRAINER_PIC_PAINTER_FRLG] =
     {
         .frontPic = TRAINER_FRONT_PIC(gTrainerFrontPic_PainterFrlg, gTrainerPalette_PainterFrlg),
+    },
+    [TRAINER_PIC_JACK] =
+    {
+        .frontPic = TRAINER_FRONT_PIC(gTrainerFrontPic_Jack, gTrainerPalette_Jack),
     },
 };
