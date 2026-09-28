@@ -3140,16 +3140,61 @@ IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
 
 === TRAINER_JACK ===
 Name: JACK
-Class: Swimmer M
-Pic: Swimmer M
+Class: Rival
+Pic: Red
 Gender: Male
-Music: Swimmer
+Music: Male
+Items: Full Restore / Full Restore
 Double Battle: No
-AI: Check Bad Move
+AI: Basic Trainer / Smart Switching / HP Aware / Randomize Switchin
 
-Gyarados
-Level: 34
-IVs: 0 HP / 0 Atk / 0 Def / 0 SpA / 0 SpD / 0 Spe
+Metagross @ Sitrus Berry
+Level: 58
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Meteor Mash
+- Earthquake
+- Psychic
+- Shadow Ball
+
+Milotic @ Leftovers
+Level: 58
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Recover
+- Scald
+- Ice Beam
+- Toxic
+
+Salamence @ Lum Berry
+Level: 58
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Dragon Claw
+- Aerial Ace
+- Flamethrower
+- Dragon Dance
+
+Lucario @ Expert Belt
+Level: 58
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Aura Sphere
+- Flash Cannon
+- Dark Pulse
+- Extreme Speed
+
+Magnezone @ Air Balloon
+Level: 58
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Thunderbolt
+- Flash Cannon
+- Volt Switch
+- Tri Attack
+
+Dragonite @ Sitrus Berry
+Level: 58
+IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe
+- Dragon Claw
+- Earthquake
+- Thunderbolt
+- Ice Beam
 
 === TRAINER_DUDLEY ===
 Name: DUDLEY
