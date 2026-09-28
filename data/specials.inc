@@ -641,4 +641,5 @@ gSpecials::
 	def_special StickerManGetBragFlags
 	def_special CheckAddCoins
 
+	def_special ChallengeReset_ForceCurrentGymFresh
 	def_special ReturnPlayerToLastPokemonCenter
