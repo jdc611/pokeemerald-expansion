@@ -219,7 +219,16 @@ void ChallengeReset_OnMapLoaded(void)
     // that completion permanent.
     if (gMapHeader.battleType == MAP_BATTLE_SCENE_GYM
      && !IsGymBadgeEarned(gMapHeader.regionMapSectionId))
+    {
+        // Every physical gym load is a new unfinished attempt. Reset both the
+        // persistent trainer flags and the in-memory per-visit list here,
+        // after the destination map is authoritative and before field play.
         ClearGymTrainerFlags(gMapHeader.regionMapSectionId);
+        sChallengeTrainerCount = 0;
+        sChallengeActive = TRUE;
+        sChallengeMapSection = gMapHeader.regionMapSectionId;
+        sChallengeIsGym = TRUE;
+    }
 }
 
 void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct MapHeader *to, u16 fromMap, s16 x, s16 y)
