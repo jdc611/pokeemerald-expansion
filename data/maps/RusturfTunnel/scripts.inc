@@ -53,10 +53,12 @@ RusturfTunnel_EventScript_ClearTunnelScene::
 	call_if_eq VAR_TEMP_1, 2, RusturfTunnel_EventScript_FaceWandasBoyfriend2
 	call_if_eq VAR_TEMP_1, 3, RusturfTunnel_EventScript_FaceWandasBoyfriend3
 	call RusturfTunnel_EventScript_WandasBoyfriendNotice
-	msgbox RusturfTunnel_Text_YouShatteredBoulder, MSGBOX_DEFAULT
+	msgbox RusturfTunnel_Text_YouShatteredBoulderTakeHM, MSGBOX_DEFAULT
 	call_if_eq VAR_TEMP_1, 2, RusturfTunnel_EventScript_WandasBoyfriendApproachPlayer
 	call_if_eq VAR_TEMP_1, 3, RusturfTunnel_EventScript_WandasBoyfriendApproachPlayer
+	giveitem ITEM_HM_STRENGTH
 	setflag FLAG_RECEIVED_HM_STRENGTH
+	msgbox RusturfTunnel_Text_ExplainStrength, MSGBOX_DEFAULT
 	closemessage
 	call_if_eq VAR_TEMP_1, 1, RusturfTunnel_EventScript_BoyfriendApproachWanda1
 	call_if_eq VAR_TEMP_1, 2, RusturfTunnel_EventScript_BoyfriendApproachWanda2
@@ -482,11 +484,17 @@ RusturfTunnel_Text_ToGetToVerdanturf:
 	.string "you need to go to DEWFORD, then pass\l"
 	.string "through SLATEPORT and MAUVILLE…$"
 
-RusturfTunnel_Text_YouShatteredBoulder:
+RusturfTunnel_Text_YouShatteredBoulderTakeHM:
 	.string "Wow! You shattered that boulder\n"
 	.string "blocking the way.\p"
-	.string "Thanks to you, the tunnel is finally\n"
-	.string "open again!$"
+	.string "To show you how much I appreciate it,\n"
+	.string "I'd like you to have this HM.$"
+
+RusturfTunnel_Text_ExplainStrength:
+	.string "That HM contains STRENGTH.\p"
+	.string "If a muscular POKéMON were to learn\n"
+	.string "that, it would be able to move even\l"
+	.string "large boulders.$"
 
 RusturfTunnel_Text_WandaReunion:
 	.string "WANDA!\n"
