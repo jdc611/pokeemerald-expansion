@@ -116,18 +116,21 @@ static bool8 IsCaveCompletionExit(mapsec_u16_t section, u16 fromMap, s16 x, s16 
     }
 }
 
-static bool8 IsGymBadgeEarned(mapsec_u16_t section)
+static bool8 IsGymCompleted(mapsec_u16_t section)
 {
+    // Use the leader-defeated story flags, not badge ownership. Debug/test
+    // helpers intentionally grant badges for obedience and field-move access,
+    // so badge flags are not reliable evidence that a gym attempt is complete.
     switch (section)
     {
-    case MAPSEC_RUSTBORO_CITY: return FlagGet(FLAG_BADGE01_GET);
-    case MAPSEC_DEWFORD_TOWN: return FlagGet(FLAG_BADGE02_GET);
-    case MAPSEC_MAUVILLE_CITY: return FlagGet(FLAG_BADGE03_GET);
-    case MAPSEC_LAVARIDGE_TOWN: return FlagGet(FLAG_BADGE04_GET);
-    case MAPSEC_PETALBURG_CITY: return FlagGet(FLAG_BADGE05_GET);
-    case MAPSEC_FORTREE_CITY: return FlagGet(FLAG_BADGE06_GET);
-    case MAPSEC_MOSSDEEP_CITY: return FlagGet(FLAG_BADGE07_GET);
-    case MAPSEC_SOOTOPOLIS_CITY: return FlagGet(FLAG_BADGE08_GET);
+    case MAPSEC_RUSTBORO_CITY: return FlagGet(FLAG_DEFEATED_RUSTBORO_GYM);
+    case MAPSEC_DEWFORD_TOWN: return FlagGet(FLAG_DEFEATED_DEWFORD_GYM);
+    case MAPSEC_MAUVILLE_CITY: return FlagGet(FLAG_DEFEATED_MAUVILLE_GYM);
+    case MAPSEC_LAVARIDGE_TOWN: return FlagGet(FLAG_DEFEATED_LAVARIDGE_GYM);
+    case MAPSEC_PETALBURG_CITY: return FlagGet(FLAG_DEFEATED_PETALBURG_GYM);
+    case MAPSEC_FORTREE_CITY: return FlagGet(FLAG_DEFEATED_FORTREE_GYM);
+    case MAPSEC_MOSSDEEP_CITY: return FlagGet(FLAG_DEFEATED_MOSSDEEP_GYM);
+    case MAPSEC_SOOTOPOLIS_CITY: return FlagGet(FLAG_DEFEATED_SOOTOPOLIS_GYM);
     default: return FALSE;
     }
 }
@@ -171,7 +174,7 @@ bool8 ChallengeReset_ShouldIgnoreTrainerFlag(u16 trainerFlag)
 
     if (!ChallengeResetEnabled()
      || gMapHeader.battleType != MAP_BATTLE_SCENE_GYM
-     || IsGymBadgeEarned(gMapHeader.regionMapSectionId))
+     || IsGymCompleted(gMapHeader.regionMapSectionId))
         return FALSE;
 
     // A defeated flag from a previous unfinished gym visit must not suppress
@@ -211,7 +214,7 @@ void ChallengeReset_ForceCurrentGymFresh(void)
 {
     if (!ChallengeResetEnabled()
      || gMapHeader.battleType != MAP_BATTLE_SCENE_GYM
-     || IsGymBadgeEarned(gMapHeader.regionMapSectionId))
+     || IsGymCompleted(gMapHeader.regionMapSectionId))
         return;
 
     // Script-level gym-entry fallback. MAP_SCRIPT_ON_TRANSITION runs on the
@@ -235,7 +238,7 @@ void ChallengeReset_OnMapLoaded(void)
     // every visit with their regular trainer flags clear; earned badges make
     // that completion permanent.
     if (gMapHeader.battleType == MAP_BATTLE_SCENE_GYM
-     && !IsGymBadgeEarned(gMapHeader.regionMapSectionId))
+     && !IsGymCompleted(gMapHeader.regionMapSectionId))
     {
         // Every physical gym load is a new unfinished attempt. Reset both the
         // persistent trainer flags and the in-memory per-visit list here,
@@ -265,7 +268,7 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
     if (to->battleType == MAP_BATTLE_SCENE_GYM
      && from->battleType != MAP_BATTLE_SCENE_GYM)
     {
-        if (!IsGymBadgeEarned(to->regionMapSectionId))
+        if (!IsGymCompleted(to->regionMapSectionId))
         {
             ClearGymTrainerFlags(to->regionMapSectionId);
         }
@@ -277,7 +280,7 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
     // restore its regular trainers; with the badge, preserve completion.
     if (IsHoennGymMap(fromMap) && to->battleType != MAP_BATTLE_SCENE_GYM)
     {
-        if (!IsGymBadgeEarned(from->regionMapSectionId))
+        if (!IsGymCompleted(from->regionMapSectionId))
             ClearGymTrainerFlags(from->regionMapSectionId);
         ClearChallengeState();
         return;
@@ -321,7 +324,7 @@ void ChallengeReset_OnMapTransition(const struct MapHeader *from, const struct M
     // Gym completion is authoritative: each gym's own badge flag is set by
     // the leader's post-battle script before the player can leave. Completed
     // gyms keep their trainer flags; unfinished gyms are reset below.
-    if (sChallengeIsGym && IsGymBadgeEarned(sChallengeMapSection))
+    if (sChallengeIsGym && IsGymCompleted(sChallengeMapSection))
     {
         ClearChallengeState();
         return;
