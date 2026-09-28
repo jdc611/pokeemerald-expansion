@@ -32,6 +32,8 @@ EverGrandeCity_EventScript_JackLeagueGate::
 	msgbox EverGrandeCity_Text_JackLeagueIntro, MSGBOX_DEFAULT
 	trainerbattle_no_intro TRAINER_JACK, EverGrandeCity_Text_JackDefeat
 	msgbox EverGrandeCity_Text_JackAfterBattle, MSGBOX_DEFAULT
+	applymovement 1, EverGrandeCity_Movement_JackLeaves
+	waitmovement 0
 	removeobject 1
 EverGrandeCity_EventScript_JackLeagueGateDone:
 	setvar VAR_TEMP_2, 1
@@ -43,6 +45,21 @@ EverGrandeCity_Movement_JackStopsPlayer:
 	step_end
 
 EverGrandeCity_Movement_JackApproaches:
+	walk_down
+	walk_down
+	step_end
+
+EverGrandeCity_Movement_JackLeaves:
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	walk_down
 	walk_down
 	walk_down
 	step_end
