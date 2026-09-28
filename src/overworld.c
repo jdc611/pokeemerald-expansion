@@ -711,7 +711,6 @@ void WarpIntoMap(void)
                                    gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y);
     ApplyCurrentWarp();
     LoadCurrentMapData();
-    ChallengeReset_OnMapLoaded();
     SetPlayerCoordsFromWarp();
 }
 
@@ -889,6 +888,7 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
                                    gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y);
     ApplyCurrentWarp();
     LoadCurrentMapData();
+    ChallengeReset_OnMapLoaded();
     LoadObjEventTemplatesFromHeader();
     TrySetMapSaveWarpStatus();
     ClearTempFieldEventData();
@@ -941,6 +941,7 @@ static void LoadMapFromWarp(bool32 a1)
     bool8 isIndoors;
 
     LoadCurrentMapData();
+    ChallengeReset_OnMapLoaded();
     if (!(sObjectEventLoadFlag & SKIP_OBJECT_EVENT_LOAD))
     {
         if (gMapHeader.mapLayoutId == LAYOUT_BATTLE_FRONTIER_BATTLE_PYRAMID_FLOOR)
